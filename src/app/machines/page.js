@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { getMachines } from "@/lib/api";
 
 const machinesFallback = [
@@ -21,19 +24,27 @@ function normalizeMachines(payload) {
 	}));
 }
 
-export default async function MachinesPage() {
-	let machines = machinesFallback;
-	let apiError = "";
+export default function MachinesPage() {
+	const [machines, setMachines] = useState(machinesFallback);
+	const [apiError, setApiError] = useState("");
 
-	try {
-		const response = await getMachines();
-		const normalized = normalizeMachines(response);
-		if (normalized.length) {
-			machines = normalized;
-		}
-	} catch (error) {
-		apiError = error.message;
-	}
+	useEffect(() => {
+		const timer = setTimeout(async () => {
+			const token = localStorage.getItem("auth_token") || "";
+
+			try {
+				const response = await getMachines(token);
+				const normalized = normalizeMachines(response);
+				if (normalized.length) {
+					setMachines(normalized);
+				}
+			} catch (error) {
+				setApiError(error.message);
+			}
+		}, 0);
+
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<section className="rise-in space-y-6">

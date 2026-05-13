@@ -1,16 +1,27 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { getMachineById } from "@/lib/api";
 
-export default async function MachineDetailPage({ params }) {
-	const { id } = await params;
-	let machine = null;
-	let apiError = "";
+export default function MachineDetailPage({ params }) {
+	const { id } = params;
+	const [machine, setMachine] = useState(null);
+	const [apiError, setApiError] = useState("");
 
-	try {
-		const response = await getMachineById(id);
-		machine = response?.data ?? response;
-	} catch (error) {
-		apiError = error.message;
-	}
+	useEffect(() => {
+		const timer = setTimeout(async () => {
+			const token = localStorage.getItem("auth_token") || "";
+
+			try {
+				const response = await getMachineById(id, token);
+				setMachine(response?.data ?? response);
+			} catch (error) {
+				setApiError(error.message);
+			}
+		}, 0);
+
+		return () => clearTimeout(timer);
+	}, [id]);
 
 	return (
 		<section className="rise-in space-y-6">

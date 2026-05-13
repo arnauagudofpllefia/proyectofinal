@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { getDashboardStats } from "@/lib/api";
 
 const kpisFallback = [
@@ -30,19 +33,27 @@ function normalizeKpis(payload) {
 	return [];
 }
 
-export default async function DashboardPage() {
-	let kpis = kpisFallback;
-	let apiError = "";
+export default function DashboardPage() {
+	const [kpis, setKpis] = useState(kpisFallback);
+	const [apiError, setApiError] = useState("");
 
-	try {
-		const stats = await getDashboardStats();
-		const normalized = normalizeKpis(stats);
-		if (normalized.length) {
-			kpis = normalized;
-		}
-	} catch (error) {
-		apiError = error.message;
-	}
+	useEffect(() => {
+		const timer = setTimeout(async () => {
+			const token = localStorage.getItem("auth_token") || "";
+
+			try {
+				const stats = await getDashboardStats(token);
+				const normalized = normalizeKpis(stats);
+				if (normalized.length) {
+					setKpis(normalized);
+				}
+			} catch (error) {
+				setApiError(error.message);
+			}
+		}, 0);
+
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<section className="rise-in space-y-6">
@@ -65,7 +76,7 @@ export default async function DashboardPage() {
 				<h2 className="text-xl font-semibold text-white">Actividad reciente</h2>
 				<p className="mt-2 text-sm text-slate-300">
 					{apiError
-						? `No se pudo leer el dashboard: ${apiError}`
+						? `No se pudo leer /admin/dashboard: ${apiError}`
 						: "Datos cargados desde tu API de Laravel."}
 				</p>
 			</article>

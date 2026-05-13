@@ -76,17 +76,19 @@ export async function apiRequestWithFallback(paths, options = {}) {
   throw lastError || new Error("No se pudo completar la peticion.");
 }
 
+export async function getHealth() {
+  return apiRequest("/health");
+}
+
 export async function loginRequest({ email, password }) {
-  return apiRequestWithFallback(["/login", "/auth/login"], {
+  return apiRequest("/login", {
     method: "POST",
     body: { email, password },
-    withCsrf: true,
-    credentials: "include",
   });
 }
 
 export async function registerRequest({ name, email, password }) {
-  return apiRequestWithFallback(["/register", "/auth/register"], {
+  return apiRequest("/register", {
     method: "POST",
     body: {
       name,
@@ -94,44 +96,57 @@ export async function registerRequest({ name, email, password }) {
       password,
       password_confirmation: password,
     },
-    withCsrf: true,
-    credentials: "include",
   });
 }
 
-export async function getMachines() {
-  return apiRequestWithFallback(["/machines", "/maquinas"]);
+export async function getCurrentUser(token) {
+  return apiRequest("/user", { token });
 }
 
-export async function getMachineById(id) {
-  return apiRequestWithFallback([`/machines/${id}`, `/maquinas/${id}`]);
+export async function logoutRequest(token) {
+  return apiRequest("/logout", {
+    method: "POST",
+    token,
+  });
 }
 
-export async function getReservations() {
-  return apiRequestWithFallback(["/reservations", "/reservas"]);
+export async function getMachines(token) {
+  return apiRequest("/machines", { token });
+}
+
+export async function getMachineById(id, token) {
+  return apiRequest(`/machines/${id}`, { token });
+}
+
+export async function getMachineSlots(id, token) {
+  return apiRequest(`/machines/${id}/slots`, { token });
+}
+
+export async function getReservations(token) {
+  return apiRequest("/admin/reservations", { token });
 }
 
 export async function getMyReservations(token) {
-  return apiRequestWithFallback(["/reservations/my", "/my-reservations"], {
+  return apiRequest("/reservations/my", {
     token,
-    credentials: token ? "omit" : "include",
   });
 }
 
 export async function createReservation(payload, token) {
-  return apiRequestWithFallback(["/reservations", "/reservas"], {
+  return apiRequest("/reservations", {
     method: "POST",
     body: payload,
     token,
-    withCsrf: !token,
-    credentials: token ? "omit" : "include",
   });
 }
 
-export async function getDashboardStats() {
-  return apiRequestWithFallback([
-    "/dashboard/stats",
-    "/dashboard/summary",
-    "/stats",
-  ]);
+export async function cancelReservation(id, token) {
+  return apiRequest(`/reservations/${id}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export async function getDashboardStats(token) {
+  return apiRequest("/admin/dashboard", { token });
 }

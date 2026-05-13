@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { getMyReservations } from "@/lib/api";
 
 const myReservationsFallback = [
@@ -19,19 +22,27 @@ function normalizeMyReservations(payload) {
 	}));
 }
 
-export default async function MyReservationsPage() {
-	let myReservations = myReservationsFallback;
-	let apiError = "";
+export default function MyReservationsPage() {
+	const [myReservations, setMyReservations] = useState(myReservationsFallback);
+	const [apiError, setApiError] = useState("");
 
-	try {
-		const response = await getMyReservations();
-		const normalized = normalizeMyReservations(response);
-		if (normalized.length) {
-			myReservations = normalized;
-		}
-	} catch (error) {
-		apiError = error.message;
-	}
+	useEffect(() => {
+		const timer = setTimeout(async () => {
+			const token = localStorage.getItem("auth_token") || "";
+
+			try {
+				const response = await getMyReservations(token);
+				const normalized = normalizeMyReservations(response);
+				if (normalized.length) {
+					setMyReservations(normalized);
+				}
+			} catch (error) {
+				setApiError(error.message);
+			}
+		}, 0);
+
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<section className="rise-in space-y-6">
