@@ -1,20 +1,52 @@
-const slots = [
-	{ hour: "08:00", zone: "Cardio", spots: 6 },
-	{ hour: "10:00", zone: "Fuerza", spots: 2 },
-	{ hour: "18:00", zone: "Funcional", spots: 9 },
+import { getReservations } from "@/lib/api";
+
+const slotsFallback = [
+	{ id: "1", hour: "08:00", zone: "Cardio", spots: 6 },
+	{ id: "2", hour: "10:00", zone: "Fuerza", spots: 2 },
+	{ id: "3", hour: "18:00", zone: "Funcional", spots: 9 },
 ];
 
-export default function ReservationsPage() {
+function normalizeSlots(payload) {
+	const data = payload?.data ?? payload;
+	if (!Array.isArray(data)) {
+		return [];
+	}
+
+	return data.map((slot, index) => ({
+		id: String(slot?.id ?? slot?.uuid ?? index + 1),
+		hour: slot?.hour ?? slot?.hora ?? slot?.time ?? "--:--",
+		zone: slot?.zone ?? slot?.zona ?? "General",
+		spots: slot?.spots ?? slot?.plazas ?? slot?.available ?? 0,
+	}));
+}
+
+export default async function ReservationsPage() {
+	let slots = slotsFallback;
+	let apiError = "";
+
+	try {
+		const response = await getReservations();
+		const normalized = normalizeSlots(response);
+		if (normalized.length) {
+			slots = normalized;
+		}
+	} catch (error) {
+		apiError = error.message;
+	}
+
 	return (
 		<section className="rise-in space-y-6">
 			<header>
 				<p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Reservas</p>
 				<h1 className="mt-2 text-3xl font-semibold text-white">Agenda inteligente</h1>
+				<p className="mt-2 text-sm text-slate-300">
+					{apiError ? `Usando datos temporales: ${apiError}` : "Horarios cargados desde tu API."}
+				</p>
 			</header>
 
 			<div className="grid gap-4 md:grid-cols-3">
 				{slots.map((slot) => (
-					<article key={slot.hour} className="glass-panel rounded-2xl p-5">
+					<article key={slot.id} className="glass-panel rounded-2xl p-5">
 						<p className="text-sm text-slate-400">{slot.zone}</p>
 						<h2 className="mt-2 text-2xl font-semibold text-white">{slot.hour}</h2>
 						<p className="mt-1 text-sm text-slate-300">{slot.spots} plazas libres</p>

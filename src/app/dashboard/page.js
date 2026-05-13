@@ -1,10 +1,49 @@
-const kpis = [
-	{ label: "Reservas activas", value: "128" },
-	{ label: "Maquinas disponibles", value: "42" },
-	{ label: "Usuarios online", value: "87" },
+import { getDashboardStats } from "@/lib/api";
+
+const kpisFallback = [
+	{ label: "Reservas activas", value: "--" },
+	{ label: "Maquinas disponibles", value: "--" },
+	{ label: "Usuarios online", value: "--" },
 ];
 
-export default function DashboardPage() {
+function normalizeKpis(payload) {
+	const data = payload?.data ?? payload;
+
+	if (Array.isArray(data)) {
+		return data
+			.slice(0, 3)
+			.map((item, index) => ({
+				label: item?.label || item?.name || `Indicador ${index + 1}`,
+				value: item?.value ?? item?.total ?? "--",
+			}));
+	}
+
+	if (data && typeof data === "object") {
+		return Object.entries(data)
+			.slice(0, 3)
+			.map(([label, value]) => ({
+				label: label.replaceAll("_", " "),
+				value: value ?? "--",
+			}));
+	}
+
+	return [];
+}
+
+export default async function DashboardPage() {
+	let kpis = kpisFallback;
+	let apiError = "";
+
+	try {
+		const stats = await getDashboardStats();
+		const normalized = normalizeKpis(stats);
+		if (normalized.length) {
+			kpis = normalized;
+		}
+	} catch (error) {
+		apiError = error.message;
+	}
+
 	return (
 		<section className="rise-in space-y-6">
 			<header>
@@ -17,7 +56,7 @@ export default function DashboardPage() {
 				{kpis.map((item) => (
 					<article key={item.label} className="glass-panel rounded-2xl p-5">
 						<p className="text-sm text-slate-400">{item.label}</p>
-						<p className="mt-3 text-4xl font-semibold text-cyan-200">{item.value}</p>
+						<p className="mt-3 text-4xl font-semibold text-cyan-200">{String(item.value)}</p>
 					</article>
 				))}
 			</div>
@@ -25,7 +64,9 @@ export default function DashboardPage() {
 			<article className="glass-panel rounded-2xl p-6">
 				<h2 className="text-xl font-semibold text-white">Actividad reciente</h2>
 				<p className="mt-2 text-sm text-slate-300">
-					Aqui veras eventos del sistema cuando conectes esta vista a tu API de Laravel.
+					{apiError
+						? `No se pudo leer el dashboard: ${apiError}`
+						: "Datos cargados desde tu API de Laravel."}
 				</p>
 			</article>
 		</section>
