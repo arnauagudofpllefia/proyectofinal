@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #050b16;
+  --foreground: #e8eefc;
+  --panel: #0b1324cc;
+  --line: #1d2b47;
+  --primary: #1dd3ff;
+  --primary-strong: #14b8ff;
+  --accent: #45f8b3;
 }
 
 @theme inline {
@@ -12,15 +17,55 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(29, 211, 255, 0.22), transparent 35%),
+    radial-gradient(circle at 85% 5%, rgba(69, 248, 179, 0.16), transparent 32%),
+    linear-gradient(180deg, #070d1a 0%, #050b16 65%, #040913 100%);
+}
+
+::selection {
+  background: rgba(29, 211, 255, 0.25);
+  color: #f8fbff;
+}
+
+.glass-panel {
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(12, 20, 38, 0.95), rgba(7, 13, 24, 0.8));
+  box-shadow: 0 12px 45px rgba(5, 10, 18, 0.45);
+}
+
+.energy-ring {
+  position: relative;
+}
+
+.energy-ring::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(120deg, rgba(29, 211, 255, 0.65), rgba(69, 248, 179, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 450ms ease-out both;
 }
