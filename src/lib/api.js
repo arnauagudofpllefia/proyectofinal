@@ -12,10 +12,31 @@ async function parseResponse(response) {
   const payload = isJson ? await response.json() : await response.text();
 
   if (!response.ok) {
+    const validationErrors = isJson && payload?.errors ? payload.errors : null;
+    const firstValidationError = validationErrors
+      ? Object.values(validationErrors).flat().find(Boolean)
+      : "";
+
+    const genericByStatus =
+      response.status === 422
+        ? "Datos no validos. Revisa los campos del formulario."
+        : `Error ${response.status}: ${response.statusText || "respuesta no valida"}`;
+
+    const payloadText =
+      !isJson && typeof payload === "string" && payload.trim()
+        ? payload.trim().slice(0, 180)
+        : "";
+
     const message =
-      (isJson && (payload.message || payload.error)) ||
-      `Error ${response.status}: ${response.statusText}`;
-    throw new Error(message);
+      firstValidationError ||
+      (isJson && (payload?.message || payload?.error || payload?.detail)) ||
+      payloadText ||
+      genericByStatus;
+
+    const error = new Error(message);
+    error.status = response.status;
+    error.details = validationErrors;
+    throw error;
   }
 
   return payload;
@@ -83,18 +104,18 @@ export async function getHealth() {
 export async function loginRequest({ email, password }) {
   return apiRequest("/login", {
     method: "POST",
-    body: { email, password },
+    body: { email, contrasena: password },
   });
 }
 
-export async function registerRequest({ name, email, password }) {
+export async function registerRequest({ name, email, password, password_confirmation }) {
   return apiRequest("/register", {
     method: "POST",
     body: {
-      name,
+      nombre: name,
       email,
-      password,
-      password_confirmation: password,
+      contrasena: password,
+      contrasena_confirmation: password_confirmation,
     },
   });
 }
