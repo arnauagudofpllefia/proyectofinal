@@ -28,6 +28,7 @@ export default function LoginPage() {
 
 			if (token) {
 				localStorage.setItem("auth_token", token);
+				document.cookie = `auth_token=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax`;
 			}
 
 			setMessage("Sesion iniciada correctamente.");

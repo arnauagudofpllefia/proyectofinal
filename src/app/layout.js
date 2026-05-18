@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -17,17 +18,22 @@ export const metadata = {
   description: "Gestion premium de maquinas y reservas",
 };
 
-export default function RootLayout({ children }) {
-  const navItems = [
-    { href: "/", label: "Inicio" },
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/admin", label: "Admin" },
-    { href: "/machines", label: "Maquinas" },
-    { href: "/reservations", label: "Reservas" },
-    { href: "/reservations/my", label: "Mis reservas" },
-    { href: "/login", label: "Login" },
-    { href: "/register", label: "Registro" },
-  ];
+export default async function RootLayout({ children }) {
+  const cookieStore = await cookies();
+  const isAuthenticated = Boolean(cookieStore.get("auth_token")?.value);
+  const navItems = isAuthenticated
+    ? [
+        { href: "/", label: "Inicio" },
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/admin", label: "Admin" },
+        { href: "/machines", label: "Maquinas" },
+        { href: "/reservations", label: "Reservas" },
+        { href: "/reservations/my", label: "Mis reservas" },
+      ]
+    : [
+        { href: "/login", label: "Login" },
+        { href: "/register", label: "Registro" },
+      ];
 
   return (
     <html
