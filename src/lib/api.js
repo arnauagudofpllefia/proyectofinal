@@ -171,3 +171,21 @@ export async function cancelReservation(id, token) {
 export async function getDashboardStats(token) {
   return apiRequest("/admin/dashboard", { token });
 }
+
+export async function getGymInfo(token) {
+  return apiRequestWithFallback(
+    ["/admin/gym", "/admin/gym-info", "/admin/gimnasio", "/gym"],
+    { token }
+  );
+}
+
+export async function updateGymInfo(payload, token) {
+  return apiRequestWithFallback(
+    ["/admin/gym", "/admin/gym-info", "/admin/gimnasio", "/gym"],
+    {
+      method: "PUT",
+      body: payload,
+      token,
+    }
+  );
+}

@@ -15,10 +15,10 @@ export default function Home() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href="/dashboard"
+            href="/admin"
             className="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
           >
-            Ir al dashboard
+            Ir al panel admin
           </Link>
           <Link
             href="/machines"

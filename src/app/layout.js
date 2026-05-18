@@ -21,6 +21,7 @@ export default function RootLayout({ children }) {
   const navItems = [
     { href: "/", label: "Inicio" },
     { href: "/dashboard", label: "Dashboard" },
+    { href: "/admin", label: "Admin" },
     { href: "/machines", label: "Maquinas" },
     { href: "/reservations", label: "Reservas" },
     { href: "/reservations/my", label: "Mis reservas" },
