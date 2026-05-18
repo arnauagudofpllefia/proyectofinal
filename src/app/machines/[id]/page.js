@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { getMachineById } from "@/lib/api";
 
-export default function MachineDetailPage({ params }) {
-	const { id } = params;
+export default function MachineDetailPage() {
+	const params = useParams();
+	const id = params?.id;
 	const [machine, setMachine] = useState(null);
 	const [apiError, setApiError] = useState("");
 
 	useEffect(() => {
+		if (!id) {
+			return;
+		}
+
 		const timer = setTimeout(async () => {
 			const token = localStorage.getItem("auth_token") || "";
 
