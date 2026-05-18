@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api";
+import { apiRequest, apiRequestWithFallback } from "@/lib/api";
 
 function normalizeCollection(payload) {
     const data = payload?.data ?? payload;
@@ -13,6 +13,21 @@ function normalizeCollection(payload) {
 
     if (Array.isArray(data?.rows)) {
         return data.rows;
+    }
+
+    if (data?.gimnasio && typeof data.gimnasio === "object") {
+        return [data.gimnasio];
+    }
+
+    if (data?.gym && typeof data.gym === "object") {
+        return [data.gym];
+    }
+
+    if (data && typeof data === "object") {
+        const firstArrayValue = Object.values(data).find((value) => Array.isArray(value));
+        if (Array.isArray(firstArrayValue)) {
+            return firstArrayValue;
+        }
     }
 
     if (data && typeof data === "object") {
@@ -30,6 +45,40 @@ function normalizeId(value, fallback) {
     return String(value);
 }
 
+function extractDate(value) {
+    if (!value) {
+        return "";
+    }
+
+    const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+    return match ? match[1] : "";
+}
+
+function extractTime(value) {
+    if (!value) {
+        return "";
+    }
+
+    const match = String(value).match(/(\d{2}:\d{2})(?::\d{2})?/);
+    return match ? match[1] : "";
+}
+
+function extractEntityName(value) {
+    if (!value) {
+        return "";
+    }
+
+    if (typeof value === "string" || typeof value === "number") {
+        return String(value);
+    }
+
+    if (typeof value === "object") {
+        return String(value.nombre ?? value.name ?? value.titulo ?? value.title ?? "");
+    }
+
+    return "";
+}
+
 const adminResources = {
     gyms: {
         key: "gyms",
@@ -44,9 +93,9 @@ const adminResources = {
             edit: true,
             delete: false,
         },
-        listPath: "/admin/gym",
-        createPath: "/admin/gym",
-        updatePath: "/admin/gym",
+        listPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym"],
+        createPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym"],
+        updatePath: ["/admin/gyms/{id}", "/admin/gimnasios/{id}", "/admin/gym/{id}", "/admin/gyms", "/admin/gimnasios", "/admin/gym"],
         fields: [
             {
                 name: "name",
@@ -71,11 +120,13 @@ const adminResources = {
             },
         ],
         normalizeItem(item, index) {
+            const source = item?.gimnasio ?? item?.gym ?? item;
+
             return {
-                id: normalizeId(item?.id ?? item?.uuid, `gym-${index + 1}`),
-                name: item?.name ?? item?.nombre ?? "",
-                address: item?.address ?? item?.direccion ?? "",
-                phone: item?.phone ?? item?.telefono ?? "",
+                id: normalizeId(source?.id ?? source?.uuid, `gym-${index + 1}`),
+                name: source?.name ?? source?.nombre ?? "",
+                address: source?.address ?? source?.direccion ?? "",
+                phone: source?.phone ?? source?.telefono ?? "",
             };
         },
         buildPayload(values) {
@@ -84,8 +135,11 @@ const adminResources = {
             const phone = values.phone.trim();
 
             return {
+                name,
                 nombre: name,
+                address,
                 direccion: address,
+                phone,
                 telefono: phone,
             };
         },
@@ -190,6 +244,13 @@ const adminResources = {
                 placeholder: "1",
             },
             {
+                name: "gymId",
+                label: "ID gimnasio",
+                type: "text",
+                required: true,
+                placeholder: "1",
+            },
+            {
                 name: "machineId",
                 label: "ID maquina",
                 type: "text",
@@ -203,8 +264,14 @@ const adminResources = {
                 required: true,
             },
             {
-                name: "hour",
-                label: "Hora",
+                name: "startTime",
+                label: "Hora inicio",
+                type: "time",
+                required: true,
+            },
+            {
+                name: "endTime",
+                label: "Hora fin",
                 type: "time",
                 required: true,
             },
@@ -212,11 +279,12 @@ const adminResources = {
                 name: "status",
                 label: "Estado",
                 type: "select",
-                required: true,
+                required: false,
+                defaultValue: "activa",
                 options: [
-                    { value: "pendiente", label: "Pendiente" },
-                    { value: "confirmada", label: "Confirmada" },
+                    { value: "activa", label: "Activa" },
                     { value: "cancelada", label: "Cancelada" },
+                    { value: "completada", label: "Completada" },
                 ],
             },
         ],
@@ -224,43 +292,86 @@ const adminResources = {
             return {
                 id: normalizeId(item?.id ?? item?.uuid ?? item?.code, `reservation-${index + 1}`),
                 userId: normalizeId(item?.user_id ?? item?.usuario_id ?? item?.user?.id, ""),
+                gymId: normalizeId(item?.gimnasio_id ?? item?.gym_id ?? item?.gym?.id, ""),
                 machineId: normalizeId(item?.machine_id ?? item?.maquina_id ?? item?.machine?.id, ""),
                 userName:
-                    item?.user_name ?? item?.usuario ?? item?.usuario_nombre ?? item?.user?.name ?? item?.user?.nombre ?? "",
+                    extractEntityName(item?.user_name) ||
+                    extractEntityName(item?.usuario) ||
+                    extractEntityName(item?.usuario_nombre) ||
+                    extractEntityName(item?.user?.name) ||
+                    extractEntityName(item?.user?.nombre),
+                gymName:
+                    extractEntityName(item?.gym_name) ||
+                    extractEntityName(item?.gimnasio) ||
+                    extractEntityName(item?.gym?.name) ||
+                    extractEntityName(item?.gym?.nombre),
                 machineName:
-                    item?.machine_name ?? item?.maquina ?? item?.maquina_nombre ?? item?.machine?.name ?? item?.machine?.nombre ?? "",
-                date: item?.date ?? item?.fecha ?? "",
-                hour: item?.hour ?? item?.hora ?? item?.time ?? "",
-                status: item?.status ?? item?.estado ?? "pendiente",
+                    extractEntityName(item?.machine_name) ||
+                    extractEntityName(item?.maquina) ||
+                    extractEntityName(item?.maquina_nombre) ||
+                    extractEntityName(item?.machine?.name) ||
+                    extractEntityName(item?.machine?.nombre),
+                date:
+                    item?.date ??
+                    item?.fecha ??
+                    extractDate(item?.hora_inicio ?? item?.start_time) ??
+                    "",
+                startTime: extractTime(item?.hora_inicio ?? item?.start_time ?? item?.hour ?? item?.hora ?? item?.time),
+                endTime: extractTime(item?.hora_fin ?? item?.end_time),
+                status: item?.status ?? item?.estado ?? "activa",
             };
         },
         buildPayload(values) {
             const userId = values.userId.trim();
+            const gymId = values.gymId.trim();
             const machineId = values.machineId.trim();
             const date = values.date.trim();
-            const hour = values.hour.trim();
+            const startTime = values.startTime.trim();
+            const endTime = values.endTime.trim();
             const status = values.status.trim();
+            const startDateTime = date && startTime ? `${date}T${startTime}:00` : startTime;
+            const endDateTime = date && endTime ? `${date}T${endTime}:00` : endTime;
 
-            return {
-                user_id: userId,
+            const payload = {
                 usuario_id: userId,
-                machine_id: machineId,
                 maquina_id: machineId,
-                date,
-                fecha: date,
-                hour,
-                hora: hour,
-                status,
-                estado: status,
+                gimnasio_id: gymId,
+                hora_inicio: startDateTime,
+                hora_fin: endDateTime,
             };
+
+            if (status) {
+                payload.estado = status;
+            }
+
+            return payload;
+        },
+        validate(values) {
+            const errors = [];
+            const allowedStatuses = ["activa", "cancelada", "completada"];
+            const status = String(values.status ?? "").trim().toLowerCase();
+
+            if (status && !allowedStatuses.includes(status)) {
+                errors.push("status: valor no permitido (activa, cancelada, completada)");
+            }
+
+            const startTime = String(values.startTime ?? "").trim();
+            const endTime = String(values.endTime ?? "").trim();
+
+            if (startTime && endTime && endTime <= startTime) {
+                errors.push("endTime: debe ser posterior a Hora inicio");
+            }
+
+            return errors;
         },
         getItemTitle(item) {
-            return item.machineName || `Reserva ${item.id}`;
+            return item.machineName || item.gymName || `Reserva ${item.id}`;
         },
         getItemMeta(item) {
             return [
                 item.userName || `Usuario ${item.userId}`,
-                [item.date, item.hour].filter(Boolean).join(" "),
+                item.gymName || (item.gymId ? `Gimnasio ${item.gymId}` : ""),
+                [item.date, item.startTime, item.endTime].filter(Boolean).join(" "),
                 item.status,
             ]
                 .filter(Boolean)
@@ -399,7 +510,19 @@ function resolvePath(path, params = {}) {
         return "";
     }
 
+    if (Array.isArray(path)) {
+        return path.map((currentPath) => resolvePath(currentPath, params));
+    }
+
     return path.replaceAll("{id}", encodeURIComponent(String(params.id ?? "")));
+}
+
+async function requestPath(pathOrPaths, options) {
+    if (Array.isArray(pathOrPaths)) {
+        return apiRequestWithFallback(pathOrPaths, options);
+    }
+
+    return apiRequest(pathOrPaths, options);
 }
 
 export function getAdminResource(resourceKey) {
@@ -482,9 +605,79 @@ export function validateResourceForm(resourceKey, values, mode) {
     return errors;
 }
 
+function hasInvalidEstadoError(error) {
+    const details = error?.details;
+    const estadoErrors = details?.estado;
+
+    if (!Array.isArray(estadoErrors)) {
+        return false;
+    }
+
+    return estadoErrors.some((message) =>
+        String(message).toLowerCase().includes("invalid")
+    );
+}
+
+function getReservationStatusCandidates(status) {
+    const normalized = String(status || "").trim().toLowerCase();
+    const byIntent = {
+        activa: ["activa", "active"],
+        cancelada: ["cancelada", "cancelled", "canceled", "anulada"],
+        completada: ["completada", "completed", "finalizada"],
+    };
+
+    const specific = byIntent[normalized] ?? [];
+    const defaults = ["activa", "cancelada", "completada"];
+
+    return [...new Set([normalized, ...specific, ...defaults].filter(Boolean))];
+}
+
+async function requestReservationWithStatusFallback(path, method, payload, token) {
+    try {
+        return await requestPath(path, {
+            method,
+            body: payload,
+            token,
+        });
+    } catch (error) {
+        if (error?.status !== 422 || !hasInvalidEstadoError(error)) {
+            throw error;
+        }
+
+        const attempted = new Set([String(payload?.estado ?? "").toLowerCase()]);
+        const candidates = getReservationStatusCandidates(payload?.estado);
+
+        for (const candidate of candidates) {
+            if (attempted.has(candidate)) {
+                continue;
+            }
+
+            attempted.add(candidate);
+
+            try {
+                return await requestPath(path, {
+                    method,
+                    body: {
+                        ...payload,
+                        estado: candidate,
+                        status: candidate,
+                    },
+                    token,
+                });
+            } catch (retryError) {
+                if (retryError?.status !== 422 || !hasInvalidEstadoError(retryError)) {
+                    throw retryError;
+                }
+            }
+        }
+
+        throw error;
+    }
+}
+
 export async function listAdminResource(resourceKey, token) {
     const resource = getAdminResource(resourceKey);
-    return apiRequest(resolvePath(resource.listPath), { token });
+    return requestPath(resolvePath(resource.listPath), { token });
 }
 
 export async function createAdminResource(resourceKey, values, token) {
@@ -493,9 +686,16 @@ export async function createAdminResource(resourceKey, values, token) {
         throw new Error(`La ruta para crear ${resource.singularTitle} no esta disponible.`);
     }
 
-    return apiRequest(resolvePath(resource.createPath), {
+    const payload = resource.buildPayload(values);
+    const path = resolvePath(resource.createPath);
+
+    if (resourceKey === "reservations") {
+        return requestReservationWithStatusFallback(path, "POST", payload, token);
+    }
+
+    return requestPath(path, {
         method: "POST",
-        body: resource.buildPayload(values),
+        body: payload,
         token,
     });
 }
@@ -506,9 +706,17 @@ export async function updateAdminResource(resourceKey, id, values, token) {
         throw new Error(`La ruta para actualizar ${resource.singularTitle} no esta disponible.`);
     }
 
-    return apiRequest(resolvePath(resource.updatePath, { id }), {
-        method: resource.updateMethod ?? "PUT",
-        body: resource.buildPayload(values),
+    const payload = resource.buildPayload(values);
+    const path = resolvePath(resource.updatePath, { id });
+    const method = resource.updateMethod ?? "PUT";
+
+    if (resourceKey === "reservations") {
+        return requestReservationWithStatusFallback(path, method, payload, token);
+    }
+
+    return requestPath(path, {
+        method,
+        body: payload,
         token,
     });
 }
@@ -519,7 +727,7 @@ export async function deleteAdminResource(resourceKey, id, token) {
         throw new Error(`La ruta para eliminar ${resource.singularTitle} no esta disponible.`);
     }
 
-    return apiRequest(resolvePath(resource.deletePath, { id }), {
+    return requestPath(resolvePath(resource.deletePath, { id }), {
         method: "DELETE",
         token,
     });

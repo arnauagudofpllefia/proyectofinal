@@ -26,13 +26,15 @@ export default function LoginPage() {
 			const response = await loginRequest(form);
 			const token = response?.token || response?.access_token || response?.data?.token;
 
-			if (token) {
-				localStorage.setItem("auth_token", token);
-				document.cookie = `auth_token=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax`;
+			if (!token) {
+				throw new Error("La API de login no devolvio token.");
 			}
 
+			localStorage.setItem("auth_token", token);
+			document.cookie = `auth_token=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax`;
+
 			setMessage("Sesion iniciada correctamente.");
-			router.push("/dashboard");
+			window.location.href = "/dashboard";
 		} catch (submitError) {
 			setError(submitError.message || "No se pudo iniciar sesion.");
 		} finally {
