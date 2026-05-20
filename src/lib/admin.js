@@ -124,11 +124,13 @@ const adminResources = {
         capabilities: {
             create: true,
             edit: true,
-            delete: false,
+            delete: true,
         },
         listPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym", "/gyms", "/gimnasios", "/gym"],
         createPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym"],
-        updatePath: ["/admin/gyms/{id}", "/admin/gimnasios/{id}", "/admin/gym/{id}", "/admin/gyms", "/admin/gimnasios", "/admin/gym"],
+        updatePath: ["/admin/gym/{id}", "/gym/{id}"],
+        updateMethod: "PUT",
+        deletePath: ["/admin/gym/{id}", "/admin/gyms/{id}", "/admin/gimnasios/{id}"],
         fields: [
             {
                 name: "name",
