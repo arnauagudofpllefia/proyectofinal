@@ -7,6 +7,30 @@ function normalizeCollection(payload) {
         return data;
     }
 
+    if (Array.isArray(payload?.gyms)) {
+        return payload.gyms;
+    }
+
+    if (Array.isArray(payload?.gimnasios)) {
+        return payload.gimnasios;
+    }
+
+    if (Array.isArray(payload?.gimnasio)) {
+        return payload.gimnasio;
+    }
+
+    if (Array.isArray(data?.gyms)) {
+        return data.gyms;
+    }
+
+    if (Array.isArray(data?.gimnasios)) {
+        return data.gimnasios;
+    }
+
+    if (Array.isArray(data?.gimnasio)) {
+        return data.gimnasio;
+    }
+
     if (Array.isArray(data?.items)) {
         return data.items;
     }
@@ -15,19 +39,28 @@ function normalizeCollection(payload) {
         return data.rows;
     }
 
+    if (data && typeof data === "object") {
+        const objectKeys = Object.keys(data);
+        const hasOnlyInformationalKeys = objectKeys.length > 0 && objectKeys.every((key) =>
+            ["message", "status", "success", "detail"].includes(String(key).toLowerCase())
+        );
+
+        if (hasOnlyInformationalKeys) {
+            return [];
+        }
+
+        const firstArrayValue = Object.values(data).find((value) => Array.isArray(value));
+        if (Array.isArray(firstArrayValue)) {
+            return firstArrayValue;
+        }
+    }
+
     if (data?.gimnasio && typeof data.gimnasio === "object") {
         return [data.gimnasio];
     }
 
     if (data?.gym && typeof data.gym === "object") {
         return [data.gym];
-    }
-
-    if (data && typeof data === "object") {
-        const firstArrayValue = Object.values(data).find((value) => Array.isArray(value));
-        if (Array.isArray(firstArrayValue)) {
-            return firstArrayValue;
-        }
     }
 
     if (data && typeof data === "object") {
@@ -93,7 +126,7 @@ const adminResources = {
             edit: true,
             delete: false,
         },
-        listPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym"],
+        listPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym", "/gyms", "/gimnasios", "/gym"],
         createPath: ["/admin/gyms", "/admin/gimnasios", "/admin/gym"],
         updatePath: ["/admin/gyms/{id}", "/admin/gimnasios/{id}", "/admin/gym/{id}", "/admin/gyms", "/admin/gimnasios", "/admin/gym"],
         fields: [
@@ -175,6 +208,13 @@ const adminResources = {
                 placeholder: "Cinta X9",
             },
             {
+                name: "gymId",
+                label: "Gimnasio",
+                type: "select",
+                required: true,
+                options: [],
+            },
+            {
                 name: "zone",
                 label: "Zona",
                 type: "text",
@@ -197,26 +237,41 @@ const adminResources = {
             return {
                 id: normalizeId(item?.id ?? item?.uuid, `machine-${index + 1}`),
                 name: item?.name ?? item?.nombre ?? "",
+                gymId: normalizeId(item?.gimnasio_id ?? item?.gym_id ?? item?.gym?.id, ""),
                 zone: item?.zone ?? item?.zona ?? "",
                 status: item?.status ?? item?.estado ?? "Disponible",
             };
         },
         buildPayload(values) {
             const name = values.name.trim();
+            const gymIdRaw = values.gymId.trim();
+            const gymId = Number.parseInt(gymIdRaw, 10);
             const zone = values.zone.trim();
             const status = values.status.trim();
 
             return {
+                gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
+                gym_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 nombre: name,
                 zona: zone,
                 estado: status,
             };
         },
+        validate(values) {
+            const errors = [];
+            const gymId = String(values.gymId ?? "").trim();
+
+            if (gymId && !/^\d+$/.test(gymId)) {
+                errors.push("gymId: debe ser un entero");
+            }
+
+            return errors;
+        },
         getItemTitle(item) {
             return item.name || "Maquina sin nombre";
         },
         getItemMeta(item) {
-            return [item.zone, item.status].filter(Boolean).join(" · ");
+            return [item.gymId ? `Gym ${item.gymId}` : "", item.zone, item.status].filter(Boolean).join(" · ");
         },
     },
     reservations: {
@@ -677,7 +732,45 @@ async function requestReservationWithStatusFallback(path, method, payload, token
 
 export async function listAdminResource(resourceKey, token) {
     const resource = getAdminResource(resourceKey);
-    return requestPath(resolvePath(resource.listPath), { token });
+    const resolvedPath = resolvePath(resource.listPath);
+
+    if (resourceKey !== "gyms" || !Array.isArray(resolvedPath)) {
+        return requestPath(resolvedPath, { token });
+    }
+
+    let lastError = null;
+    let bestPayload = null;
+    let bestScore = -1;
+
+    for (const path of resolvedPath) {
+        try {
+            const payload = await apiRequest(path, { token });
+            const normalized = normalizeResourceList(resourceKey, payload);
+            const namedCount = normalized.filter((item) => String(item?.name || "").trim()).length;
+            const score = normalized.length * 100 + namedCount;
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestPayload = payload;
+            }
+
+            if (normalized.length > 1 && namedCount > 0) {
+                return payload;
+            }
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    if (bestPayload) {
+        return bestPayload;
+    }
+
+    if (lastError) {
+        throw lastError;
+    }
+
+    return requestPath(resolvedPath, { token });
 }
 
 export async function createAdminResource(resourceKey, values, token) {

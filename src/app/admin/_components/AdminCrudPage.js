@@ -71,6 +71,17 @@ async function fetchResourceItems(resourceKey, token) {
     return normalizeResourceList(resourceKey, response);
 }
 
+function normalizeGymOptionValue(value) {
+    const raw = String(value ?? "").trim();
+
+    if (/^\d+$/.test(raw)) {
+        return raw;
+    }
+
+    const fallbackMatch = raw.match(/^gym-(\d+)$/i);
+    return fallbackMatch ? fallbackMatch[1] : "";
+}
+
 export default function AdminCrudPage({ resourceKey }) {
     const resource = getAdminResource(resourceKey);
     const capabilities = resource.capabilities ?? {};
@@ -87,10 +98,21 @@ export default function AdminCrudPage({ resourceKey }) {
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const [fieldErrors, setFieldErrors] = useState([]);
+    const [gymOptions, setGymOptions] = useState([]);
 
     const mode = selectedId ? "edit" : "create";
     const canSubmit = selectedId ? canEdit : canCreate;
-    const visibleFields = getVisibleFields(resourceKey, mode);
+    const baseVisibleFields = getVisibleFields(resourceKey, mode);
+    const visibleFields = baseVisibleFields.map((field) => {
+        if (resourceKey === "machines" && field.name === "gymId") {
+            return {
+                ...field,
+                options: gymOptions,
+            };
+        }
+
+        return field;
+    });
     const headingLabel = canCreate || canEdit ? `Gestion de ${resource.title.toLowerCase()}` : `Consulta de ${resource.title.toLowerCase()}`;
 
     const loadItems = async () => {
@@ -126,6 +148,33 @@ export default function AdminCrudPage({ resourceKey }) {
                 setErrorMessage("");
 
                 try {
+                    if (resourceKey === "machines") {
+                        try {
+                            const gymsResponse = await listAdminResource("gyms", token);
+                            const normalizedGyms = normalizeResourceList("gyms", gymsResponse);
+                            setGymOptions(
+                                normalizedGyms
+                                    .map((gym) => {
+                                        const gymId = normalizeGymOptionValue(gym.id);
+
+                                        if (!gymId) {
+                                            return null;
+                                        }
+
+                                        return {
+                                            value: gymId,
+                                            label: gym.name || `Gimnasio ${gymId}`,
+                                        };
+                                    })
+                                    .filter(Boolean)
+                            );
+                        } catch {
+                            setGymOptions([]);
+                        }
+                    } else {
+                        setGymOptions([]);
+                    }
+
                     const normalized = await fetchResourceItems(resourceKey, token);
                     setItems(normalized);
                     setForbidden(false);

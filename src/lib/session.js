@@ -1,0 +1,51 @@
+import { cookies } from "next/headers";
+import { getCurrentUser } from "@/lib/api";
+
+function normalizeRole(user) {
+    const rawRole =
+        user?.role ??
+        user?.rol ??
+        user?.tipo ??
+        user?.data?.role ??
+        user?.data?.rol ??
+        user?.data?.tipo ??
+        "";
+
+    return String(rawRole).trim().toLowerCase();
+}
+
+export async function getServerSessionInfo() {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value || "";
+
+    if (!token) {
+        return {
+            token: "",
+            user: null,
+            role: "",
+            isAuthenticated: false,
+            isAdmin: false,
+        };
+    }
+
+    try {
+        const user = await getCurrentUser(token);
+        const role = normalizeRole(user);
+
+        return {
+            token,
+            user,
+            role,
+            isAuthenticated: true,
+            isAdmin: role === "admin",
+        };
+    } catch {
+        return {
+            token,
+            user: null,
+            role: "",
+            isAuthenticated: true,
+            isAdmin: false,
+        };
+    }
+}

@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthSessionGuard from "@/app/_components/AuthSessionGuard";
+import LogoutButton from "@/app/_components/LogoutButton";
+import { getServerSessionInfo } from "@/lib/session";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,21 +21,19 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const cookieStore = await cookies();
-  const isAuthenticated = Boolean(cookieStore.get("auth_token")?.value);
+  const { isAuthenticated, isAdmin } = await getServerSessionInfo();
   const navItems = isAuthenticated
     ? [
-        { href: "/", label: "Inicio" },
-        { href: "/dashboard", label: "Dashboard" },
-        { href: "/admin", label: "Admin" },
-        { href: "/machines", label: "Maquinas" },
-        { href: "/reservations", label: "Reservas" },
-        { href: "/reservations/my", label: "Mis reservas" },
-      ]
+      { href: "/", label: "Inicio" },
+      { href: "/dashboard", label: "Mis reservas" },
+      ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+      { href: "/machines", label: "Maquinas" },
+      { href: "/reservations", label: "Reservas" },
+    ]
     : [
-        { href: "/login", label: "Login" },
-        { href: "/register", label: "Registro" },
-      ];
+      { href: "/login", label: "Login" },
+      { href: "/register", label: "Registro" },
+    ];
 
   return (
     <html
@@ -63,6 +62,7 @@ export default async function RootLayout({ children }) {
                   {item.label}
                 </Link>
               ))}
+              {isAuthenticated ? <LogoutButton /> : null}
             </nav>
           </div>
         </header>
