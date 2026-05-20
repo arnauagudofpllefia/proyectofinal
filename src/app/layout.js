@@ -28,7 +28,6 @@ export default async function RootLayout({ children }) {
       { href: "/dashboard", label: "Mis reservas" },
       ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       { href: "/machines", label: "Maquinas" },
-      { href: "/reservations", label: "Reservas" },
     ]
     : [
       { href: "/login", label: "Login" },

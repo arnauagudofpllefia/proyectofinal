@@ -23,12 +23,6 @@ export default async function Home() {
       href: "/machines",
     },
     {
-      label: "Reservas",
-      value: reservationsCount,
-      detail: isAdmin ? "Reservas totales del sistema." : "Disponible solo para administradores.",
-      href: isAdmin ? "/reservations" : null,
-    },
-    {
       label: "Mis reservas",
       value: myReservationsCount,
       detail: "Tus reservas activas y programadas.",

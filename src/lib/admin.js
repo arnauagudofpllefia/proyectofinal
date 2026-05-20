@@ -234,6 +234,13 @@ const adminResources = {
                     { value: "Mantenimiento", label: "Mantenimiento" },
                 ],
             },
+                {
+                    name: "description",
+                    label: "Descripcion",
+                    type: "text",
+                    required: false,
+                    placeholder: "Descripcion de la maquina",
+                },
         ],
         normalizeItem(item, index) {
             return {
@@ -242,6 +249,7 @@ const adminResources = {
                 gymId: normalizeId(item?.gimnasio_id ?? item?.gym_id ?? item?.gym?.id, ""),
                 zone: item?.zone ?? item?.zona ?? "",
                 status: item?.status ?? item?.estado ?? "Disponible",
+                    description: item?.description ?? item?.descripcion ?? "",
             };
         },
         buildPayload(values) {
@@ -250,6 +258,7 @@ const adminResources = {
             const gymId = Number.parseInt(gymIdRaw, 10);
             const zone = values.zone.trim();
             const status = values.status.trim();
+                const description = (values.description ?? "").trim();
 
             return {
                 gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
@@ -257,6 +266,8 @@ const adminResources = {
                 nombre: name,
                 zona: zone,
                 estado: status,
+                    description,
+                    descripcion: description,
             };
         },
         validate(values) {

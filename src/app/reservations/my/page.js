@@ -8,6 +8,49 @@ const myReservationsFallback = [
 	{ id: "R-1043", machine: "Remo Pro", date: "16/05/2026", hour: "10:00" },
 ];
 
+function extractText(value, fallback = "") {
+	if (typeof value === "string") {
+		return value;
+	}
+
+	if (value && typeof value === "object") {
+		const objectText =
+			value?.name ??
+			value?.nombre ??
+			value?.title ??
+			value?.descripcion ??
+			value?.description ??
+			"";
+
+		if (typeof objectText === "string") {
+			return objectText;
+		}
+	}
+
+	return fallback;
+}
+
+function extractDate(dateSource) {
+	if (typeof dateSource !== "string" || !dateSource) {
+		return "Sin fecha";
+	}
+
+	if (dateSource.includes("T")) {
+		return dateSource.split("T")[0];
+	}
+
+	return dateSource;
+}
+
+function extractHour(timeSource) {
+	if (typeof timeSource !== "string" || !timeSource) {
+		return "--:--";
+	}
+
+	const match = timeSource.match(/(\d{2}:\d{2})/);
+	return match ? match[1] : "--:--";
+}
+
 function normalizeMyReservations(payload) {
 	const data = payload?.data ?? payload;
 	if (!Array.isArray(data)) {
@@ -16,9 +59,14 @@ function normalizeMyReservations(payload) {
 
 	return data.map((item, index) => ({
 		id: item?.id ?? item?.code ?? `R-${index + 1}`,
-		machine: item?.machine ?? item?.machine_name ?? item?.maquina ?? "Sin maquina",
-		date: item?.date ?? item?.fecha ?? "Sin fecha",
-		hour: item?.hour ?? item?.hora ?? "--:--",
+		machine:
+			extractText(item?.machine_name) ||
+			extractText(item?.maquina_nombre) ||
+			extractText(item?.machine) ||
+			extractText(item?.maquina) ||
+			"Sin maquina",
+		date: extractDate(item?.date ?? item?.fecha ?? item?.hora_inicio ?? item?.start_time),
+		hour: extractHour(item?.hour ?? item?.hora ?? item?.hora_inicio ?? item?.start_time),
 	}));
 }
 
@@ -59,16 +107,11 @@ export default function MyReservationsPage() {
 			<div className="space-y-4">
 				{myReservations.map((item) => (
 					<article key={item.id} className="glass-panel rounded-2xl p-5">
-						<div className="flex flex-wrap items-center justify-between gap-3">
-							<div>
-								<h2 className="text-lg font-semibold text-white">{item.machine}</h2>
-								<p className="mt-1 text-sm text-slate-300">
-									{item.date} a las {item.hour}
-								</p>
-							</div>
-							<span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-100">
-								{item.id}
-							</span>
+						<div>
+							<h2 className="text-lg font-semibold text-white">{item.machine}</h2>
+							<p className="mt-1 text-sm text-slate-300">
+								{item.date} a las {item.hour}
+							</p>
 						</div>
 					</article>
 				))}

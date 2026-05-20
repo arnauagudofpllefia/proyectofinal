@@ -143,6 +143,11 @@ export async function getMachineSlots(id, token) {
   return apiRequest(`/machines/${id}/slots`, { token });
 }
 
+export async function getMachineReservations(id, token) {
+  const encodedId = encodeURIComponent(String(id));
+  return apiRequest(`/machines/${encodedId}/reservations`, { token });
+}
+
 export async function getReservations(token) {
   return apiRequest("/admin/reservations", { token });
 }
