@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { registerRequest } from "@/lib/api";
+import { getGyms, registerRequest } from "@/lib/api";
 
 export default function RegisterPage() {
 	const router = useRouter();
@@ -11,11 +11,31 @@ export default function RegisterPage() {
 		email: "",
 		password: "",
 		password_confirmation: "",
+		gymId: "",
 	});
+	const [gyms, setGyms] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
 	const [fieldErrors, setFieldErrors] = useState([]);
+
+	useEffect(() => {
+		const timer = setTimeout(async () => {
+			try {
+				const gymsData = await getGyms("");
+				const list = Array.isArray(gymsData) ? gymsData : (gymsData?.data ?? []);
+				setGyms(
+					list.map((g) => ({
+						id: String(g?.id ?? ""),
+						name: g?.nombre ?? g?.name ?? `Gimnasio ${g?.id}`,
+					}))
+				);
+			} catch {
+				setGyms([]);
+			}
+		}, 0);
+		return () => clearTimeout(timer);
+	}, []);
 
 	const handleChange = (event) => {
 		const { name, value } = event.target;
@@ -39,6 +59,12 @@ export default function RegisterPage() {
 		if (form.password !== form.password_confirmation) {
 			setError("Las contrasenas no coinciden.");
 			setFieldErrors(["password_confirmation: no coincide con password"]);
+			setLoading(false);
+			return;
+		}
+
+		if (!form.gymId) {
+			setError("Selecciona un gimnasio para continuar.");
 			setLoading(false);
 			return;
 		}
@@ -99,6 +125,24 @@ export default function RegisterPage() {
 							className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-300/70"
 							placeholder="tu@email.com"
 						/>
+					</label>
+
+					<label className="block text-sm text-slate-300">
+						Gimnasio
+						<select
+							name="gymId"
+							value={form.gymId}
+							onChange={handleChange}
+							required
+							className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-300/70"
+						>
+							<option value="">Selecciona tu gimnasio</option>
+							{gyms.map((gym) => (
+								<option key={gym.id} value={gym.id}>
+									{gym.name}
+								</option>
+							))}
+						</select>
 					</label>
 
 					<label className="block text-sm text-slate-300">

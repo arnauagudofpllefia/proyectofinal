@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createReservation, getCurrentUser, getMachines } from "@/lib/api";
+import { getCurrentUser, getMachines } from "@/lib/api";
 
 const machinesFallback = [
 	{ id: "1", name: "Cinta X9", status: "Disponible", zone: "Cardio", gymId: "1", description: "" },
@@ -26,162 +26,52 @@ function normalizeMachines(payload) {
 	}));
 }
 
-function toIsoDateTime(date, time) {
-	return `${date}T${time}:00`;
-}
-
-function extractUserId(userPayload) {
+function extractUserGymId(userPayload) {
 	const user = userPayload?.data ?? userPayload;
-	const candidate = user?.id ?? user?.user_id ?? user?.usuario_id ?? user?.uuid;
+	const candidate = user?.gym_id ?? user?.gimnasio_id ?? user?.gym?.id ?? user?.gimnasio?.id;
 	return candidate != null ? String(candidate) : "";
 }
 
 export default function MachinesPage() {
-	const [machines, setMachines] = useState(machinesFallback);
+	const [machines, setMachines] = useState([]);
+	const [userGymId, setUserGymId] = useState("");
+	const [gymName, setGymName] = useState("");
 	const [apiError, setApiError] = useState("");
-	const [reservationForms, setReservationForms] = useState({});
-	const [reservationState, setReservationState] = useState({});
-
-	const reloadMachines = async () => {
-		const token = localStorage.getItem("auth_token") || "";
-
-		try {
-			const response = await getMachines(token);
-			const normalized = normalizeMachines(response);
-			if (normalized.length) {
-				setMachines(normalized);
-			}
-			setApiError("");
-		} catch (error) {
-			setApiError(error.message);
-		}
-	};
 
 	useEffect(() => {
 		const timer = setTimeout(async () => {
-			await reloadMachines();
+			const token = localStorage.getItem("auth_token") || "";
+
+			let gymId = "";
+			let gymLabel = "";
+			try {
+				const meResponse = await getCurrentUser(token);
+				gymId = extractUserGymId(meResponse);
+				const user = meResponse?.data ?? meResponse;
+				gymLabel = user?.gym?.name ?? user?.gym?.nombre ?? user?.gimnasio?.name ?? user?.gimnasio?.nombre ?? "";
+			} catch {
+				gymId = "";
+			}
+
+			setUserGymId(gymId);
+			setGymName(gymLabel);
+
+			try {
+				const response = await getMachines(token);
+				const normalized = normalizeMachines(response);
+				const filtered = gymId
+					? normalized.filter((m) => !m.gymId || m.gymId === gymId)
+					: normalized;
+				setMachines(filtered.length ? filtered : machinesFallback);
+				setApiError("");
+			} catch (error) {
+				setApiError(error.message);
+				setMachines(machinesFallback);
+			}
 		}, 0);
 
 		return () => clearTimeout(timer);
 	}, []);
-
-	const handleReservationFieldChange = (machineId, field, value) => {
-		setReservationForms((prev) => ({
-			...prev,
-			[machineId]: {
-				...prev[machineId],
-				[field]: value,
-			},
-		}));
-	};
-
-	const handleReservationSubmit = async (event, machine) => {
-		event.preventDefault();
-		const machineId = machine.id;
-		const form = reservationForms[machineId] ?? { date: "", startTime: "", endTime: "" };
-
-		setReservationState((prev) => ({
-			...prev,
-			[machineId]: { loading: true, error: "", success: "" },
-		}));
-
-		if (!form.date || !form.startTime || !form.endTime) {
-			setReservationState((prev) => ({
-				...prev,
-				[machineId]: {
-					loading: false,
-					error: "Completa fecha, hora de inicio y hora de fin.",
-					success: "",
-				},
-			}));
-			return;
-		}
-
-		if (form.endTime <= form.startTime) {
-			setReservationState((prev) => ({
-				...prev,
-				[machineId]: {
-					loading: false,
-					error: "La hora de fin debe ser posterior a la de inicio.",
-					success: "",
-				},
-			}));
-			return;
-		}
-
-		const token = localStorage.getItem("auth_token") || "";
-		if (!token) {
-			setReservationState((prev) => ({
-				...prev,
-				[machineId]: {
-					loading: false,
-					error: "Inicia sesion para poder reservar.",
-					success: "",
-				},
-			}));
-			return;
-		}
-
-		let userId = "";
-		try {
-			const meResponse = await getCurrentUser(token);
-			userId = extractUserId(meResponse);
-		} catch {
-			userId = "";
-		}
-
-		if (!userId) {
-			setReservationState((prev) => ({
-				...prev,
-				[machineId]: {
-					loading: false,
-					error: "No se pudo identificar tu usuario. Vuelve a iniciar sesion.",
-					success: "",
-				},
-			}));
-			return;
-		}
-
-		const startDateTime = toIsoDateTime(form.date, form.startTime);
-		const endDateTime = toIsoDateTime(form.date, form.endTime);
-		const payload = {
-			usuario_id: userId,
-			user_id: userId,
-			maquina_id: machineId,
-			machine_id: machineId,
-			gimnasio_id: machine.gymId || undefined,
-			gym_id: machine.gymId || undefined,
-			hora_inicio: startDateTime,
-			hora_fin: endDateTime,
-			estado: "activa",
-		};
-
-		try {
-			const response = await createReservation(payload, token);
-			setReservationState((prev) => ({
-				...prev,
-				[machineId]: {
-					loading: false,
-					error: "",
-					success: response?.message ?? "Reserva creada correctamente.",
-				},
-			}));
-			setReservationForms((prev) => ({
-				...prev,
-				[machineId]: { date: "", startTime: "", endTime: "" },
-			}));
-			await reloadMachines();
-		} catch (error) {
-			setReservationState((prev) => ({
-				...prev,
-				[machineId]: {
-					loading: false,
-					error: error.message || "No se pudo crear la reserva.",
-					success: "",
-				},
-			}));
-		}
-	};
 
 	return (
 		<section className="rise-in space-y-6">
@@ -189,22 +79,24 @@ export default function MachinesPage() {
 				<p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Maquinas</p>
 				<h1 className="mt-2 text-3xl font-semibold text-white">Catalogo de equipos</h1>
 				<p className="mt-2 text-sm text-slate-300">
-					{apiError ? `Usando datos temporales: ${apiError}` : "Listado cargado desde tu API."}
+					{apiError
+						? `Usando datos temporales: ${apiError}`
+						: gymName
+							? `Equipos disponibles en ${gymName}.`
+							: "Equipos disponibles en tu gimnasio."}
 				</p>
+				{userGymId ? (
+					<Link
+						href="/profile"
+						className="mt-2 inline-block text-xs text-cyan-300 underline underline-offset-2 hover:text-cyan-200"
+					>
+						Cambiar gimnasio
+					</Link>
+				) : null}
 			</header>
 
-			<div className="grid gap-4">
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{machines.map((machine) => (
-					(() => {
-						const machineForm = reservationForms[machine.id] ?? { date: "", startTime: "", endTime: "" };
-						const machineRequestState = reservationState[machine.id] ?? {
-							loading: false,
-							error: "",
-							success: "",
-						};
-						const canReserve = String(machine.status).toLowerCase() !== "mantenimiento";
-
-						return (
 					<article
 						key={machine.id}
 						className="energy-ring glass-panel rounded-2xl p-5 transition hover:-translate-y-0.5"
@@ -229,10 +121,10 @@ export default function MachinesPage() {
 							Ver detalle
 						</Link>
 					</article>
-						);
-					})()
 				))}
 			</div>
 		</section>
 	);
 }
+
+

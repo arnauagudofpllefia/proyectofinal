@@ -108,7 +108,7 @@ export async function loginRequest({ email, password }) {
   });
 }
 
-export async function registerRequest({ name, email, password, password_confirmation }) {
+export async function registerRequest({ name, email, password, password_confirmation, gymId }) {
   return apiRequest("/register", {
     method: "POST",
     body: {
@@ -116,8 +116,36 @@ export async function registerRequest({ name, email, password, password_confirma
       email,
       contrasena: password,
       contrasena_confirmation: password_confirmation,
+      ...(gymId ? { gimnasio_id: gymId, gym_id: gymId } : {}),
     },
   });
+}
+
+export async function getGyms(token) {
+  // No dedicated gyms endpoint — extract unique gyms from machines
+  const machines = await apiRequest("/machines", { token });
+  const data = Array.isArray(machines) ? machines : (machines?.data ?? []);
+  const seen = new Set();
+  const gyms = [];
+  for (const m of data) {
+    const g = m?.gimnasio ?? m?.gym;
+    if (g?.id != null && !seen.has(g.id)) {
+      seen.add(g.id);
+      gyms.push(g);
+    }
+  }
+  return gyms;
+}
+
+export async function updateUserGym(gymId, token) {
+  return apiRequestWithFallback(
+    ["/user/gym", "/user/gimnasio", "/user"],
+    {
+      method: "PATCH",
+      body: { gimnasio_id: gymId, gym_id: gymId },
+      token,
+    }
+  );
 }
 
 export async function getCurrentUser(token) {
