@@ -122,19 +122,7 @@ export async function registerRequest({ name, email, password, password_confirma
 }
 
 export async function getGyms(token) {
-  // No dedicated gyms endpoint — extract unique gyms from machines
-  const machines = await apiRequest("/machines", { token });
-  const data = Array.isArray(machines) ? machines : (machines?.data ?? []);
-  const seen = new Set();
-  const gyms = [];
-  for (const m of data) {
-    const g = m?.gimnasio ?? m?.gym;
-    if (g?.id != null && !seen.has(g.id)) {
-      seen.add(g.id);
-      gyms.push(g);
-    }
-  }
-  return gyms;
+  return apiRequest("/gyms", { token: token || undefined });
 }
 
 export async function updateUserGym(gymId, token) {
