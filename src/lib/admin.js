@@ -234,13 +234,13 @@ const adminResources = {
                     { value: "Mantenimiento", label: "Mantenimiento" },
                 ],
             },
-                {
-                    name: "description",
-                    label: "Descripcion",
-                    type: "text",
-                    required: false,
-                    placeholder: "Descripcion de la maquina",
-                },
+            {
+                name: "description",
+                label: "Descripcion",
+                type: "text",
+                required: false,
+                placeholder: "Descripcion de la maquina",
+            },
         ],
         normalizeItem(item, index) {
             return {
@@ -249,7 +249,7 @@ const adminResources = {
                 gymId: normalizeId(item?.gimnasio_id ?? item?.gym_id ?? item?.gym?.id, ""),
                 zone: item?.zone ?? item?.zona ?? "",
                 status: item?.status ?? item?.estado ?? "Disponible",
-                    description: item?.description ?? item?.descripcion ?? "",
+                description: item?.description ?? item?.descripcion ?? "",
             };
         },
         buildPayload(values) {
@@ -258,7 +258,7 @@ const adminResources = {
             const gymId = Number.parseInt(gymIdRaw, 10);
             const zone = values.zone.trim();
             const status = values.status.trim();
-                const description = (values.description ?? "").trim();
+            const description = (values.description ?? "").trim();
 
             return {
                 gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
@@ -266,8 +266,8 @@ const adminResources = {
                 nombre: name,
                 zona: zone,
                 estado: status,
-                    description,
-                    descripcion: description,
+                description,
+                descripcion: description,
             };
         },
         validate(values) {
@@ -495,6 +495,13 @@ const adminResources = {
                 ],
             },
             {
+                name: "gymId",
+                label: "Gimnasio",
+                type: "select",
+                required: false,
+                options: [],
+            },
+            {
                 name: "password",
                 label: "Contrasena temporal",
                 type: "password",
@@ -518,6 +525,7 @@ const adminResources = {
                 email: item?.email ?? "",
                 phone: item?.phone ?? item?.telefono ?? "",
                 role: item?.role ?? item?.rol ?? item?.tipo ?? "user",
+                gymId: normalizeId(item?.gimnasio_id ?? item?.gym_id ?? item?.gimnasio?.id ?? item?.gym?.id, ""),
                 password: "",
                 passwordConfirmation: "",
             };
@@ -529,6 +537,9 @@ const adminResources = {
             const role = values.role.trim();
             const password = values.password.trim();
             const passwordConfirmation = values.passwordConfirmation.trim();
+            const gymId = String(values.gymId ?? "").trim();
+            const parsedGymId = Number.parseInt(gymId, 10);
+            const normalizedGymId = Number.isInteger(parsedGymId) ? parsedGymId : gymId;
 
             const payload = {
                 name,
@@ -539,6 +550,11 @@ const adminResources = {
                 role,
                 rol: role,
             };
+
+            if (gymId) {
+                payload.gimnasio_id = normalizedGymId;
+                payload.gym_id = normalizedGymId;
+            }
 
             if (password) {
                 payload.password = password;
@@ -818,6 +834,32 @@ export async function updateAdminResource(resourceKey, id, values, token) {
 
     if (resourceKey === "reservations") {
         return requestReservationWithStatusFallback(path, method, payload, token);
+    }
+
+    if (resourceKey === "users") {
+        const { gimnasio_id, gym_id, ...userPayload } = payload;
+        const encodedId = encodeURIComponent(String(id));
+        const hasGymInPayload =
+            (gimnasio_id !== undefined && String(gimnasio_id).trim() !== "") ||
+            (gym_id !== undefined && String(gym_id).trim() !== "");
+
+        const userResponse = await requestPath(path, {
+            method,
+            body: userPayload,
+            token,
+        });
+
+        if (hasGymInPayload) {
+            await apiRequest(`/admin/users/${encodedId}/gym`, {
+                method: "PATCH",
+                body: {
+                    gimnasio_id,
+                },
+                token,
+            });
+        }
+
+        return userResponse;
     }
 
     return requestPath(path, {

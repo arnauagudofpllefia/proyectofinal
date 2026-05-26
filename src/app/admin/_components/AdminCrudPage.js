@@ -104,7 +104,7 @@ export default function AdminCrudPage({ resourceKey }) {
     const canSubmit = selectedId ? canEdit : canCreate;
     const baseVisibleFields = getVisibleFields(resourceKey, mode);
     const visibleFields = baseVisibleFields.map((field) => {
-        if (resourceKey === "machines" && field.name === "gymId") {
+        if ((resourceKey === "machines" || resourceKey === "users") && field.name === "gymId") {
             return {
                 ...field,
                 options: gymOptions,
@@ -148,7 +148,7 @@ export default function AdminCrudPage({ resourceKey }) {
                 setErrorMessage("");
 
                 try {
-                    if (resourceKey === "machines") {
+                    if (resourceKey === "machines" || resourceKey === "users") {
                         try {
                             const gymsResponse = await listAdminResource("gyms", token);
                             const normalizedGyms = normalizeResourceList("gyms", gymsResponse);
