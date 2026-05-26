@@ -4,24 +4,92 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCurrentUser, getGyms, updateUserGym } from "@/lib/api";
 
-const GYM_CHANGE_KEY = "gym_last_changed";
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+const GYM_NEXT_ALLOWED_KEY = "gym_next_allowed_change_at";
 
-function daysUntilNextChange(lastChangedIso) {
-	if (!lastChangedIso) {
+function daysUntilDate(isoDate) {
+	if (!isoDate) {
 		return 0;
 	}
-	const diff = TWO_WEEKS_MS - (Date.now() - Date.parse(lastChangedIso));
+
+	const parsed = Date.parse(isoDate);
+	if (Number.isNaN(parsed)) {
+		return 0;
+	}
+
+	const diff = parsed - Date.now();
 	return diff > 0 ? Math.ceil(diff / (24 * 60 * 60 * 1000)) : 0;
+}
+
+function plusTwoWeeks(isoDate) {
+	if (!isoDate) {
+		return "";
+	}
+
+	const parsed = Date.parse(isoDate);
+	if (Number.isNaN(parsed)) {
+		return "";
+	}
+
+	return new Date(parsed + TWO_WEEKS_MS).toISOString();
+}
+
+function formatLocalDateTime(isoDate) {
+	if (!isoDate) {
+		return "";
+	}
+
+	const parsed = new Date(isoDate);
+	if (Number.isNaN(parsed.getTime())) {
+		return "";
+	}
+
+	return parsed.toLocaleString("es-ES", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
+
+function parseIsoDate(isoDate) {
+	if (!isoDate) {
+		return null;
+	}
+
+	const parsed = Date.parse(isoDate);
+	return Number.isNaN(parsed) ? null : parsed;
+}
+
+function pickMostRestrictiveDate(...dates) {
+	const parsedDates = dates
+		.map((date) => ({ date, parsed: parseIsoDate(date) }))
+		.filter((item) => item.parsed !== null);
+
+	if (!parsedDates.length) {
+		return "";
+	}
+
+	parsedDates.sort((a, b) => b.parsed - a.parsed);
+	return parsedDates[0].date;
 }
 
 function extractUserInfo(payload) {
 	const user = payload?.data ?? payload;
+	const lastGymChangeAt =
+		user?.gimnasio_cambiado_en ??
+		user?.gym_changed_at ??
+		user?.gym?.changed_at ??
+		"";
+	const nextAllowedChangeAt = user?.next_allowed_change_at ?? plusTwoWeeks(lastGymChangeAt);
+
 	return {
 		name: user?.name ?? user?.nombre ?? "",
 		email: user?.email ?? "",
 		gymId: String(user?.gym_id ?? user?.gimnasio_id ?? user?.gym?.id ?? user?.gimnasio?.id ?? ""),
 		gymName: user?.gym?.name ?? user?.gym?.nombre ?? user?.gimnasio?.name ?? user?.gimnasio?.nombre ?? "",
+		nextAllowedChangeAt,
 	};
 }
 
@@ -29,20 +97,36 @@ export default function ProfilePage() {
 	const [user, setUser] = useState(null);
 	const [gyms, setGyms] = useState([]);
 	const [selectedGymId, setSelectedGymId] = useState("");
-	const [daysLeft, setDaysLeft] = useState(0);
+	const [nextAllowedChangeAt, setNextAllowedChangeAt] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
+	const daysLeft = daysUntilDate(nextAllowedChangeAt);
 
 	useEffect(() => {
 		const timer = setTimeout(async () => {
 			const token = localStorage.getItem("auth_token") || "";
+			const localNextAllowed = localStorage.getItem(GYM_NEXT_ALLOWED_KEY) || "";
+			if (localNextAllowed) {
+				setNextAllowedChangeAt(localNextAllowed);
+			}
 
 			try {
 				const meResponse = await getCurrentUser(token);
 				const info = extractUserInfo(meResponse);
+				const mergedNextAllowed = pickMostRestrictiveDate(
+					info.nextAllowedChangeAt,
+					localNextAllowed
+				);
 				setUser(info);
 				setSelectedGymId(info.gymId);
+				setNextAllowedChangeAt(mergedNextAllowed);
+
+				if (mergedNextAllowed) {
+					localStorage.setItem(GYM_NEXT_ALLOWED_KEY, mergedNextAllowed);
+				} else {
+					localStorage.removeItem(GYM_NEXT_ALLOWED_KEY);
+				}
 			} catch {
 				setUser(null);
 			}
@@ -60,8 +144,6 @@ export default function ProfilePage() {
 				setGyms([]);
 			}
 
-			const lastChanged = localStorage.getItem(GYM_CHANGE_KEY);
-			setDaysLeft(daysUntilNextChange(lastChanged));
 		}, 0);
 
 		return () => clearTimeout(timer);
@@ -77,13 +159,16 @@ export default function ProfilePage() {
 			return;
 		}
 
-		if (daysLeft > 0) {
-			setError(`Solo puedes cambiar de gimnasio cada dos semanas. Puedes volver a cambiar en ${daysLeft} dia${daysLeft === 1 ? "" : "s"}.`);
+		if (selectedGymId === user?.gymId) {
+			setError("Ya estas en ese gimnasio.");
 			return;
 		}
 
-		if (selectedGymId === user?.gymId) {
-			setError("Ya estas en ese gimnasio.");
+		if (daysLeft > 0) {
+			const formattedDate = formatLocalDateTime(nextAllowedChangeAt);
+			setError(
+				`Solo puedes cambiar de gimnasio cada dos semanas. Podras cambiar en ${daysLeft} dia${daysLeft === 1 ? "" : "s"}${formattedDate ? ` (${formattedDate})` : ""}.`
+			);
 			return;
 		}
 
@@ -91,17 +176,41 @@ export default function ProfilePage() {
 		const token = localStorage.getItem("auth_token") || "";
 
 		try {
-			await updateUserGym(selectedGymId, token);
-			localStorage.setItem(GYM_CHANGE_KEY, new Date().toISOString());
-			setDaysLeft(14);
+			const response = await updateUserGym(selectedGymId, token);
+			const nextAllowedFromSuccess =
+				response?.next_allowed_change_at ??
+				response?.data?.next_allowed_change_at ??
+				new Date(Date.now() + TWO_WEEKS_MS).toISOString();
+
+			setNextAllowedChangeAt(nextAllowedFromSuccess);
+			localStorage.setItem(GYM_NEXT_ALLOWED_KEY, nextAllowedFromSuccess);
 			const selectedGym = gyms.find((g) => g.id === selectedGymId);
 			setUser((prev) => ({
 				...prev,
 				gymId: selectedGymId,
 				gymName: selectedGym?.name ?? "",
+				nextAllowedChangeAt: nextAllowedFromSuccess,
 			}));
 			setSuccess("Gimnasio actualizado correctamente.");
 		} catch (err) {
+			const nextAllowedFromApi =
+				err?.payload?.next_allowed_change_at ??
+				err?.payload?.data?.next_allowed_change_at ??
+				"";
+
+			if (nextAllowedFromApi) {
+				setNextAllowedChangeAt(nextAllowedFromApi);
+				localStorage.setItem(GYM_NEXT_ALLOWED_KEY, nextAllowedFromApi);
+				const remainingDays = daysUntilDate(nextAllowedFromApi);
+				const formattedDate = formatLocalDateTime(nextAllowedFromApi);
+				setError(
+					remainingDays > 0
+						? `Solo puedes cambiar de gimnasio cada dos semanas. Podras cambiar en ${remainingDays} dia${remainingDays === 1 ? "" : "s"}${formattedDate ? ` (${formattedDate})` : ""}.`
+						: err.message || "No se pudo cambiar el gimnasio."
+				);
+				return;
+			}
+
 			setError(err.message || "No se pudo cambiar el gimnasio.");
 		} finally {
 			setLoading(false);
@@ -135,7 +244,7 @@ export default function ProfilePage() {
 								<strong>{daysLeft} dia{daysLeft === 1 ? "" : "s"}</strong>. Solo se permite un cambio cada dos semanas.
 							</p>
 						) : (
-							<p className="text-sm text-slate-400">Puedes cambiar de gimnasio ahora. Tras el cambio deberas esperar dos semanas para volver a cambiarlo.</p>
+							<p className="text-sm text-slate-400">Puedes cambiar de gimnasio ahora. La regla de dos semanas la valida el backend.</p>
 						)}
 
 						<form onSubmit={handleChangeGym} className="space-y-4">
@@ -144,7 +253,7 @@ export default function ProfilePage() {
 								<select
 									value={selectedGymId}
 									onChange={(e) => setSelectedGymId(e.target.value)}
-									disabled={daysLeft > 0}
+									disabled={loading || daysLeft > 0}
 									className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-300/70 disabled:opacity-50"
 								>
 									<option value="">Selecciona un gimnasio</option>

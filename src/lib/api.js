@@ -36,6 +36,7 @@ async function parseResponse(response) {
     const error = new Error(message);
     error.status = response.status;
     error.details = validationErrors;
+    error.payload = isJson ? payload : null;
     throw error;
   }
 
