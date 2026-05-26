@@ -126,14 +126,43 @@ export async function getGyms(token) {
 }
 
 export async function updateUserGym(gymId, token) {
-  return apiRequestWithFallback(
-    ["/user/gym", "/user/gimnasio", "/user"],
+  const normalizedGymId = String(gymId);
+  const attempts = [
     {
+      path: "/user/gym",
       method: "PATCH",
-      body: { gimnasio_id: gymId, gym_id: gymId },
-      token,
+      body: { gimnasio_id: normalizedGymId, gym_id: normalizedGymId, gymId: normalizedGymId },
+    },
+    {
+      path: "/user/gimnasio",
+      method: "PATCH",
+      body: { gimnasio_id: normalizedGymId, gym_id: normalizedGymId, gymId: normalizedGymId },
+    },
+  ];
+
+  let lastError = null;
+
+  for (const attempt of attempts) {
+    try {
+      return await apiRequest(attempt.path, {
+        method: attempt.method,
+        body: attempt.body,
+        token,
+      });
+    } catch (error) {
+      // Keep trying only when the endpoint is missing or method is not allowed.
+      if (error?.status === 404 || error?.status === 405) {
+        lastError = error;
+        continue;
+      }
+
+      throw error;
     }
-  );
+  }
+
+  const endpointHint = "Tu API no tiene un endpoint para cambiar gimnasio del usuario. Debes implementarlo en backend (por ejemplo PATCH /api/user/gym).";
+  const fallbackMessage = lastError?.message ? `${endpointHint} Detalle: ${lastError.message}` : endpointHint;
+  throw new Error(fallbackMessage);
 }
 
 export async function getCurrentUser(token) {
