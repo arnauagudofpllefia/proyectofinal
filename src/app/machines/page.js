@@ -131,7 +131,7 @@ export default function MachinesPage() {
 									<p className="mt-2 text-sm text-[var(--muted)]">{machine.description}</p>
 								) : null}
 								<Link href={`/machines/${machine.id}`} className="btn-secondary mt-4 inline-block">
-									Ver detalle
+									Reservar
 								</Link>
 							</div>
 						</article>

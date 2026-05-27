@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { createReservation, getCurrentUser, getMachineById, getMachineReservations, getMachineSlots } from "@/lib/api";
+import { createReservation, getCurrentUser, getMachineById, getMachineReservations, getMachineSlots, getMyReservations } from "@/lib/api";
 import { getGymIdFromUser, getUserRole, isAdminRole, normalizeGymId } from "@/lib/gym";
+import { addAppNotification } from "@/lib/notifications";
 
 function normalizeMachine(data, machineId) {
 	return {
@@ -46,6 +47,33 @@ function normalizeHourValue(value) {
 	return match ? match[1] : "";
 }
 
+function normalizeDateValue(value) {
+	if (typeof value !== "string" || !value) {
+		return "";
+	}
+
+	if (value.includes("T")) {
+		return value.split("T")[0];
+	}
+
+	return value;
+}
+
+function getReservationMachineId(item) {
+	return String(item?.machine_id ?? item?.maquina_id ?? item?.machine?.id ?? item?.machineId ?? "");
+}
+
+function getReservationDateKey(item) {
+	const directDate = normalizeDateValue(item?.date ?? item?.fecha ?? item?.hora_inicio ?? item?.start_time);
+	if (directDate) {
+		return directDate;
+	}
+
+	const fallbackTime = item?.hora_inicio ?? item?.start_time ?? item?.hora ?? item?.hour ?? "";
+	const parsed = fallbackTime.includes("T") ? fallbackTime.split("T")[0] : "";
+	return parsed;
+}
+
 function addMinutesToTime(time, minutesToAdd) {
 	const [hourString, minuteString] = String(time).split(":");
 	const hours = Number.parseInt(hourString, 10);
@@ -61,6 +89,20 @@ function addMinutesToTime(time, minutesToAdd) {
 	const finalMinutes = String(normalizedTotal % 60).padStart(2, "0");
 
 	return `${finalHours}:${finalMinutes}`;
+}
+
+function getMinutesBetweenTimes(startTime, endTime) {
+	const startMatch = String(startTime).match(/^(\d{2}):(\d{2})$/);
+	const endMatch = String(endTime).match(/^(\d{2}):(\d{2})$/);
+
+	if (!startMatch || !endMatch) {
+		return Number.NaN;
+	}
+
+	const startMinutes = Number(startMatch[1]) * 60 + Number(startMatch[2]);
+	const endMinutes = Number(endMatch[1]) * 60 + Number(endMatch[2]);
+
+	return endMinutes - startMinutes;
 }
 
 function isSlotReservable(slot) {
@@ -99,6 +141,18 @@ function normalizeReservationHour(value) {
 	return match ? match[1] : "--:--";
 }
 
+function normalizeReservationTimeDisplay(value) {
+	if (typeof value !== "string" || !value) {
+		return "--:--";
+	}
+
+	if (value.includes("T")) {
+		return value.split("T")[1]?.slice(0, 5) ?? "--:--";
+	}
+
+	return normalizeReservationHour(value);
+}
+
 function getReservationTimestamp(item) {
 	const rawDateTime = item?.hora_inicio ?? item?.start_time;
 	if (typeof rawDateTime === "string" && rawDateTime) {
@@ -135,10 +189,13 @@ function normalizePublicReservations(payload) {
 		})
 		.map((item, index) => {
 			const horaValue = item?.hora ?? "";
+			const horaFinValue = item?.hora_fin ?? item?.end_time ?? "";
 			return {
 				id: String(index),
 				hora: horaValue,
-				horaDisplay: horaValue.includes("T") ? horaValue.split("T")[1]?.slice(0, 5) : "--:--",
+				horaDisplay: normalizeReservationTimeDisplay(horaValue),
+				horaFin: horaFinValue,
+				horaFinDisplay: normalizeReservationTimeDisplay(horaFinValue),
 				estado: item?.estado ?? "activa",
 				plazas: item?.plazas ?? 0,
 			};
@@ -293,6 +350,25 @@ export default function MachineDetailPage() {
 			return;
 		}
 
+		const durationMinutes = getMinutesBetweenTimes(form.startTime, form.endTime);
+		if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+			setRequestState({
+				loading: false,
+				error: "La hora de fin debe ser posterior a la de inicio.",
+				success: "",
+			});
+			return;
+		}
+
+		if (durationMinutes > 60) {
+			setRequestState({
+				loading: false,
+				error: "La reserva solo puede durar 1 hora como maximo.",
+				success: "",
+			});
+			return;
+		}
+
 		if (form.endTime <= form.startTime) {
 			setRequestState({
 				loading: false,
@@ -338,6 +414,56 @@ export default function MachineDetailPage() {
 			return;
 		}
 
+		let myReservations = [];
+		try {
+			const reservationsResponse = await getMyReservations(token);
+			myReservations = Array.isArray(reservationsResponse?.data ?? reservationsResponse)
+				? (reservationsResponse?.data ?? reservationsResponse)
+				: [];
+		} catch {
+			myReservations = [];
+		}
+
+		const requestedDateKey = form.date;
+		const requestedMachineId = String(machine?.id ?? id);
+		const activeReservationsForDay = myReservations.filter((item) => {
+			const status = String(item?.status ?? item?.estado ?? "activa").toLowerCase();
+			if (status === "cancelada" || status === "completada") {
+				return false;
+			}
+
+			return getReservationDateKey(item) === requestedDateKey;
+		});
+
+		if (activeReservationsForDay.length >= 3) {
+			setRequestState({
+				loading: false,
+				error: "Solo puedes hacer 3 reservas por dia.",
+				success: "",
+			});
+			return;
+		}
+
+		const alreadyReservedMachine = myReservations.some((item) => {
+			const status = String(item?.status ?? item?.estado ?? "activa").toLowerCase();
+			if (status === "cancelada" || status === "completada") {
+				return false;
+			}
+
+			const sameDay = getReservationDateKey(item) === requestedDateKey;
+			const sameMachine = getReservationMachineId(item) === requestedMachineId || String(item?.machine_name ?? item?.maquina_nombre ?? item?.machine ?? item?.maquina ?? "") === String(machine?.name ?? "");
+			return sameDay && sameMachine;
+		});
+
+		if (alreadyReservedMachine) {
+			setRequestState({
+				loading: false,
+				error: "Solo puedes reservar una vez la misma maquina en el dia.",
+				success: "",
+			});
+			return;
+		}
+
 		const payload = {
 			usuario_id: userId,
 			user_id: userId,
@@ -356,6 +482,13 @@ export default function MachineDetailPage() {
 				loading: false,
 				error: "",
 				success: response?.message ?? "Reserva creada correctamente.",
+			});
+			addAppNotification({
+				type: "reservation-created",
+				title: "Reserva creada",
+				message: `${machine?.name ?? "Maquina"} - ${form.date} de ${form.startTime} a ${form.endTime}`,
+				reservationId: response?.data?.id ?? response?.id ?? "",
+				dedupeKey: `reservation-created-${machine?.id ?? id}-${form.date}-${form.startTime}-${form.endTime}`,
 			});
 			setForm({ date: "", startTime: "", endTime: "" });
 			await loadMachineData();
@@ -463,7 +596,10 @@ export default function MachineDetailPage() {
 																	: "border-[var(--line)] bg-white text-[var(--foreground)]"
 															}`}
 														>
-															<p className="font-semibold">{slot.horaDisplay}</p>
+															<p className="font-semibold">
+																{slot.horaDisplay}
+																{slot.horaFinDisplay && slot.horaFinDisplay !== "--:--" ? ` - ${slot.horaFinDisplay}` : ""}
+															</p>
 															<p>{slot.estado === "activa" ? "Ocupada" : "Disponible"}</p>
 														</div>
 													))
@@ -486,6 +622,10 @@ export default function MachineDetailPage() {
 								? "El inicio se selecciona solo entre franjas disponibles."
 								: "No hay franjas detectadas; puedes introducir hora manualmente."}
 						</p>
+						<p className="mt-1 text-xs text-[var(--muted)]">
+							Maximo 3 reservas por dia y solo una vez por maquina al dia.
+						</p>
+							<p className="mt-1 text-xs text-[var(--muted)]">Duracion maxima permitida: 1 hora.</p>
 						<form className="mt-4 space-y-3" onSubmit={handleReserve}>
 							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Fecha
@@ -530,7 +670,6 @@ export default function MachineDetailPage() {
 									value={form.endTime}
 									onChange={(event) => handleChange("endTime", event.target.value)}
 									className="field-input mt-1"
-									readOnly={availableSlots.length > 0}
 									required
 								/>
 							</label>
