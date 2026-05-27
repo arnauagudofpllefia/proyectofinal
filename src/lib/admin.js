@@ -242,8 +242,15 @@ const adminResources = {
                 placeholder: "Descripcion de la maquina",
             },
             {
+                name: "imageFile",
+                label: "Subir imagen",
+                type: "file",
+                required: false,
+                accept: "image/*",
+            },
+            {
                 name: "imageUrl",
-                label: "URL imagen",
+                label: "URL imagen (opcional)",
                 type: "url",
                 required: false,
                 placeholder: "https://...",
@@ -258,6 +265,7 @@ const adminResources = {
                 status: item?.status ?? item?.estado ?? "Disponible",
                 description: item?.description ?? item?.descripcion ?? "",
                 imageUrl: item?.image_url ?? item?.imagen_url ?? item?.imagen ?? item?.image ?? item?.foto ?? "",
+                imageFile: null,
             };
         },
         buildPayload(values) {
@@ -268,8 +276,9 @@ const adminResources = {
             const status = values.status.trim();
             const description = (values.description ?? "").trim();
             const imageUrl = (values.imageUrl ?? "").trim();
+            const imageFile = values.imageFile instanceof File ? values.imageFile : null;
 
-            return {
+            const basePayload = {
                 gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 gym_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 nombre: name,
@@ -277,10 +286,24 @@ const adminResources = {
                 estado: status,
                 description,
                 descripcion: description,
-                image_url: imageUrl,
-                imagen_url: imageUrl,
-                imagen: imageUrl,
             };
+
+            if (!imageFile) {
+                return {
+                    ...basePayload,
+                    image_url: imageUrl,
+                    imagen_url: imageUrl,
+                    imagen: imageUrl,
+                };
+            }
+
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(basePayload)) {
+                if (value === undefined || value === null) continue;
+                formData.append(key, String(value));
+            }
+            formData.append("imagen", imageFile);
+            return formData;
         },
         validate(values) {
             const errors = [];
@@ -870,6 +893,12 @@ export async function updateAdminResource(resourceKey, id, values, token) {
         return requestReservationWithStatusFallback(path, method, payload, token);
     }
 
+    const isFormDataPayload = typeof FormData !== "undefined" && payload instanceof FormData;
+    if (isFormDataPayload && method !== "POST") {
+        payload.append("_method", method);
+    }
+    const effectiveMethod = isFormDataPayload ? "POST" : method;
+
     if (resourceKey === "users") {
         const { gimnasio_id, gym_id, ...userPayload } = payload;
         const encodedId = encodeURIComponent(String(id));
@@ -897,7 +926,7 @@ export async function updateAdminResource(resourceKey, id, values, token) {
     }
 
     return requestPath(path, {
-        method,
+        method: effectiveMethod,
         body: payload,
         token,
     });

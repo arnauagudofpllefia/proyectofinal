@@ -55,6 +55,25 @@ function FieldInput({ field, value, disabled, onChange }) {
         );
     }
 
+    if (field.type === "file") {
+        const fileName = value instanceof File ? value.name : "";
+        return (
+            <div className="mt-1 space-y-1">
+                <input
+                    name={field.name}
+                    type="file"
+                    accept={field.accept || "image/*"}
+                    onChange={onChange}
+                    disabled={disabled || field.disabled}
+                    className="field-input"
+                />
+                {fileName ? (
+                    <p className="text-xs text-(--muted)">Archivo: {fileName}</p>
+                ) : null}
+            </div>
+        );
+    }
+
     return (
         <input
             name={field.name}
@@ -283,7 +302,12 @@ export default function AdminCrudPage({ resourceKey }) {
     }, [resource.title, resourceKey, selectedGymScopeId, selectedId, needsGymSelection]);
 
     const handleChange = (event) => {
-        const { name, value } = event.target;
+        const { name, value, type, files } = event.target;
+        if (type === "file") {
+            const file = files && files[0] ? files[0] : null;
+            setForm((prev) => ({ ...prev, [name]: file }));
+            return;
+        }
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 

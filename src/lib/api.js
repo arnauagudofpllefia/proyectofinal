@@ -66,17 +66,25 @@ export async function apiRequest(path, options = {}) {
     });
   }
 
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+
   const requestHeaders = {
     Accept: "application/json",
-    ...(body ? { "Content-Type": "application/json" } : {}),
+    ...(body && !isFormData ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...headers,
   };
 
+  const requestBody = body
+    ? isFormData
+      ? body
+      : JSON.stringify(body)
+    : undefined;
+
   const response = await fetch(getApiUrl(path), {
     method,
     headers: requestHeaders,
-    body: body ? JSON.stringify(body) : undefined,
+    body: requestBody,
     credentials,
     cache,
   });
