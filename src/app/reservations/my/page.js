@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cancelReservation, getCurrentUser, getMyReservations } from "@/lib/api";
 import { getGymIdFromUser, normalizeGymId } from "@/lib/gym";
+import { addAppNotification } from "@/lib/notifications";
 
 const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
@@ -173,6 +174,13 @@ export default function MyReservationsPage() {
 				currentReservations.filter((reservation) => String(reservation.id) !== String(reservationId))
 			);
 			setSuccessMessage(successText || response?.message || "Reserva cancelada correctamente.");
+			addAppNotification({
+				type: "reservation-cancelled",
+				title: "Reserva cancelada",
+				message: `Tu reserva ${reservationId} se ha cancelado correctamente.`,
+				reservationId,
+				dedupeKey: `cancelled-${reservationId}`,
+			});
 			return true;
 		} catch (error) {
 			setApiError(error.message || "No se pudo cancelar la reserva.");
@@ -328,6 +336,13 @@ export default function MyReservationsPage() {
 
 			const triggerReminder = () => {
 				remindedReservationsRef.current.add(reservationId);
+				addAppNotification({
+					type: "reservation-reminder",
+					title: "Quedan 5 minutos para tu reserva",
+					message: `${reservation.machine} - ${reservation.date} a las ${reservation.hour}`,
+					reservationId,
+					dedupeKey: `reminder-5m-${reservationId}`,
+				});
 				void (async () => {
 					const shownAsWebNotification = await showReminderNotification(reservation);
 					if (!shownAsWebNotification) {
@@ -384,6 +399,13 @@ export default function MyReservationsPage() {
 			setTimeout(() => {
 				setSuccessMessage("Perfecto, mantenemos tu reserva.");
 				setReminderReservation(null);
+				addAppNotification({
+					type: "reservation-accepted",
+					title: "Reserva confirmada",
+					message: `Has confirmado mantener tu reserva ${reservationId}.`,
+					reservationId,
+					dedupeKey: `accepted-${reservationId}`,
+				});
 			}, 0);
 		}
 	}, [searchParams, pathname, router, cancelReservationById]);
@@ -403,6 +425,16 @@ export default function MyReservationsPage() {
 	};
 
 	const handleReminderAccept = () => {
+		if (reminderReservation) {
+			addAppNotification({
+				type: "reservation-accepted",
+				title: "Reserva confirmada",
+				message: `Has confirmado mantener tu reserva ${reminderReservation.id}.`,
+				reservationId: reminderReservation.id,
+				dedupeKey: `accepted-${reminderReservation.id}`,
+			});
+		}
+
 		setReminderReservation(null);
 	};
 

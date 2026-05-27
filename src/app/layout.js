@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthSessionGuard from "@/app/_components/AuthSessionGuard";
+import NotificationBellButton from "@/app/_components/NotificationBellButton";
 import LogoutButton from "@/app/_components/LogoutButton";
 import { getServerSessionInfo } from "@/lib/session";
 import "./globals.css";
@@ -43,10 +44,10 @@ export default async function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
         <AuthSessionGuard />
 
-        <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-white/85 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-(--line) bg-white/85 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 text-base font-semibold text-[var(--primary-strong)]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] text-white">
+            <Link href="/" className="flex items-center gap-2 text-base font-semibold text-(--primary-strong)">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-(--primary) text-white">
                 G
               </span>
               GymNau
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }) {
                   {item.label}
                 </Link>
               ))}
+              {isAuthenticated ? <NotificationBellButton /> : null}
               {isAuthenticated ? <LogoutButton /> : null}
             </nav>
           </div>
