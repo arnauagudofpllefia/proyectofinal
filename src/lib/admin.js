@@ -241,6 +241,13 @@ const adminResources = {
                 required: false,
                 placeholder: "Descripcion de la maquina",
             },
+            {
+                name: "imageUrl",
+                label: "URL imagen",
+                type: "url",
+                required: false,
+                placeholder: "https://...",
+            },
         ],
         normalizeItem(item, index) {
             return {
@@ -250,6 +257,7 @@ const adminResources = {
                 zone: item?.zone ?? item?.zona ?? "",
                 status: item?.status ?? item?.estado ?? "Disponible",
                 description: item?.description ?? item?.descripcion ?? "",
+                imageUrl: item?.image_url ?? item?.imagen_url ?? item?.imagen ?? item?.image ?? item?.foto ?? "",
             };
         },
         buildPayload(values) {
@@ -259,6 +267,7 @@ const adminResources = {
             const zone = values.zone.trim();
             const status = values.status.trim();
             const description = (values.description ?? "").trim();
+            const imageUrl = (values.imageUrl ?? "").trim();
 
             return {
                 gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
@@ -268,6 +277,9 @@ const adminResources = {
                 estado: status,
                 description,
                 descripcion: description,
+                image_url: imageUrl,
+                imagen_url: imageUrl,
+                imagen: imageUrl,
             };
         },
         validate(values) {
@@ -314,9 +326,9 @@ const adminResources = {
             {
                 name: "gymId",
                 label: "ID gimnasio",
-                type: "text",
+                type: "select",
                 required: true,
-                placeholder: "1",
+                options: [],
             },
             {
                 name: "machineId",
@@ -601,6 +613,26 @@ function resolvePath(path, params = {}) {
     return path.replaceAll("{id}", encodeURIComponent(String(params.id ?? "")));
 }
 
+function appendGymScopeToPath(path, gymId) {
+    if (!gymId || !path) {
+        return path;
+    }
+
+    const separator = path.includes("?") ? "&" : "?";
+    return `${path}${separator}gimnasio_id=${encodeURIComponent(gymId)}&gym_id=${encodeURIComponent(gymId)}`;
+}
+
+function applyGymScopeToPath(pathOrPaths, gymId) {
+    if (!gymId) {
+        return pathOrPaths;
+    }
+
+    if (Array.isArray(pathOrPaths)) {
+        return pathOrPaths.map((path) => appendGymScopeToPath(path, gymId));
+    }
+
+    return appendGymScopeToPath(pathOrPaths, gymId);
+}
 async function requestPath(pathOrPaths, options) {
     if (Array.isArray(pathOrPaths)) {
         return apiRequestWithFallback(pathOrPaths, options);
@@ -759,12 +791,14 @@ async function requestReservationWithStatusFallback(path, method, payload, token
     }
 }
 
-export async function listAdminResource(resourceKey, token) {
+export async function listAdminResource(resourceKey, token, options = {}) {
     const resource = getAdminResource(resourceKey);
+    const gymId = String(options?.gymId ?? "").trim();
     const resolvedPath = resolvePath(resource.listPath);
+    const scopedPath = applyGymScopeToPath(resolvedPath, gymId);
 
     if (resourceKey !== "gyms" || !Array.isArray(resolvedPath)) {
-        return requestPath(resolvedPath, { token });
+        return requestPath(scopedPath, { token });
     }
 
     let lastError = null;

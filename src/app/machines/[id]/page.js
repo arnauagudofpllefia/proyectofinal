@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { createReservation, getCurrentUser, getMachineById, getMachineReservations, getMachineSlots } from "@/lib/api";
+import { getGymIdFromUser, getUserRole, isAdminRole, normalizeGymId } from "@/lib/gym";
 
 function normalizeMachine(data, machineId) {
 	return {
@@ -14,6 +15,7 @@ function normalizeMachine(data, machineId) {
 		description: data?.description ?? data?.descripcion ?? "",
 		gymName: data?.gym?.name ?? data?.gym?.nombre ?? data?.gimnasio?.name ?? data?.gimnasio?.nombre ?? "-",
 		gymId: String(data?.gym_id ?? data?.gimnasio_id ?? data?.gym?.id ?? ""),
+		imageUrl: data?.image_url ?? data?.imagen_url ?? data?.imagen ?? data?.image ?? data?.foto ?? "",
 	};
 }
 
@@ -201,9 +203,34 @@ export default function MachineDetailPage() {
 		}
 
 		const token = localStorage.getItem("auth_token") || "";
+		let userGymId = "";
+		let userIsAdmin = false;
+
+		try {
+			const meResponse = await getCurrentUser(token);
+			userGymId = getGymIdFromUser(meResponse);
+			userIsAdmin = isAdminRole(getUserRole(meResponse));
+		} catch {
+			userGymId = "";
+			userIsAdmin = false;
+		}
+
 		const machineResponse = await getMachineById(id, token);
 		const normalizedMachine = normalizeMachine(machineResponse?.data ?? machineResponse, id);
 		setMachine(normalizedMachine);
+
+		if (
+			!userIsAdmin &&
+			normalizeGymId(userGymId) &&
+			normalizeGymId(normalizedMachine.gymId) &&
+			normalizeGymId(userGymId) !== normalizeGymId(normalizedMachine.gymId)
+		) {
+			setApiError("Esta maquina pertenece a otro gimnasio. Solo puedes ver maquinas de tu gimnasio.");
+			setMachine(null);
+			setSlots([]);
+			setMachineReservations([]);
+			return;
+		}
 
 		try {
 			const slotsResponse = await getMachineSlots(id, token);
@@ -394,6 +421,13 @@ export default function MachineDetailPage() {
 			{machine ? (
 				<div className="grid gap-5 lg:grid-cols-3">
 					<article className="glass-panel rounded-2xl p-6 lg:col-span-2">
+						{machine.imageUrl ? (
+							<img
+								src={machine.imageUrl}
+								alt={machine.name}
+								className="mb-4 h-56 w-full rounded-2xl border border-slate-800 object-cover"
+							/>
+						) : null}
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<p className="text-sm text-slate-300">Zona: {machine.zone}</p>
 							<span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-100">

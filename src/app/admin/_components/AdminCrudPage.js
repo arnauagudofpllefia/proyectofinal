@@ -14,6 +14,12 @@ import {
     updateAdminResource,
     validateResourceForm,
 } from "@/lib/admin";
+import {
+    ADMIN_GYM_SCOPE_EVENT,
+    filterItemsByGym,
+    normalizeGymId,
+    readStoredAdminGymId,
+} from "@/lib/gym";
 
 function flattenValidationErrors(details) {
     if (!details || typeof details !== "object") {
@@ -39,7 +45,7 @@ function FieldInput({ field, value, disabled, onChange }) {
                 name={field.name}
                 value={value}
                 onChange={onChange}
-                disabled={disabled}
+                disabled={disabled || field.disabled}
                 className={baseClassName}
             >
                 <option value="">Selecciona una opcion</option>
@@ -59,27 +65,26 @@ function FieldInput({ field, value, disabled, onChange }) {
             value={value}
             onChange={onChange}
             required={field.required}
-            disabled={disabled}
+            disabled={disabled || field.disabled}
             placeholder={field.placeholder}
             className={baseClassName}
         />
     );
 }
 
-async function fetchResourceItems(resourceKey, token) {
-    const response = await listAdminResource(resourceKey, token);
-    return normalizeResourceList(resourceKey, response);
+function isGymScopedResource(resourceKey) {
+    return resourceKey === "machines" || resourceKey === "reservations" || resourceKey === "users";
 }
 
-function normalizeGymOptionValue(value) {
-    const raw = String(value ?? "").trim();
+async function fetchResourceItems(resourceKey, token, gymScopeId) {
+    const response = await listAdminResource(resourceKey, token, { gymId: gymScopeId });
+    const normalized = normalizeResourceList(resourceKey, response);
 
-    if (/^\d+$/.test(raw)) {
-        return raw;
+    if (!isGymScopedResource(resourceKey) || !gymScopeId) {
+        return normalized;
     }
 
-    const fallbackMatch = raw.match(/^gym-(\d+)$/i);
-    return fallbackMatch ? fallbackMatch[1] : "";
+    return filterItemsByGym(normalized, gymScopeId);
 }
 
 export default function AdminCrudPage({ resourceKey }) {
@@ -88,8 +93,18 @@ export default function AdminCrudPage({ resourceKey }) {
     const canCreate = Boolean(capabilities.create);
     const canEdit = Boolean(capabilities.edit);
     const canDelete = Boolean(capabilities.delete);
+    const initialGymScopeId = readStoredAdminGymId();
+    const [selectedGymScopeId, setSelectedGymScopeId] = useState(initialGymScopeId);
     const [items, setItems] = useState([]);
-    const [form, setForm] = useState(() => createEmptyForm(resourceKey));
+    const [form, setForm] = useState(() => {
+        const nextForm = createEmptyForm(resourceKey);
+
+        if (isGymScopedResource(resourceKey) && initialGymScopeId) {
+            nextForm.gymId = initialGymScopeId;
+        }
+
+        return nextForm;
+    });
     const [selectedId, setSelectedId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -99,15 +114,17 @@ export default function AdminCrudPage({ resourceKey }) {
     const [successMessage, setSuccessMessage] = useState("");
     const [fieldErrors, setFieldErrors] = useState([]);
     const [gymOptions, setGymOptions] = useState([]);
+    const needsGymSelection = isGymScopedResource(resourceKey) && !selectedGymScopeId;
 
     const mode = selectedId ? "edit" : "create";
     const canSubmit = selectedId ? canEdit : canCreate;
     const baseVisibleFields = getVisibleFields(resourceKey, mode);
     const visibleFields = baseVisibleFields.map((field) => {
-        if ((resourceKey === "machines" || resourceKey === "users") && field.name === "gymId") {
+        if (isGymScopedResource(resourceKey) && field.name === "gymId") {
             return {
                 ...field,
                 options: gymOptions,
+                disabled: Boolean(selectedGymScopeId),
             };
         }
 
@@ -116,12 +133,19 @@ export default function AdminCrudPage({ resourceKey }) {
     const headingLabel = canCreate || canEdit ? `Gestion de ${resource.title.toLowerCase()}` : `Consulta de ${resource.title.toLowerCase()}`;
 
     const loadItems = async () => {
+        if (needsGymSelection) {
+            setItems([]);
+            setLoading(false);
+            setErrorMessage("");
+            return [];
+        }
+
         const token = localStorage.getItem("auth_token") || "";
         setLoading(true);
         setErrorMessage("");
 
         try {
-            const normalized = await fetchResourceItems(resourceKey, token);
+            const normalized = await fetchResourceItems(resourceKey, token, selectedGymScopeId);
             setItems(normalized);
             setForbidden(false);
             return normalized;
@@ -141,21 +165,52 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     useEffect(() => {
+        const handleGymScopeChange = (event) => {
+            const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
+            setSelectedGymScopeId(nextGymId);
+
+            if (selectedId) {
+                return;
+            }
+
+            if (isGymScopedResource(resourceKey)) {
+                setForm((prev) => ({
+                    ...prev,
+                    gymId: nextGymId,
+                }));
+            }
+        };
+
+        window.addEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
+
+        return () => {
+            window.removeEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
+        };
+    }, [resourceKey, selectedId]);
+
+    useEffect(() => {
         const timer = setTimeout(() => {
             (async () => {
+                if (needsGymSelection) {
+                    setItems([]);
+                    setGymOptions([]);
+                    setLoading(false);
+                    return;
+                }
+
                 const token = localStorage.getItem("auth_token") || "";
                 setLoading(true);
                 setErrorMessage("");
 
                 try {
-                    if (resourceKey === "machines" || resourceKey === "users") {
+                    if (isGymScopedResource(resourceKey)) {
                         try {
                             const gymsResponse = await listAdminResource("gyms", token);
                             const normalizedGyms = normalizeResourceList("gyms", gymsResponse);
                             setGymOptions(
                                 normalizedGyms
                                     .map((gym) => {
-                                        const gymId = normalizeGymOptionValue(gym.id);
+                                        const gymId = normalizeGymId(gym.id);
 
                                         if (!gymId) {
                                             return null;
@@ -175,8 +230,20 @@ export default function AdminCrudPage({ resourceKey }) {
                         setGymOptions([]);
                     }
 
-                    const normalized = await fetchResourceItems(resourceKey, token);
+                    const normalized = await fetchResourceItems(resourceKey, token, selectedGymScopeId);
                     setItems(normalized);
+
+                    if (selectedId && !normalized.some((item) => item.id === selectedId)) {
+                        const nextForm = createEmptyForm(resourceKey);
+
+                        if (isGymScopedResource(resourceKey) && selectedGymScopeId) {
+                            nextForm.gymId = selectedGymScopeId;
+                        }
+
+                        setSelectedId(null);
+                        setForm(nextForm);
+                    }
+
                     setForbidden(false);
                 } catch (error) {
                     if (error?.status === 401 || error?.status === 403) {
@@ -194,7 +261,7 @@ export default function AdminCrudPage({ resourceKey }) {
         }, 0);
 
         return () => clearTimeout(timer);
-    }, [resource.title, resourceKey]);
+    }, [resource.title, resourceKey, selectedGymScopeId, selectedId, needsGymSelection]);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -202,8 +269,14 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     const resetForm = () => {
+        const nextForm = createEmptyForm(resourceKey);
+
+        if (isGymScopedResource(resourceKey) && selectedGymScopeId) {
+            nextForm.gymId = selectedGymScopeId;
+        }
+
         setSelectedId(null);
-        setForm(createEmptyForm(resourceKey));
+        setForm(nextForm);
         setFieldErrors([]);
         setSuccessMessage("");
     };
@@ -318,6 +391,20 @@ export default function AdminCrudPage({ resourceKey }) {
         }
     };
 
+    if (needsGymSelection) {
+        return (
+            <section className="space-y-4">
+                <header className="glass-panel rounded-2xl p-6">
+                    <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">{resource.title}</p>
+                    <h2 className="mt-2 text-2xl font-semibold text-white">Selecciona un gimnasio primero</h2>
+                    <p className="mt-2 text-sm text-slate-300">
+                        Para administrar {resource.title.toLowerCase()} debes elegir antes un gimnasio en el selector superior.
+                    </p>
+                </header>
+            </section>
+        );
+    }
+
     return (
         <section className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
             <div className="space-y-4">
@@ -342,6 +429,13 @@ export default function AdminCrudPage({ resourceKey }) {
 
                     {items.map((item) => (
                         <article key={item.id} className="glass-panel rounded-2xl p-5">
+                            {resourceKey === "machines" && item.imageUrl ? (
+                                <img
+                                    src={item.imageUrl}
+                                    alt={resource.getItemTitle(item)}
+                                    className="mb-4 h-40 w-full rounded-xl border border-slate-800 object-cover"
+                                />
+                            ) : null}
                             <div className="flex items-start justify-between gap-3">
                                 <div>
                                     <p className="text-xs uppercase tracking-[0.18em] text-slate-500">ID {item.id}</p>

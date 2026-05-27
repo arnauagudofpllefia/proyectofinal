@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { getMachines, getMyReservations, getReservations } from "@/lib/api";
 import { getServerSessionInfo } from "@/lib/session";
+import { filterItemsByGym, getGymIdFromUser } from "@/lib/gym";
 
 export default async function Home() {
-  const { token, isAdmin } = await getServerSessionInfo();
+  const { token, isAdmin, user } = await getServerSessionInfo();
+  const userGymId = getGymIdFromUser(user);
 
   const [machinesResult, reservationsResult, myReservationsResult] = await Promise.allSettled([
     getMachines(token),
@@ -11,9 +13,9 @@ export default async function Home() {
     getMyReservations(token),
   ]);
 
-  const machinesCount = countItems(machinesResult);
+  const machinesCount = countItemsByGym(machinesResult, isAdmin ? "" : userGymId);
   const reservationsCount = isAdmin ? countItems(reservationsResult) : null;
-  const myReservationsCount = countItems(myReservationsResult);
+  const myReservationsCount = countItemsByGym(myReservationsResult, isAdmin ? "" : userGymId);
 
   const summaryCards = [
     {
@@ -102,4 +104,17 @@ function countItems(result) {
 
   const data = result.value?.data ?? result.value;
   return Array.isArray(data) ? data.length : null;
+}
+
+function countItemsByGym(result, gymId) {
+  if (!result || result.status !== "fulfilled") {
+    return null;
+  }
+
+  const data = result.value?.data ?? result.value;
+  if (!Array.isArray(data)) {
+    return null;
+  }
+
+  return filterItemsByGym(data, gymId).length;
 }

@@ -1,12 +1,5 @@
-import Link from "next/link";
-
-const adminNavItems = [
-    { href: "/admin", label: "Resumen" },
-    { href: "/admin/gyms", label: "Gimnasios" },
-    { href: "/admin/machines", label: "Maquinas" },
-    { href: "/admin/reservations", label: "Reservas" },
-    { href: "/admin/users", label: "Usuarios" },
-];
+import AdminGymScopePicker from "@/app/admin/_components/AdminGymScopePicker";
+import AdminScopedNav from "@/app/admin/_components/AdminScopedNav";
 
 export default function AdminLayout({ children }) {
     return (
@@ -23,17 +16,8 @@ export default function AdminLayout({ children }) {
                 </p>
             </header>
 
-            <nav className="flex flex-wrap gap-2">
-                {adminNavItems.map((item) => (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        className="rounded-xl border border-cyan-300/20 bg-slate-950/40 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-400/10"
-                    >
-                        {item.label}
-                    </Link>
-                ))}
-            </nav>
+            <AdminGymScopePicker />
+            <AdminScopedNav />
 
             {children}
         </section>

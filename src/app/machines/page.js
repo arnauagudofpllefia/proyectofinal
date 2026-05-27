@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCurrentUser, getMachines } from "@/lib/api";
+import { getGymIdFromUser, getGymNameFromUser, getUserRole, isAdminRole, normalizeGymId } from "@/lib/gym";
 
 const machinesFallback = [
 	{ id: "1", name: "Cinta X9", status: "Disponible", zone: "Cardio", gymId: "1", description: "" },
@@ -23,19 +24,15 @@ function normalizeMachines(payload) {
 		zone: machine?.zone ?? machine?.zona ?? "Sin zona",
 		gymId: String(machine?.gym_id ?? machine?.gimnasio_id ?? machine?.gym?.id ?? ""),
 		description: machine?.description ?? machine?.descripcion ?? "",
+		imageUrl: machine?.image_url ?? machine?.imagen_url ?? machine?.imagen ?? machine?.image ?? machine?.foto ?? "",
 	}));
-}
-
-function extractUserGymId(userPayload) {
-	const user = userPayload?.data ?? userPayload;
-	const candidate = user?.gym_id ?? user?.gimnasio_id ?? user?.gym?.id ?? user?.gimnasio?.id;
-	return candidate != null ? String(candidate) : "";
 }
 
 export default function MachinesPage() {
 	const [machines, setMachines] = useState([]);
 	const [userGymId, setUserGymId] = useState("");
 	const [gymName, setGymName] = useState("");
+	const [isAdminUser, setIsAdminUser] = useState(false);
 	const [apiError, setApiError] = useState("");
 
 	useEffect(() => {
@@ -44,29 +41,39 @@ export default function MachinesPage() {
 
 			let gymId = "";
 			let gymLabel = "";
+			let isAdminUserRole = false;
 			try {
 				const meResponse = await getCurrentUser(token);
-				gymId = extractUserGymId(meResponse);
-				const user = meResponse?.data ?? meResponse;
-				gymLabel = user?.gym?.name ?? user?.gym?.nombre ?? user?.gimnasio?.name ?? user?.gimnasio?.nombre ?? "";
+				gymId = getGymIdFromUser(meResponse);
+				gymLabel = getGymNameFromUser(meResponse);
+				isAdminUserRole = isAdminRole(getUserRole(meResponse));
 			} catch {
 				gymId = "";
 			}
 
 			setUserGymId(gymId);
 			setGymName(gymLabel);
+			setIsAdminUser(isAdminUserRole);
 
 			try {
 				const response = await getMachines(token);
 				const normalized = normalizeMachines(response);
-				const filtered = gymId
-					? normalized.filter((m) => !m.gymId || m.gymId === gymId)
-					: normalized;
-				setMachines(filtered.length ? filtered : machinesFallback);
+				const filtered = isAdminUserRole
+					? normalized
+					: gymId
+						? normalized.filter((machine) => normalizeGymId(machine.gymId) === normalizeGymId(gymId))
+						: [];
+				setMachines(filtered);
 				setApiError("");
 			} catch (error) {
 				setApiError(error.message);
-				setMachines(machinesFallback);
+				setMachines(
+					isAdminUserRole
+						? machinesFallback
+						: gymId
+							? machinesFallback.filter((machine) => normalizeGymId(machine.gymId) === normalizeGymId(gymId))
+							: []
+				);
 			}
 		}, 0);
 
@@ -83,7 +90,9 @@ export default function MachinesPage() {
 						? `Usando datos temporales: ${apiError}`
 						: gymName
 							? `Equipos disponibles en ${gymName}.`
-							: "Equipos disponibles en tu gimnasio."}
+							: isAdminUser
+								? "Equipos disponibles en todos los gimnasios."
+								: "Equipos disponibles en tu gimnasio."}
 				</p>
 				{userGymId ? (
 					<Link
@@ -101,6 +110,13 @@ export default function MachinesPage() {
 						key={machine.id}
 						className="energy-ring glass-panel rounded-2xl p-5 transition hover:-translate-y-0.5"
 					>
+						{machine.imageUrl ? (
+							<img
+								src={machine.imageUrl}
+								alt={machine.name}
+								className="mb-4 h-44 w-full rounded-xl border border-slate-800 object-cover"
+							/>
+						) : null}
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
 								<h2 className="text-xl font-semibold text-white">{machine.name}</h2>

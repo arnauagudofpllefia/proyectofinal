@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getMyReservations } from "@/lib/api";
+import { getCurrentUser, getMyReservations } from "@/lib/api";
+import { getGymIdFromUser, normalizeGymId } from "@/lib/gym";
 
 const myReservationsFallback = [
 	{ id: "R-1042", machine: "Cinta X9", date: "15/05/2026", hour: "08:00" },
@@ -65,6 +66,8 @@ function normalizeMyReservations(payload) {
 			extractText(item?.machine) ||
 			extractText(item?.maquina) ||
 			"Sin maquina",
+		gymId: String(item?.gym_id ?? item?.gimnasio_id ?? item?.gym?.id ?? item?.gimnasio?.id ?? ""),
+		gymName: extractText(item?.gym?.name) || extractText(item?.gym?.nombre) || extractText(item?.gimnasio) || "",
 		date: extractDate(item?.date ?? item?.fecha ?? item?.hora_inicio ?? item?.start_time),
 		hour: extractHour(item?.hour ?? item?.hora ?? item?.hora_inicio ?? item?.start_time),
 	}));
@@ -79,11 +82,21 @@ export default function MyReservationsPage() {
 			const token = localStorage.getItem("auth_token") || "";
 
 			try {
+				let userGymId = "";
+				try {
+					const meResponse = await getCurrentUser(token);
+					userGymId = getGymIdFromUser(meResponse);
+				} catch {
+					userGymId = "";
+				}
+
 				const response = await getMyReservations(token);
 				const normalized = normalizeMyReservations(response);
-				if (normalized.length) {
-					setMyReservations(normalized);
-				}
+				const scopedReservations = userGymId
+					? normalized.filter((item) => normalizeGymId(item.gymId) === normalizeGymId(userGymId))
+					: normalized;
+
+				setMyReservations(scopedReservations.length ? scopedReservations : []);
 			} catch (error) {
 				setApiError(error.message);
 			}
@@ -112,9 +125,15 @@ export default function MyReservationsPage() {
 							<p className="mt-1 text-sm text-slate-300">
 								{item.date} a las {item.hour}
 							</p>
+							{item.gymName ? <p className="mt-1 text-xs text-slate-400">{item.gymName}</p> : null}
 						</div>
 					</article>
 				))}
+				{myReservations.length === 0 ? (
+					<article className="glass-panel rounded-2xl p-5 text-sm text-slate-300">
+						No hay reservas en tu gimnasio actualmente.
+					</article>
+				) : null}
 			</div>
 		</section>
 	);

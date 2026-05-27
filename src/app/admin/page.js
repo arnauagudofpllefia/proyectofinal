@@ -3,22 +3,48 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getAdminResources, listAdminResource, normalizeResourceList } from "@/lib/admin";
+import { ADMIN_GYM_SCOPE_EVENT, filterItemsByGym, normalizeGymId, readStoredAdminGymId } from "@/lib/gym";
 
 const resources = getAdminResources();
+const gymScopedResourceKeys = new Set(["machines", "reservations", "users"]);
 
 export default function AdminHomePage() {
     const [counts, setCounts] = useState({});
     const [errorMessage, setErrorMessage] = useState("");
+    const [selectedGymScopeId, setSelectedGymScopeId] = useState(() => readStoredAdminGymId());
 
     useEffect(() => {
+        const handleGymScopeChange = (event) => {
+            const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
+            setSelectedGymScopeId(nextGymId);
+        };
+
+        window.addEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
+
+        return () => {
+            window.removeEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!selectedGymScopeId) {
+            return;
+        }
+
         const timer = setTimeout(async () => {
             const token = localStorage.getItem("auth_token") || "";
 
             try {
                 const results = await Promise.all(
                     resources.map(async (resource) => {
-                        const response = await listAdminResource(resource.key, token);
-                        return [resource.key, normalizeResourceList(resource.key, response).length];
+                        const response = await listAdminResource(resource.key, token, { gymId: selectedGymScopeId });
+                        const normalized = normalizeResourceList(resource.key, response);
+                        const scopedItems =
+                            selectedGymScopeId && gymScopedResourceKeys.has(resource.key)
+                                ? filterItemsByGym(normalized, selectedGymScopeId)
+                                : normalized;
+
+                        return [resource.key, scopedItems.length];
                     })
                 );
 
@@ -34,7 +60,19 @@ export default function AdminHomePage() {
         }, 0);
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [selectedGymScopeId]);
+
+    const visibleResources = resources.filter((resource) => {
+        if (resource.key === "gyms") {
+            return true;
+        }
+
+        if (!selectedGymScopeId && gymScopedResourceKeys.has(resource.key)) {
+            return false;
+        }
+
+        return true;
+    });
 
     return (
         <section className="space-y-6">
@@ -44,11 +82,16 @@ export default function AdminHomePage() {
                 <p className="mt-2 text-sm text-slate-300">
                     Accede al CRUD de cada recurso desde paginas separadas dentro de la carpeta admin.
                 </p>
+                {selectedGymScopeId ? (
+                    <p className="mt-2 text-xs text-cyan-100">Filtrando por gimnasio {selectedGymScopeId}.</p>
+                ) : (
+                    <p className="mt-2 text-xs text-amber-200">Selecciona un gimnasio para habilitar Resumen, Maquinas, Reservas y Usuarios.</p>
+                )}
                 {errorMessage ? <p className="mt-3 text-sm text-rose-300">{errorMessage}</p> : null}
             </header>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {resources.map((resource) => (
+                {visibleResources.map((resource) => (
                     <Link
                         key={resource.key}
                         href={`/admin/${resource.slug}`}
