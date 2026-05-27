@@ -137,7 +137,7 @@ const adminResources = {
                 label: "Nombre",
                 type: "text",
                 required: true,
-                placeholder: "GymFlow Central",
+                placeholder: "GymNau Central",
             },
             {
                 name: "address",

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "GymFlow",
+  title: "GymNau",
   description: "Gestion minimalista de maquinas y reservas",
 };
 
@@ -49,7 +49,7 @@ export default async function RootLayout({ children }) {
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primary)] text-white">
                 G
               </span>
-              GymFlow
+              GymNau
             </Link>
             <nav className="flex flex-wrap items-center justify-end gap-1">
               {navItems.map((item) => (

@@ -35,7 +35,7 @@ export default async function Home() {
   if (!isAuthenticated) {
     return (
       <section className="rise-in surface-card mx-auto max-w-3xl p-10 text-center">
-        <p className="badge badge-primary mb-4">GymFlow</p>
+        <p className="badge badge-primary mb-4">GymNau</p>
         <h1 className="text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
           Gestion minimalista de tu gimnasio
         </h1>
@@ -81,7 +81,7 @@ export default async function Home() {
         </p>
         <h1 className="mt-2 text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
           {isAdmin
-            ? "Vista general de GymFlow"
+            ? "Vista general de GymNau"
             : resolvedGymName || "Aun no tienes gimnasio asignado"}
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-[var(--muted)] sm:text-base">
