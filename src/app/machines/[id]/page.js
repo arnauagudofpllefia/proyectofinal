@@ -412,101 +412,98 @@ export default function MachineDetailPage() {
 
 	return (
 		<section className="rise-in space-y-6">
-			<header>
-				<p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Detalle de maquina</p>
-				<h1 className="mt-2 text-3xl font-semibold text-white">{machine?.name ?? `Maquina #${id}`}</h1>
-				<p className="mt-2 text-sm text-slate-300">Consulta disponibilidad y reserva sin salir de esta pantalla.</p>
+			<header className="surface-card p-6">
+				<p className="badge badge-primary mb-2">Detalle de maquina</p>
+				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">{machine?.name ?? `Maquina #${id}`}</h1>
+				<p className="mt-2 text-sm text-[var(--muted)]">Consulta disponibilidad y reserva sin salir de esta pantalla.</p>
 			</header>
 
 			{machine ? (
 				<div className="grid gap-5 lg:grid-cols-3">
-					<article className="glass-panel rounded-2xl p-6 lg:col-span-2">
+					<article className="surface-card overflow-hidden lg:col-span-2">
 						{machine.imageUrl ? (
-							<img
-								src={machine.imageUrl}
-								alt={machine.name}
-								className="mb-4 h-56 w-full rounded-2xl border border-slate-800 object-cover"
-							/>
+							// eslint-disable-next-line @next/next/no-img-element
+							<img src={machine.imageUrl} alt={machine.name} className="h-64 w-full object-cover" />
 						) : null}
-						<div className="flex flex-wrap items-center justify-between gap-3">
-							<p className="text-sm text-slate-300">Zona: {machine.zone}</p>
-							<span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-100">
-								{statusText}
-							</span>
-						</div>
-						<p className="mt-3 text-sm text-slate-300">Gimnasio: {machine.gymName}</p>
-						<p className="mt-3 text-sm text-slate-400">
-							{machine.description || "Sin descripcion disponible para esta maquina."}
-						</p>
-
-						<h2 className="mt-6 text-lg font-semibold text-white">Ocupacion actual</h2>
-						{machineReservations.length ? (
-							<div className="mt-3 space-y-4">
-								{groupedReservationEntries.map(([dayLabel, occupancy]) => (
-									<div key={dayLabel} className="space-y-2">
-										<button
-											type="button"
-											onClick={() => toggleDayGroup(dayLabel)}
-											className="flex w-full items-center justify-between rounded-lg border border-cyan-300/25 bg-cyan-400/5 px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/90 transition hover:bg-cyan-400/10"
-										>
-											<span>{dayLabel}</span>
-											<span>
-												{occupancy.length} franja{occupancy.length === 1 ? "" : "s"}
-												{expandedDays[dayLabel] ? " - Ocultar" : " - Ver"}
-											</span>
-										</button>
-										{expandedDays[dayLabel]
-											? occupancy.map((slot) => (
-													<div
-														key={slot.id}
-														className={`rounded-xl border p-3 text-sm ${
-															slot.estado === "activa"
-																? "border-rose-700/50 bg-rose-950/30 text-rose-300"
-																: "border-slate-700 bg-slate-950/50 text-slate-300"
-														}`}
-													>
-														<p className="font-semibold text-white">{slot.horaDisplay}</p>
-														<p className="text-sm">
-															{slot.estado === "activa" ? "Ocupada" : "Disponible"}
-														</p>
-													</div>
-												))
-											: null}
-									</div>
-								))}
+						<div className="p-6">
+							<div className="flex flex-wrap items-center justify-between gap-3">
+								<p className="text-sm text-[var(--muted)]">Zona: {machine.zone}</p>
+								<span className={`badge ${/disponible|available/i.test(statusText) ? "badge-success" : "badge-muted"}`}>
+									{statusText}
+								</span>
 							</div>
-						) : (
-							<p className="mt-3 text-sm text-slate-400">
-								{reservationsError || "Todavia no hay reservas registradas para esta maquina."}
+							<p className="mt-3 text-sm text-[var(--muted)]">Gimnasio: {machine.gymName}</p>
+							<p className="mt-3 text-sm text-[var(--foreground)]">
+								{machine.description || "Sin descripcion disponible para esta maquina."}
 							</p>
-						)}
+
+							<h2 className="mt-6 text-lg font-semibold text-[var(--foreground)]">Ocupacion actual</h2>
+							{machineReservations.length ? (
+								<div className="mt-3 space-y-3">
+									{groupedReservationEntries.map(([dayLabel, occupancy]) => (
+										<div key={dayLabel} className="space-y-2">
+											<button
+												type="button"
+												onClick={() => toggleDayGroup(dayLabel)}
+												className="flex w-full items-center justify-between rounded-lg border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[var(--primary-strong)] transition hover:bg-[#eef2ff]"
+											>
+												<span>{dayLabel}</span>
+												<span>
+													{occupancy.length} franja{occupancy.length === 1 ? "" : "s"}
+													{expandedDays[dayLabel] ? " - Ocultar" : " - Ver"}
+												</span>
+											</button>
+											{expandedDays[dayLabel]
+												? occupancy.map((slot) => (
+														<div
+															key={slot.id}
+															className={`rounded-lg border p-3 text-sm ${
+																slot.estado === "activa"
+																	? "border-rose-200 bg-rose-50 text-rose-700"
+																	: "border-[var(--line)] bg-white text-[var(--foreground)]"
+															}`}
+														>
+															<p className="font-semibold">{slot.horaDisplay}</p>
+															<p>{slot.estado === "activa" ? "Ocupada" : "Disponible"}</p>
+														</div>
+													))
+												: null}
+										</div>
+									))}
+								</div>
+							) : (
+								<p className="mt-3 text-sm text-[var(--muted)]">
+									{reservationsError || "Todavia no hay reservas registradas para esta maquina."}
+								</p>
+							)}
+						</div>
 					</article>
 
-					<aside className="glass-panel rounded-2xl p-6">
-						<h2 className="text-lg font-semibold text-white">Reservar ahora</h2>
-						<p className="mt-1 text-xs text-slate-400">
+					<aside className="surface-card p-6">
+						<h2 className="text-lg font-semibold text-[var(--foreground)]">Reservar ahora</h2>
+						<p className="mt-1 text-xs text-[var(--muted)]">
 							{availableSlots.length
 								? "El inicio se selecciona solo entre franjas disponibles."
 								: "No hay franjas detectadas; puedes introducir hora manualmente."}
 						</p>
 						<form className="mt-4 space-y-3" onSubmit={handleReserve}>
-							<label className="block text-xs text-slate-300">
+							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Fecha
 								<input
 									type="date"
 									value={form.date}
 									onChange={(event) => handleChange("date", event.target.value)}
-									className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-slate-100 outline-none"
+									className="field-input mt-1"
 									required
 								/>
 							</label>
-							<label className="block text-xs text-slate-300">
+							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Hora inicio
 								{availableSlots.length ? (
 									<select
 										value={form.startTime}
 										onChange={(event) => handleChange("startTime", event.target.value)}
-										className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-slate-100 outline-none"
+										className="field-input mt-1"
 										required
 									>
 										<option value="">Selecciona una franja</option>
@@ -521,46 +518,43 @@ export default function MachineDetailPage() {
 										type="time"
 										value={form.startTime}
 										onChange={(event) => handleChange("startTime", event.target.value)}
-										className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-slate-100 outline-none"
+										className="field-input mt-1"
 										required
 									/>
 								)}
 							</label>
-							<label className="block text-xs text-slate-300">
+							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Hora fin
 								<input
 									type="time"
 									value={form.endTime}
 									onChange={(event) => handleChange("endTime", event.target.value)}
-									className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-slate-100 outline-none"
+									className="field-input mt-1"
 									readOnly={availableSlots.length > 0}
 									required
 								/>
 							</label>
 
-							{requestState.error ? <p className="text-sm text-rose-300">{requestState.error}</p> : null}
-							{requestState.success ? <p className="text-sm text-emerald-300">{requestState.success}</p> : null}
+							{requestState.error ? <p className="text-sm text-rose-600">{requestState.error}</p> : null}
+							{requestState.success ? <p className="text-sm text-emerald-700">{requestState.success}</p> : null}
 
 							<button
 								type="submit"
 								disabled={requestState.loading || !canReserve || !canReserveBySlots}
-								className="w-full rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+								className="btn-primary w-full"
 							>
 								{requestState.loading ? "Reservando..." : canReserve ? "Confirmar reserva" : "No disponible"}
 							</button>
 						</form>
 
-						<Link
-							href="/machines"
-							className="mt-4 inline-block text-xs font-semibold text-cyan-200 transition hover:text-cyan-100"
-						>
+						<Link href="/machines" className="mt-4 inline-block text-xs font-semibold text-[var(--primary)] hover:text-[var(--primary-strong)]">
 							Volver al catalogo
 						</Link>
 					</aside>
 				</div>
 			) : (
-				<article className="glass-panel rounded-2xl p-6">
-					<p className="text-slate-300">No se pudo cargar la maquina: {apiError || "sin datos"}</p>
+				<article className="surface-card p-6">
+					<p className="text-[var(--muted)]">No se pudo cargar la maquina: {apiError || "sin datos"}</p>
 				</article>
 			)}
 		</section>

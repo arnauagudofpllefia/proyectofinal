@@ -107,32 +107,26 @@ export default function MyReservationsPage() {
 
 	return (
 		<section className="rise-in space-y-6">
-			<header>
-				<p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Mis reservas</p>
-				<h1 className="mt-2 text-3xl font-semibold text-white">Tu actividad programada</h1>
-				<p className="mt-2 text-sm text-slate-300">
+			<header className="surface-card p-6">
+				<p className="badge badge-primary mb-2">Mis reservas</p>
+				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">Tu actividad programada</h1>
+				<p className="mt-2 text-sm text-[var(--muted)]">
 					{apiError
 						? `Si este endpoint requiere auth, inicia sesion primero. Error: ${apiError}`
-						: "Datos cargados desde tu API."}
+						: "Reservas activas en tu gimnasio."}
 				</p>
 			</header>
 
-			<div className="space-y-4">
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{myReservations.map((item) => (
-					<article key={item.id} className="glass-panel rounded-2xl p-5">
-						<div>
-							<h2 className="text-lg font-semibold text-white">{item.machine}</h2>
-							<p className="mt-1 text-sm text-slate-300">
-								{item.date} a las {item.hour}
-							</p>
-							{item.gymName ? <p className="mt-1 text-xs text-slate-400">{item.gymName}</p> : null}
-						</div>
+					<article key={item.id} className="surface-card p-5">
+						<h2 className="text-base font-semibold text-[var(--foreground)]">{item.machine}</h2>
+						<p className="mt-1 text-sm text-[var(--muted)]">{item.date} a las {item.hour}</p>
+						{item.gymName ? <p className="mt-2 text-xs text-[var(--muted)]">{item.gymName}</p> : null}
 					</article>
 				))}
 				{myReservations.length === 0 ? (
-					<article className="glass-panel rounded-2xl p-5 text-sm text-slate-300">
-						No hay reservas en tu gimnasio actualmente.
-					</article>
+					<article className="surface-card p-5 text-sm text-[var(--muted)]">No hay reservas en tu gimnasio actualmente.</article>
 				) : null}
 			</div>
 		</section>

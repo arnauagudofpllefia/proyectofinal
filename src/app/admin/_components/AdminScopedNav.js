@@ -12,9 +12,13 @@ const gymScopedNavItems = [
 ];
 
 export default function AdminScopedNav() {
-    const [selectedGymScopeId, setSelectedGymScopeId] = useState(() => readStoredAdminGymId());
+    const [selectedGymScopeId, setSelectedGymScopeId] = useState("");
 
     useEffect(() => {
+        const initTimer = setTimeout(() => {
+            setSelectedGymScopeId(readStoredAdminGymId());
+        }, 0);
+
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -23,6 +27,7 @@ export default function AdminScopedNav() {
         window.addEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
 
         return () => {
+            clearTimeout(initTimer);
             window.removeEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
         };
     }, []);
@@ -30,28 +35,17 @@ export default function AdminScopedNav() {
     const hasGymScope = Boolean(selectedGymScopeId);
 
     return (
-        <section className="space-y-3">
+        <section className="space-y-2">
             <div className="flex flex-wrap gap-2">
-                <Link
-                    href="/admin/gyms"
-                    className="rounded-xl border border-cyan-300/20 bg-slate-950/40 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-400/10"
-                >
-                    Gimnasios
-                </Link>
+                <Link href="/admin/gyms" className="btn-secondary">Gimnasios</Link>
 
                 {gymScopedNavItems.map((item) =>
                     hasGymScope ? (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="rounded-xl border border-cyan-300/20 bg-slate-950/40 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/45 hover:bg-cyan-400/10"
-                        >
-                            {item.label}
-                        </Link>
+                        <Link key={item.href} href={item.href} className="btn-secondary">{item.label}</Link>
                     ) : (
                         <span
                             key={item.href}
-                            className="rounded-xl border border-slate-700/70 bg-slate-950/40 px-4 py-2 text-sm font-medium text-slate-500"
+                            className="btn-ghost cursor-not-allowed opacity-60"
                             title="Selecciona primero un gimnasio"
                         >
                             {item.label}
@@ -61,7 +55,7 @@ export default function AdminScopedNav() {
             </div>
 
             {!hasGymScope ? (
-                <p className="text-xs text-amber-200">
+                <p className="text-xs text-amber-700">
                     Elige primero un gimnasio para gestionar Resumen, Maquinas, Reservas y Usuarios.
                 </p>
             ) : null}

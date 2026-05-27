@@ -36,9 +36,6 @@ function flattenValidationErrors(details) {
 }
 
 function FieldInput({ field, value, disabled, onChange }) {
-    const baseClassName =
-        "mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-300/70";
-
     if (field.type === "select") {
         return (
             <select
@@ -46,7 +43,7 @@ function FieldInput({ field, value, disabled, onChange }) {
                 value={value}
                 onChange={onChange}
                 disabled={disabled || field.disabled}
-                className={baseClassName}
+                className="field-input mt-1"
             >
                 <option value="">Selecciona una opcion</option>
                 {field.options?.map((option) => (
@@ -67,7 +64,7 @@ function FieldInput({ field, value, disabled, onChange }) {
             required={field.required}
             disabled={disabled || field.disabled}
             placeholder={field.placeholder}
-            className={baseClassName}
+            className="field-input mt-1"
         />
     );
 }
@@ -93,18 +90,9 @@ export default function AdminCrudPage({ resourceKey }) {
     const canCreate = Boolean(capabilities.create);
     const canEdit = Boolean(capabilities.edit);
     const canDelete = Boolean(capabilities.delete);
-    const initialGymScopeId = readStoredAdminGymId();
-    const [selectedGymScopeId, setSelectedGymScopeId] = useState(initialGymScopeId);
+    const [selectedGymScopeId, setSelectedGymScopeId] = useState("");
     const [items, setItems] = useState([]);
-    const [form, setForm] = useState(() => {
-        const nextForm = createEmptyForm(resourceKey);
-
-        if (isGymScopedResource(resourceKey) && initialGymScopeId) {
-            nextForm.gymId = initialGymScopeId;
-        }
-
-        return nextForm;
-    });
+    const [form, setForm] = useState(() => createEmptyForm(resourceKey));
     const [selectedId, setSelectedId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -114,6 +102,10 @@ export default function AdminCrudPage({ resourceKey }) {
     const [successMessage, setSuccessMessage] = useState("");
     const [fieldErrors, setFieldErrors] = useState([]);
     const [gymOptions, setGymOptions] = useState([]);
+    const [userOptions, setUserOptions] = useState([]);
+    const [machineOptions, setMachineOptions] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const needsGymSelection = isGymScopedResource(resourceKey) && !selectedGymScopeId;
 
     const mode = selectedId ? "edit" : "create";
@@ -121,16 +113,16 @@ export default function AdminCrudPage({ resourceKey }) {
     const baseVisibleFields = getVisibleFields(resourceKey, mode);
     const visibleFields = baseVisibleFields.map((field) => {
         if (isGymScopedResource(resourceKey) && field.name === "gymId") {
-            return {
-                ...field,
-                options: gymOptions,
-                disabled: Boolean(selectedGymScopeId),
-            };
+            return { ...field, options: gymOptions, disabled: Boolean(selectedGymScopeId) };
         }
-
+        if (resourceKey === "reservations" && field.name === "userId") {
+            return { ...field, options: userOptions };
+        }
+        if (resourceKey === "reservations" && field.name === "machineId") {
+            return { ...field, options: machineOptions };
+        }
         return field;
     });
-    const headingLabel = canCreate || canEdit ? `Gestion de ${resource.title.toLowerCase()}` : `Consulta de ${resource.title.toLowerCase()}`;
 
     const loadItems = async () => {
         if (needsGymSelection) {
@@ -156,7 +148,6 @@ export default function AdminCrudPage({ resourceKey }) {
                 setErrorMessage("Solo administradores pueden acceder a esta seccion.");
                 return [];
             }
-
             setErrorMessage(error.message || `No se pudo cargar ${resource.title.toLowerCase()}.`);
             return [];
         } finally {
@@ -165,25 +156,29 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     useEffect(() => {
+        const initTimer = setTimeout(() => {
+            const initialGymId = readStoredAdminGymId();
+            setSelectedGymScopeId(initialGymId);
+
+            if (!selectedId && isGymScopedResource(resourceKey)) {
+                setForm((prev) => ({ ...prev, gymId: initialGymId }));
+            }
+        }, 0);
+
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
 
-            if (selectedId) {
-                return;
-            }
-
+            if (selectedId) return;
             if (isGymScopedResource(resourceKey)) {
-                setForm((prev) => ({
-                    ...prev,
-                    gymId: nextGymId,
-                }));
+                setForm((prev) => ({ ...prev, gymId: nextGymId }));
             }
         };
 
         window.addEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
 
         return () => {
+            clearTimeout(initTimer);
             window.removeEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
         };
     }, [resourceKey, selectedId]);
@@ -194,6 +189,8 @@ export default function AdminCrudPage({ resourceKey }) {
                 if (needsGymSelection) {
                     setItems([]);
                     setGymOptions([]);
+                    setUserOptions([]);
+                    setMachineOptions([]);
                     setLoading(false);
                     return;
                 }
@@ -211,15 +208,8 @@ export default function AdminCrudPage({ resourceKey }) {
                                 normalizedGyms
                                     .map((gym) => {
                                         const gymId = normalizeGymId(gym.id);
-
-                                        if (!gymId) {
-                                            return null;
-                                        }
-
-                                        return {
-                                            value: gymId,
-                                            label: gym.name || `Gimnasio ${gymId}`,
-                                        };
+                                        if (!gymId) return null;
+                                        return { value: gymId, label: gym.name || `Gimnasio ${gymId}` };
                                     })
                                     .filter(Boolean)
                             );
@@ -230,16 +220,46 @@ export default function AdminCrudPage({ resourceKey }) {
                         setGymOptions([]);
                     }
 
+                    if (resourceKey === "reservations") {
+                        try {
+                            const usersResponse = await listAdminResource("users", token, { gymId: selectedGymScopeId });
+                            const normalizedUsers = normalizeResourceList("users", usersResponse);
+                            const scopedUsers = selectedGymScopeId
+                                ? normalizedUsers.filter((u) => normalizeGymId(u.gymId) === selectedGymScopeId)
+                                : normalizedUsers;
+                            setUserOptions(
+                                scopedUsers
+                                    .map((u) => ({ value: String(u.id), label: u.name || u.email || `Usuario ${u.id}` }))
+                                    .filter((o) => o.value)
+                            );
+                        } catch {
+                            setUserOptions([]);
+                        }
+
+                        try {
+                            const machinesResponse = await listAdminResource("machines", token, { gymId: selectedGymScopeId });
+                            const normalizedMachines = normalizeResourceList("machines", machinesResponse);
+                            const scopedMachines = selectedGymScopeId
+                                ? normalizedMachines.filter((m) => normalizeGymId(m.gymId) === selectedGymScopeId)
+                                : normalizedMachines;
+                            setMachineOptions(
+                                scopedMachines
+                                    .map((m) => ({ value: String(m.id), label: m.name || `Maquina ${m.id}` }))
+                                    .filter((o) => o.value)
+                            );
+                        } catch {
+                            setMachineOptions([]);
+                        }
+                    }
+
                     const normalized = await fetchResourceItems(resourceKey, token, selectedGymScopeId);
                     setItems(normalized);
 
                     if (selectedId && !normalized.some((item) => item.id === selectedId)) {
                         const nextForm = createEmptyForm(resourceKey);
-
                         if (isGymScopedResource(resourceKey) && selectedGymScopeId) {
                             nextForm.gymId = selectedGymScopeId;
                         }
-
                         setSelectedId(null);
                         setForm(nextForm);
                     }
@@ -252,7 +272,6 @@ export default function AdminCrudPage({ resourceKey }) {
                         setErrorMessage("Solo administradores pueden acceder a esta seccion.");
                         return;
                     }
-
                     setErrorMessage(error.message || `No se pudo cargar ${resource.title.toLowerCase()}.`);
                 } finally {
                     setLoading(false);
@@ -268,34 +287,37 @@ export default function AdminCrudPage({ resourceKey }) {
         setForm((prev) => ({ ...prev, [name]: value }));
     };
 
-    const resetForm = () => {
-        const nextForm = createEmptyForm(resourceKey);
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setFieldErrors([]);
+        setErrorMessage("");
+    };
 
+    const openCreateModal = () => {
+        const nextForm = createEmptyForm(resourceKey);
         if (isGymScopedResource(resourceKey) && selectedGymScopeId) {
             nextForm.gymId = selectedGymScopeId;
         }
-
         setSelectedId(null);
         setForm(nextForm);
         setFieldErrors([]);
+        setErrorMessage("");
         setSuccessMessage("");
+        setIsModalOpen(true);
     };
 
     const handleEdit = (item) => {
-        if (!canEdit) {
-            return;
-        }
-
+        if (!canEdit) return;
         setSelectedId(item.id);
         setForm(mapItemToForm(resourceKey, item));
         setFieldErrors([]);
         setErrorMessage("");
         setSuccessMessage("");
+        setIsModalOpen(true);
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
         if (!canSubmit) {
             setErrorMessage("Este recurso no admite guardado desde el frontend con las rutas actuales.");
             return;
@@ -322,24 +344,16 @@ export default function AdminCrudPage({ resourceKey }) {
                 ? await updateAdminResource(resourceKey, selectedId, form, token)
                 : await createAdminResource(resourceKey, form, token);
 
-            const normalized = normalizeResourceItem(resourceKey, response);
-            const refreshedItems = await loadItems();
-
-            if (selectedId) {
-                const refreshedItem = refreshedItems.find((item) => item.id === selectedId) || normalized;
-                if (refreshedItem) {
-                    setSelectedId(refreshedItem.id);
-                    setForm(mapItemToForm(resourceKey, refreshedItem));
-                }
-            } else {
-                resetForm();
-            }
+            normalizeResourceItem(resourceKey, response);
+            await loadItems();
 
             setSuccessMessage(
                 selectedId
                     ? `${resource.singularTitle} actualizado correctamente.`
                     : `${resource.singularTitle} creado correctamente.`
             );
+            setIsModalOpen(false);
+            setSelectedId(null);
         } catch (error) {
             if (error?.status === 401 || error?.status === 403) {
                 setForbidden(true);
@@ -347,7 +361,6 @@ export default function AdminCrudPage({ resourceKey }) {
             } else {
                 setErrorMessage(error.message || `No se pudo guardar ${resource.singularTitle}.`);
             }
-
             setFieldErrors(flattenValidationErrors(error?.details));
         } finally {
             setSaving(false);
@@ -355,15 +368,9 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     const handleDelete = async (item) => {
-        if (!canDelete) {
-            return;
-        }
-
+        if (!canDelete) return;
         const confirmed = window.confirm(`Se eliminara ${resource.singularTitle} ${resource.getItemTitle(item)}.`);
-
-        if (!confirmed) {
-            return;
-        }
+        if (!confirmed) return;
 
         const token = localStorage.getItem("auth_token") || "";
         setDeletingId(item.id);
@@ -373,11 +380,10 @@ export default function AdminCrudPage({ resourceKey }) {
         try {
             await deleteAdminResource(resourceKey, item.id, token);
             await loadItems();
-
             if (selectedId === item.id) {
-                resetForm();
+                setSelectedId(null);
+                setForm(createEmptyForm(resourceKey));
             }
-
             setSuccessMessage(`${resource.singularTitle} eliminado correctamente.`);
         } catch (error) {
             if (error?.status === 401 || error?.status === 403) {
@@ -393,159 +399,170 @@ export default function AdminCrudPage({ resourceKey }) {
 
     if (needsGymSelection) {
         return (
-            <section className="space-y-4">
-                <header className="glass-panel rounded-2xl p-6">
-                    <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">{resource.title}</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">Selecciona un gimnasio primero</h2>
-                    <p className="mt-2 text-sm text-slate-300">
-                        Para administrar {resource.title.toLowerCase()} debes elegir antes un gimnasio en el selector superior.
-                    </p>
-                </header>
+            <section className="surface-card p-6">
+                <p className="badge badge-primary mb-2">{resource.title}</p>
+                <h2 className="text-xl font-semibold text-[var(--foreground)]">Selecciona un gimnasio primero</h2>
+                <p className="mt-2 text-sm text-[var(--muted)]">
+                    Para administrar {resource.title.toLowerCase()} debes elegir antes un gimnasio en el selector superior.
+                </p>
             </section>
         );
     }
 
     return (
-        <section className="grid gap-6 xl:grid-cols-[1.3fr_0.9fr]">
-            <div className="space-y-4">
-                <header className="glass-panel rounded-2xl p-6">
-                    <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">{resource.title}</p>
-                    <h2 className="mt-2 text-2xl font-semibold text-white">{headingLabel}</h2>
-                    <p className="mt-2 text-sm text-slate-300">{resource.description}</p>
-                </header>
+        <section className="space-y-6">
+            <header className="surface-card flex flex-wrap items-start justify-between gap-4 p-6">
+                <div>
+                    <p className="badge badge-primary mb-2">{resource.title}</p>
+                    <h2 className="text-2xl font-semibold text-[var(--foreground)]">
+                        Gestion de {resource.title.toLowerCase()}
+                    </h2>
+                    <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">{resource.description}</p>
+                </div>
+                {canCreate ? (
+                    <button type="button" onClick={openCreateModal} className="btn-primary" disabled={forbidden}>
+                        + Nuevo {resource.singularTitle}
+                    </button>
+                ) : null}
+            </header>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-                    {loading ? (
-                        <article className="glass-panel rounded-2xl p-5 text-sm text-slate-300">
-                            Cargando {resource.title.toLowerCase()}...
-                        </article>
-                    ) : null}
+            {errorMessage && !isModalOpen ? (
+                <div className="surface-card border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{errorMessage}</div>
+            ) : null}
+            {successMessage ? (
+                <div className="surface-card border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                    {successMessage}
+                </div>
+            ) : null}
 
-                    {!loading && items.length === 0 ? (
-                        <article className="glass-panel rounded-2xl p-5 text-sm text-slate-300">
-                            {resource.emptyState}
-                        </article>
-                    ) : null}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {loading ? (
+                    <article className="surface-card p-5 text-sm text-[var(--muted)]">
+                        Cargando {resource.title.toLowerCase()}...
+                    </article>
+                ) : null}
 
-                    {items.map((item) => (
-                        <article key={item.id} className="glass-panel rounded-2xl p-5">
+                {!loading && items.length === 0 ? (
+                    <article className="surface-card p-5 text-sm text-[var(--muted)]">{resource.emptyState}</article>
+                ) : null}
+
+                {items.map((item) => {
+                    const isAvailable = resourceKey === "machines"
+                        && /disponible|available/i.test(String(item.status || ""));
+                    return (
+                        <article key={item.id} className="surface-card overflow-hidden">
                             {resourceKey === "machines" && item.imageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     src={item.imageUrl}
                                     alt={resource.getItemTitle(item)}
-                                    className="mb-4 h-40 w-full rounded-xl border border-slate-800 object-cover"
+                                    className="h-36 w-full object-cover"
                                 />
                             ) : null}
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <p className="text-xs uppercase tracking-[0.18em] text-slate-500">ID {item.id}</p>
-                                    <h3 className="mt-2 text-lg font-semibold text-white">{resource.getItemTitle(item)}</h3>
-                                    <p className="mt-2 text-sm text-slate-300">{resource.getItemMeta(item) || "Sin detalle adicional"}</p>
+                            <div className="p-5">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wide text-[var(--muted)]">ID {item.id}</p>
+                                        <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">
+                                            {resource.getItemTitle(item)}
+                                        </h3>
+                                        <p className="mt-1 text-sm text-[var(--muted)]">
+                                            {resource.getItemMeta(item) || "Sin detalle adicional"}
+                                        </p>
+                                    </div>
+                                    {resourceKey === "machines" ? (
+                                        <span className={`badge ${isAvailable ? "badge-success" : "badge-muted"}`}>
+                                            {item.status || "—"}
+                                        </span>
+                                    ) : (
+                                        <span className="badge badge-primary">{resource.singularTitle}</span>
+                                    )}
                                 </div>
-                                <span className="rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-100">
-                                    {resource.singularTitle}
-                                </span>
-                            </div>
-
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                {canEdit ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleEdit(item)}
-                                        disabled={saving || forbidden}
-                                        className="rounded-lg border border-cyan-300/35 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                        Editar
-                                    </button>
-                                ) : null}
-                                {canDelete ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDelete(item)}
-                                        disabled={saving || forbidden || deletingId === item.id}
-                                        className="rounded-lg border border-rose-400/35 px-3 py-2 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                        {deletingId === item.id ? "Eliminando..." : "Eliminar"}
-                                    </button>
-                                ) : null}
-                                {!canEdit && !canDelete ? (
-                                    <span className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300">
-                                        Solo lectura
-                                    </span>
-                                ) : null}
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                    {canEdit ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleEdit(item)}
+                                            disabled={saving || forbidden}
+                                            className="btn-secondary"
+                                        >
+                                            Editar
+                                        </button>
+                                    ) : null}
+                                    {canDelete ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDelete(item)}
+                                            disabled={saving || forbidden || deletingId === item.id}
+                                            className="btn-danger"
+                                        >
+                                            {deletingId === item.id ? "Eliminando..." : "Eliminar"}
+                                        </button>
+                                    ) : null}
+                                </div>
                             </div>
                         </article>
-                    ))}
-                </div>
+                    );
+                })}
             </div>
 
-            {canCreate || canEdit ? (
-                <form className="glass-panel rounded-2xl p-6 space-y-4 xl:sticky xl:top-24 xl:h-fit" onSubmit={handleSubmit}>
-                    <div className="flex items-center justify-between gap-3">
-                        <div>
-                            <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Formulario</p>
-                            <h2 className="mt-2 text-2xl font-semibold text-white">
-                                {selectedId ? `Editar ${resource.singularTitle}` : `Nuevo ${resource.singularTitle}`}
-                            </h2>
-                        </div>
-                        {canCreate ? (
-                            <button
-                                type="button"
-                                onClick={resetForm}
-                                className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-cyan-300/40 hover:bg-cyan-400/10"
-                            >
-                                Nuevo
+            {isModalOpen ? (
+                <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={closeModal}>
+                    <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-start justify-between gap-3 border-b border-[var(--line)] px-6 py-4">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">
+                                    Formulario
+                                </p>
+                                <h3 className="mt-1 text-lg font-semibold text-[var(--foreground)]">
+                                    {selectedId ? `Editar ${resource.singularTitle}` : `Nuevo ${resource.singularTitle}`}
+                                </h3>
+                            </div>
+                            <button type="button" onClick={closeModal} className="btn-ghost" aria-label="Cerrar">
+                                ✕
                             </button>
-                        ) : null}
-                    </div>
-
-                    {!canCreate && !selectedId ? (
-                        <p className="text-sm text-slate-300">Selecciona un elemento de la lista para editarlo.</p>
-                    ) : null}
-
-                    {visibleFields.map((field) => (
-                        <label key={field.name} className="block text-sm text-slate-300">
-                            {field.label}
-                            <FieldInput
-                                field={field}
-                                value={form[field.name] ?? ""}
-                                disabled={loading || saving || forbidden || (!canCreate && !selectedId)}
-                                onChange={handleChange}
-                            />
-                        </label>
-                    ))}
-
-                    {errorMessage ? <p className="text-sm text-rose-300">{errorMessage}</p> : null}
-                    {successMessage ? <p className="text-sm text-emerald-300">{successMessage}</p> : null}
-                    {fieldErrors.length > 0 ? (
-                        <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 p-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-rose-200">Detalle</p>
-                            <ul className="mt-2 space-y-1 text-sm text-rose-100">
-                                {fieldErrors.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </ul>
                         </div>
-                    ) : null}
+                        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
+                            {visibleFields.map((field) => (
+                                <label key={field.name} className="block text-sm font-medium text-[var(--foreground)]">
+                                    {field.label}
+                                    <FieldInput
+                                        field={field}
+                                        value={form[field.name] ?? ""}
+                                        disabled={loading || saving || forbidden || (!canCreate && !selectedId)}
+                                        onChange={handleChange}
+                                    />
+                                </label>
+                            ))}
 
-                    <button
-                        type="submit"
-                        disabled={loading || saving || forbidden || !canSubmit}
-                        className="w-full rounded-xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {saving ? "Guardando..." : selectedId ? "Guardar cambios" : `Crear ${resource.singularTitle}`}
-                    </button>
-                </form>
-            ) : (
-                <aside className="glass-panel rounded-2xl p-6 space-y-3 xl:sticky xl:top-24 xl:h-fit">
-                    <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Panel lateral</p>
-                    <h2 className="text-2xl font-semibold text-white">Solo lectura</h2>
-                    <p className="text-sm text-slate-300">
-                        Las rutas actuales solo permiten consultar este recurso desde administracion.
-                    </p>
-                    {errorMessage ? <p className="text-sm text-rose-300">{errorMessage}</p> : null}
-                </aside>
-            )}
+                            {errorMessage ? <p className="text-sm text-rose-600">{errorMessage}</p> : null}
+                            {fieldErrors.length > 0 ? (
+                                <div className="rounded-lg border border-rose-200 bg-rose-50 p-3">
+                                    <p className="text-xs font-semibold uppercase text-rose-700">Detalle</p>
+                                    <ul className="mt-1 space-y-1 text-sm text-rose-700">
+                                        {fieldErrors.map((item) => (
+                                            <li key={item}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : null}
+
+                            <div className="flex flex-wrap justify-end gap-2 border-t border-[var(--line)] pt-4">
+                                <button type="button" onClick={closeModal} className="btn-ghost">
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading || saving || forbidden || !canSubmit}
+                                    className="btn-primary"
+                                >
+                                    {saving ? "Guardando..." : selectedId ? "Guardar cambios" : `Crear ${resource.singularTitle}`}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            ) : null}
         </section>
     );
 }

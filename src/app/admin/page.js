@@ -11,9 +11,13 @@ const gymScopedResourceKeys = new Set(["machines", "reservations", "users"]);
 export default function AdminHomePage() {
     const [counts, setCounts] = useState({});
     const [errorMessage, setErrorMessage] = useState("");
-    const [selectedGymScopeId, setSelectedGymScopeId] = useState(() => readStoredAdminGymId());
+    const [selectedGymScopeId, setSelectedGymScopeId] = useState("");
 
     useEffect(() => {
+        const initTimer = setTimeout(() => {
+            setSelectedGymScopeId(readStoredAdminGymId());
+        }, 0);
+
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -22,6 +26,7 @@ export default function AdminHomePage() {
         window.addEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
 
         return () => {
+            clearTimeout(initTimer);
             window.removeEventListener(ADMIN_GYM_SCOPE_EVENT, handleGymScopeChange);
         };
     }, []);
@@ -76,18 +81,18 @@ export default function AdminHomePage() {
 
     return (
         <section className="space-y-6">
-            <header className="glass-panel rounded-2xl p-6">
-                <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Resumen</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Vista global del sistema</h2>
-                <p className="mt-2 text-sm text-slate-300">
-                    Accede al CRUD de cada recurso desde paginas separadas dentro de la carpeta admin.
+            <header className="surface-card p-6">
+                <p className="badge badge-primary mb-2">Resumen</p>
+                <h2 className="text-2xl font-semibold text-[var(--foreground)]">Vista global del sistema</h2>
+                <p className="mt-2 text-sm text-[var(--muted)]">
+                    Accede al CRUD de cada recurso desde paginas separadas.
                 </p>
                 {selectedGymScopeId ? (
-                    <p className="mt-2 text-xs text-cyan-100">Filtrando por gimnasio {selectedGymScopeId}.</p>
+                    <p className="mt-2 text-xs text-[var(--primary)]">Filtrando por gimnasio {selectedGymScopeId}.</p>
                 ) : (
-                    <p className="mt-2 text-xs text-amber-200">Selecciona un gimnasio para habilitar Resumen, Maquinas, Reservas y Usuarios.</p>
+                    <p className="mt-2 text-xs text-amber-700">Selecciona un gimnasio para habilitar Resumen, Maquinas, Reservas y Usuarios.</p>
                 )}
-                {errorMessage ? <p className="mt-3 text-sm text-rose-300">{errorMessage}</p> : null}
+                {errorMessage ? <p className="mt-3 text-sm text-rose-600">{errorMessage}</p> : null}
             </header>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -95,13 +100,13 @@ export default function AdminHomePage() {
                     <Link
                         key={resource.key}
                         href={`/admin/${resource.slug}`}
-                        className="glass-panel rounded-2xl p-5 transition hover:-translate-y-0.5 hover:border-cyan-300/35"
+                        className="surface-card surface-card-hover p-5"
                     >
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{resource.title}</p>
-                        <p className="mt-3 text-4xl font-semibold text-cyan-200">{counts[resource.key] ?? "--"}</p>
-                        <p className="mt-3 text-sm text-slate-300">{resource.description}</p>
-                        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-100">
-                            Abrir gestion
+                        <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">{resource.title}</p>
+                        <p className="mt-2 text-3xl font-semibold text-[var(--primary-strong)]">{counts[resource.key] ?? "--"}</p>
+                        <p className="mt-2 text-sm text-[var(--muted)]">{resource.description}</p>
+                        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">
+                            Abrir gestion →
                         </p>
                     </Link>
                 ))}

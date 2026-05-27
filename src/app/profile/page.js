@@ -218,74 +218,63 @@ export default function ProfilePage() {
 	};
 
 	return (
-		<section className="rise-in mx-auto w-full max-w-xl space-y-6">
+		<section className="rise-in mx-auto w-full max-w-2xl space-y-6">
 			<header>
-				<p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Cuenta</p>
-				<h1 className="mt-2 text-3xl font-semibold text-white">Mi perfil</h1>
+				<p className="badge badge-primary mb-2">Cuenta</p>
+				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">Mi perfil</h1>
 			</header>
 
 			{user ? (
 				<>
-					<div className="glass-panel rounded-2xl p-6 space-y-3">
-						<h2 className="text-lg font-semibold text-white">Informacion personal</h2>
-						<p className="text-sm text-slate-300">Nombre: <span className="text-white">{user.name || "—"}</span></p>
-						<p className="text-sm text-slate-300">Email: <span className="text-white">{user.email || "—"}</span></p>
-						<p className="text-sm text-slate-300">
-							Gimnasio actual:{" "}
-							<span className="text-white">{user.gymName || user.gymId || "Sin asignar"}</span>
+					<div className="surface-card p-6 space-y-2">
+						<h2 className="text-lg font-semibold text-[var(--foreground)]">Informacion personal</h2>
+						<p className="text-sm text-[var(--muted)]">Nombre: <span className="text-[var(--foreground)] font-medium">{user.name || "—"}</span></p>
+						<p className="text-sm text-[var(--muted)]">Email: <span className="text-[var(--foreground)] font-medium">{user.email || "—"}</span></p>
+						<p className="text-sm text-[var(--muted)]">
+							Gimnasio actual: <span className="text-[var(--foreground)] font-medium">{user.gymName || user.gymId || "Sin asignar"}</span>
 						</p>
 					</div>
 
-					<div className="glass-panel rounded-2xl p-6 space-y-4">
-						<h2 className="text-lg font-semibold text-white">Cambiar gimnasio</h2>
+					<div className="surface-card p-6 space-y-4">
+						<h2 className="text-lg font-semibold text-[var(--foreground)]">Cambiar gimnasio</h2>
 						{daysLeft > 0 ? (
-							<p className="rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-								Podras cambiar de gimnasio en{" "}
-								<strong>{daysLeft} dia{daysLeft === 1 ? "" : "s"}</strong>. Solo se permite un cambio cada dos semanas.
+							<p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+								Podras cambiar de gimnasio en <strong>{daysLeft} dia{daysLeft === 1 ? "" : "s"}</strong>. Solo se permite un cambio cada dos semanas.
 							</p>
 						) : (
-							<p className="text-sm text-slate-400">Puedes cambiar de gimnasio ahora. La regla de dos semanas la valida el backend.</p>
+							<p className="text-sm text-[var(--muted)]">Puedes cambiar de gimnasio ahora.</p>
 						)}
 
 						<form onSubmit={handleChangeGym} className="space-y-4">
-							<label className="block text-sm text-slate-300">
+							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Nuevo gimnasio
 								<select
 									value={selectedGymId}
 									onChange={(e) => setSelectedGymId(e.target.value)}
 									disabled={loading || daysLeft > 0}
-									className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-300/70 disabled:opacity-50"
+									className="field-input mt-1"
 								>
 									<option value="">Selecciona un gimnasio</option>
 									{gyms.map((gym) => (
-										<option key={gym.id} value={gym.id}>
-											{gym.name}
-										</option>
+										<option key={gym.id} value={gym.id}>{gym.name}</option>
 									))}
 								</select>
 							</label>
 
-							{error ? <p className="text-sm text-rose-300">{error}</p> : null}
-							{success ? <p className="text-sm text-emerald-300">{success}</p> : null}
+							{error ? <p className="text-sm text-rose-600">{error}</p> : null}
+							{success ? <p className="text-sm text-emerald-700">{success}</p> : null}
 
-							<button
-								type="submit"
-								disabled={loading || daysLeft > 0}
-								className="w-full rounded-xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
-							>
+							<button type="submit" disabled={loading || daysLeft > 0} className="btn-primary w-full">
 								{loading ? "Guardando..." : "Confirmar cambio"}
 							</button>
 						</form>
 					</div>
 				</>
 			) : (
-				<p className="text-sm text-slate-400">Cargando perfil...</p>
+				<p className="text-sm text-[var(--muted)]">Cargando perfil...</p>
 			)}
 
-			<Link
-				href="/machines"
-				className="inline-block text-xs text-cyan-300 underline underline-offset-2 hover:text-cyan-200"
-			>
+			<Link href="/machines" className="inline-block text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-strong)]">
 				← Ver maquinas
 			</Link>
 		</section>

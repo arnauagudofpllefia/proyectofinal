@@ -318,24 +318,24 @@ const adminResources = {
         fields: [
             {
                 name: "userId",
-                label: "ID usuario",
-                type: "text",
+                label: "Usuario",
+                type: "select",
                 required: true,
-                placeholder: "1",
+                options: [],
             },
             {
                 name: "gymId",
-                label: "ID gimnasio",
+                label: "Gimnasio",
                 type: "select",
                 required: true,
                 options: [],
             },
             {
                 name: "machineId",
-                label: "ID maquina",
-                type: "text",
+                label: "Maquina",
+                type: "select",
                 required: true,
-                placeholder: "2",
+                options: [],
             },
             {
                 name: "date",

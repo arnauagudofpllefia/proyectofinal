@@ -58,16 +58,16 @@ export default function AdminGymScopePicker() {
     }, [gymOptions, selectedGymId]);
 
     return (
-        <section className="glass-panel rounded-2xl p-4 sm:p-5">
+        <section className="surface-card p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <p className="text-xs uppercase tracking-[0.16em] text-cyan-200/80">Ambito admin</p>
-                    <h2 className="mt-1 text-lg font-semibold text-white">Gimnasio activo</h2>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">Ambito admin</p>
+                    <h2 className="mt-1 text-lg font-semibold text-[var(--foreground)]">Gimnasio activo</h2>
                 </div>
-                <p className="text-xs text-slate-400">{loading ? "Cargando gimnasios..." : optionLabel}</p>
+                <p className="text-xs text-[var(--muted)]">{loading ? "Cargando gimnasios..." : optionLabel}</p>
             </div>
 
-            <label className="mt-3 block text-sm text-slate-300">
+            <label className="mt-3 block text-sm font-medium text-[var(--foreground)]">
                 Selecciona gimnasio a administrar
                 <select
                     value={selectedGymId}
@@ -77,7 +77,7 @@ export default function AdminGymScopePicker() {
                         writeStoredAdminGymId(nextGymId);
                     }}
                     disabled={loading}
-                    className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-300/70 disabled:opacity-60"
+                    className="field-input mt-1"
                 >
                     <option value="">Selecciona un gimnasio</option>
                     {gymOptions.map((gym) => (

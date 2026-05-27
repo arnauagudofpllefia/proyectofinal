@@ -82,10 +82,10 @@ export default function MachinesPage() {
 
 	return (
 		<section className="rise-in space-y-6">
-			<header>
-				<p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">Maquinas</p>
-				<h1 className="mt-2 text-3xl font-semibold text-white">Catalogo de equipos</h1>
-				<p className="mt-2 text-sm text-slate-300">
+			<header className="surface-card p-6">
+				<p className="badge badge-primary mb-2">Maquinas</p>
+				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">Catalogo de equipos</h1>
+				<p className="mt-2 text-sm text-[var(--muted)]">
 					{apiError
 						? `Usando datos temporales: ${apiError}`
 						: gymName
@@ -97,7 +97,7 @@ export default function MachinesPage() {
 				{userGymId ? (
 					<Link
 						href="/profile"
-						className="mt-2 inline-block text-xs text-cyan-300 underline underline-offset-2 hover:text-cyan-200"
+						className="mt-2 inline-block text-xs font-medium text-[var(--primary)] hover:text-[var(--primary-strong)]"
 					>
 						Cambiar gimnasio
 					</Link>
@@ -105,39 +105,38 @@ export default function MachinesPage() {
 			</header>
 
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{machines.map((machine) => (
-					<article
-						key={machine.id}
-						className="energy-ring glass-panel rounded-2xl p-5 transition hover:-translate-y-0.5"
-					>
-						{machine.imageUrl ? (
-							<img
-								src={machine.imageUrl}
-								alt={machine.name}
-								className="mb-4 h-44 w-full rounded-xl border border-slate-800 object-cover"
-							/>
-						) : null}
-						<div className="flex flex-wrap items-center justify-between gap-3">
-							<div>
-								<h2 className="text-xl font-semibold text-white">{machine.name}</h2>
-								<p className="mt-1 text-sm text-slate-300">Zona: {machine.zone}</p>
+				{machines.map((machine) => {
+					const isAvailable = /disponible|available/i.test(String(machine.status || ""));
+					return (
+						<article key={machine.id} className="surface-card surface-card-hover overflow-hidden">
+							{machine.imageUrl ? (
+								// eslint-disable-next-line @next/next/no-img-element
+								<img src={machine.imageUrl} alt={machine.name} className="h-40 w-full object-cover" />
+							) : (
+								<div className="flex h-40 w-full items-center justify-center bg-[#eef2ff] text-[var(--primary)]">
+									<span className="text-2xl font-semibold">{machine.name.charAt(0).toUpperCase()}</span>
+								</div>
+							)}
+							<div className="p-5">
+								<div className="flex flex-wrap items-start justify-between gap-2">
+									<div>
+										<h2 className="text-lg font-semibold text-[var(--foreground)]">{machine.name}</h2>
+										<p className="mt-1 text-xs text-[var(--muted)]">Zona: {machine.zone}</p>
+									</div>
+									<span className={`badge ${isAvailable ? "badge-success" : "badge-muted"}`}>
+										{machine.status}
+									</span>
+								</div>
 								{machine.description ? (
-									<p className="mt-1 text-sm text-slate-400">{machine.description}</p>
+									<p className="mt-2 text-sm text-[var(--muted)]">{machine.description}</p>
 								) : null}
+								<Link href={`/machines/${machine.id}`} className="btn-secondary mt-4 inline-block">
+									Ver detalle
+								</Link>
 							</div>
-							<span className="rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-xs font-semibold text-cyan-100">
-								{machine.status}
-							</span>
-						</div>
-
-						<Link
-							href={`/machines/${machine.id}`}
-							className="mt-4 inline-block rounded-lg border border-cyan-300/35 px-3 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-400/10"
-						>
-							Ver detalle
-						</Link>
-					</article>
-				))}
+						</article>
+					);
+				})}
 			</div>
 		</section>
 	);
