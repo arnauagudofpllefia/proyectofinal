@@ -25,7 +25,7 @@ export default async function RootLayout({ children }) {
   const navItems = isAuthenticated
     ? [
       { href: "/", label: "Inicio" },
-      { href: "/dashboard", label: "Mis reservas" },
+      ...(isAdmin ? [] : [{ href: "/dashboard", label: "Mis reservas" }]),
       ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
       { href: "/machines", label: "Maquinas" },
       { href: "/profile", label: "Perfil" },
