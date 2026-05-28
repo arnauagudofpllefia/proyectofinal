@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthSessionGuard from "@/app/_components/AuthSessionGuard";
-import NotificationBellButton from "@/app/_components/NotificationBellButton";
 import ReservationNotificationScheduler from "@/app/_components/ReservationNotificationScheduler";
-import LogoutButton from "@/app/_components/LogoutButton";
+import HeaderNav from "@/app/_components/HeaderNav";
 import { getServerSessionInfo } from "@/lib/session";
 import "./globals.css";
 
@@ -47,22 +46,14 @@ export default async function RootLayout({ children }) {
         <ReservationNotificationScheduler />
 
         <header className="sticky top-0 z-20 border-b border-(--line) bg-white/85 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <div className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <Link href="/" className="flex items-center gap-2 text-base font-semibold text-(--primary-strong)">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-(--primary) text-white">
                 G
               </span>
               GymNau
             </Link>
-            <nav className="flex flex-wrap items-center justify-end gap-1">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href} className="nav-link">
-                  {item.label}
-                </Link>
-              ))}
-              {isAuthenticated ? <NotificationBellButton /> : null}
-              {isAuthenticated ? <LogoutButton /> : null}
-            </nav>
+            <HeaderNav navItems={navItems} isAuthenticated={isAuthenticated} />
           </div>
         </header>
 
