@@ -124,6 +124,23 @@ function getReservationStartAt(item) {
 	return combined ? combined.toISOString() : "";
 }
 
+function getReservationEndAt(item) {
+	const directCandidates = [
+		item?.end_time,
+		item?.hora_fin,
+		item?.fecha_hora_fin,
+	];
+
+	for (const candidate of directCandidates) {
+		const parsed = parseDateTime(candidate);
+		if (parsed) {
+			return parsed.toISOString();
+		}
+	}
+
+	return "";
+}
+
 function normalizeMyReservations(payload) {
 	const data = payload?.data ?? payload;
 	if (!Array.isArray(data)) {
@@ -142,8 +159,10 @@ function normalizeMyReservations(payload) {
 		gymName: extractText(item?.gym?.name) || extractText(item?.gym?.nombre) || extractText(item?.gimnasio) || "",
 		date: extractDate(item?.date ?? item?.fecha ?? item?.hora_inicio ?? item?.start_time),
 		hour: extractHour(item?.hour ?? item?.hora ?? item?.hora_inicio ?? item?.start_time),
+		endHour: extractHour(item?.end_hour ?? item?.hora_fin ?? item?.end_time) || "--:--",
 		status: extractText(item?.status ?? item?.estado, "activa").toLowerCase(),
 		startAt: getReservationStartAt(item),
+		endAt: getReservationEndAt(item),
 	}));
 }
 
@@ -460,7 +479,7 @@ export default function MyReservationsPage() {
 
 	return (
 		<section className="rise-in space-y-6">
-			<header className="surface-card p-6">
+			<header>
 				<p className="badge badge-primary mb-2">Mis reservas</p>
 				<h1 className="text-2xl font-semibold text-foreground sm:text-3xl">Tu actividad programada</h1>
 				<p className="mt-2 text-sm text-(--muted)">
@@ -470,31 +489,40 @@ export default function MyReservationsPage() {
 				</p>
 				{successMessage ? <p className="mt-2 text-sm text-emerald-300">{successMessage}</p> : null}
 			</header>
-
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{myReservations.map((item) => {
-					const isCanceled = item.status === "cancelada";
-					const isLoading = cancelingId === String(item.id);
+				{myReservations
+					.filter((item) => {
+						const startAtDate = parseDateTime(item.startAt);
+						if (!startAtDate) return true;
+						return startAtDate.getTime() > Date.now();
+					})
+					.map((item) => {
+						const isCanceled = item.status === "cancelada";
+						const isLoading = cancelingId === String(item.id);
 
-					return (
+						return (
 						<article key={item.id} className="surface-card p-5">
 							<h2 className="text-base font-semibold text-foreground">{item.machine}</h2>
-							<p className="mt-1 text-sm text-(--muted)">{item.date} a las {item.hour}</p>
+						<p className="mt-1 text-sm text-(--muted)">{item.date} {item.hour} - {item.endHour}</p>
 							{item.gymName ? <p className="mt-2 text-xs text-(--muted)">{item.gymName}</p> : null}
 							<p className="mt-2 text-xs uppercase tracking-[0.18em] text-(--muted)">Estado: {item.status}</p>
 							<button
 								type="button"
 								onClick={() => openCancelModal(item)}
 								disabled={isCanceled || isLoading}
-								className="mt-4 w-full rounded-xl border border-rose-400/40 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:border-rose-300 hover:text-white disabled:cursor-not-allowed disabled:border-slate-700 disabled:text-slate-500"
+								className="mt-4 w-full rounded-xl border border-red-500/60 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 transition hover:border-red-400 hover:bg-red-500/20 hover:text-red-300 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-transparent disabled:text-slate-500"
 							>
 								{isCanceled ? "Cancelada" : isLoading ? "Cancelando..." : "Cancelar reserva"}
 							</button>
 						</article>
 					);
-				})}
-				{myReservations.length === 0 ? (
-					<article className="surface-card p-5 text-sm text-(--muted)">No hay reservas en tu gimnasio actualmente.</article>
+					})}
+				{myReservations.filter((item) => {
+					const startAtDate = parseDateTime(item.startAt);
+					if (!startAtDate) return true;
+					return startAtDate.getTime() > Date.now();
+				}).length === 0 ? (
+				<p className="text-sm text-(--muted)">No hay reservas activas.</p>
 				) : null}
 			</div>
 
@@ -519,8 +547,9 @@ export default function MyReservationsPage() {
 						<div className="space-y-4 px-6 py-5">
 							<p className="text-sm text-foreground">
 								Vas a cancelar la reserva de <span className="font-semibold">{reservationToCancel.machine}</span> del{" "}
-								<span className="font-semibold">{reservationToCancel.date}</span> a las{" "}
-								<span className="font-semibold">{reservationToCancel.hour}</span>.
+							<span className="font-semibold">{reservationToCancel.date}</span> de{" "}
+							<span className="font-semibold">{reservationToCancel.hour}</span> a{" "}
+							<span className="font-semibold">{reservationToCancel.endHour}</span>.
 							</p>
 							<p className="text-sm text-(--muted)">Esta accion no se puede deshacer desde esta pantalla.</p>
 							<div className="flex flex-wrap justify-end gap-2 border-t border-(--line) pt-4">
@@ -536,7 +565,7 @@ export default function MyReservationsPage() {
 									type="button"
 									onClick={handleCancelReservation}
 									disabled={Boolean(cancelingId)}
-									className="rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:bg-slate-400"
+								className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-slate-400"
 								>
 									{cancelingId ? "Cancelando..." : "Confirmar cancelacion"}
 								</button>
@@ -560,7 +589,7 @@ export default function MyReservationsPage() {
 								Quedan 5 minutos para tu reserva. Aun quieres seguir con la reserva?
 							</p>
 							<p className="text-sm text-(--muted)">
-								{reminderReservation.machine} - {reminderReservation.date} a las {reminderReservation.hour}
+							{reminderReservation.machine} - {reminderReservation.date} {reminderReservation.hour} - {reminderReservation.endHour}
 							</p>
 							<div className="flex flex-wrap justify-end gap-2 border-t border-(--line) pt-4">
 								<button
@@ -575,7 +604,7 @@ export default function MyReservationsPage() {
 									type="button"
 									onClick={handleReminderReject}
 									disabled={Boolean(cancelingId)}
-									className="rounded-xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:bg-slate-400"
+								className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-slate-400"
 								>
 									{cancelingId === String(reminderReservation.id) ? "Cancelando..." : "Rechazar"}
 								</button>

@@ -3,27 +3,44 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getAppNotifications, getNotificationsUpdateEventName } from "@/lib/notifications";
+import { getUnreadNotificationsCount } from "@/lib/api";
 
 export default function NotificationBellButton() {
-	const [notifications, setNotifications] = useState([]);
+	const [unreadCount, setUnreadCount] = useState(0);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const update = () => setNotifications(getAppNotifications());
+		const token = localStorage.getItem("auth_token") || "";
 
-		update();
-		window.addEventListener("storage", update);
-		window.addEventListener(getNotificationsUpdateEventName(), update);
+		const loadUnreadCount = async () => {
+			if (!token) {
+				setLoading(false);
+				return;
+			}
+
+			try {
+				const response = await getUnreadNotificationsCount(token);
+				const count = response?.unread_count ?? response?.count ?? 0;
+				setUnreadCount(count);
+			} catch {
+				setUnreadCount(0);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		const timer = setTimeout(loadUnreadCount, 0);
+
+		const handleUpdate = () => loadUnreadCount();
+		window.addEventListener("storage", handleUpdate);
+		window.addEventListener(getNotificationsUpdateEventName(), handleUpdate);
 
 		return () => {
-			window.removeEventListener("storage", update);
-			window.removeEventListener(getNotificationsUpdateEventName(), update);
+			clearTimeout(timer);
+			window.removeEventListener("storage", handleUpdate);
+			window.removeEventListener(getNotificationsUpdateEventName(), handleUpdate);
 		};
 	}, []);
-
-	const unreadCount = useMemo(
-		() => notifications.filter((item) => !item.read).length,
-		[notifications]
-	);
 
 	return (
 		<Link

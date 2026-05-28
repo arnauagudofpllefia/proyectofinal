@@ -2,12 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-	clearAppNotifications,
-	getAppNotifications,
-	getNotificationsUpdateEventName,
-	markAllAppNotificationsAsRead,
-	markAppNotificationAsRead,
-} from "@/lib/notifications";
+	getNotifications,
+	markNotificationAsRead,
+	markAllNotificationsAsRead,
+} from "@/lib/api";
+import { getNotificationsUpdateEventName } from "@/lib/notifications";
 
 function formatDateTime(value) {
 	if (!value) {
@@ -30,24 +29,78 @@ function formatDateTime(value) {
 
 export default function NotificationsPage() {
 	const [notifications, setNotifications] = useState([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const update = () => setNotifications(getAppNotifications());
+		const token = localStorage.getItem("auth_token") || "";
 
-		update();
-		window.addEventListener("storage", update);
-		window.addEventListener(getNotificationsUpdateEventName(), update);
+		const loadNotifications = async () => {
+			if (!token) {
+				setLoading(false);
+				return;
+			}
+
+			try {
+				const response = await getNotifications(token);
+				const items = Array.isArray(response) ? response : response?.data ?? [];
+				setNotifications(items);
+			} catch {
+				setNotifications([]);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadNotifications();
+
+		const handleUpdate = () => loadNotifications();
+		window.addEventListener("storage", handleUpdate);
+		window.addEventListener(getNotificationsUpdateEventName(), handleUpdate);
 
 		return () => {
-			window.removeEventListener("storage", update);
-			window.removeEventListener(getNotificationsUpdateEventName(), update);
+			window.removeEventListener("storage", handleUpdate);
+			window.removeEventListener(getNotificationsUpdateEventName(), handleUpdate);
 		};
 	}, []);
 
 	const unreadCount = useMemo(
-		() => notifications.filter((item) => !item.read).length,
+		() => notifications.filter((item) => !item.read_at).length,
 		[notifications]
 	);
+
+	const handleMarkAllAsRead = async () => {
+		const token = localStorage.getItem("auth_token") || "";
+		if (!token) return;
+
+		try {
+			await markAllNotificationsAsRead(token);
+			setNotifications((prev) =>
+				prev.map((n) => ({ ...n, read_at: new Date().toISOString() }))
+			);
+			window.dispatchEvent(new Event(getNotificationsUpdateEventName()));
+		} catch {
+			console.error("Error al marcar como leídas");
+		}
+	};
+
+	const handleMarkAsRead = async (notificationId) => {
+		const token = localStorage.getItem("auth_token") || "";
+		if (!token) return;
+
+		try {
+			await markNotificationAsRead(notificationId, token);
+			setNotifications((prev) =>
+				prev.map((n) =>
+					n.id === notificationId
+						? { ...n, read_at: new Date().toISOString() }
+						: n
+				)
+			);
+			window.dispatchEvent(new Event(getNotificationsUpdateEventName()));
+		} catch {
+			console.error("Error al marcar como leída");
+		}
+	};
 
 	return (
 		<section className="rise-in space-y-6">
@@ -60,42 +113,47 @@ export default function NotificationsPage() {
 						: "No tienes notificaciones pendientes."}
 				</p>
 				<div className="mt-4 flex flex-wrap gap-2">
-					<button type="button" onClick={markAllAppNotificationsAsRead} className="btn-ghost" disabled={!notifications.length}>
+					<button type="button" onClick={handleMarkAllAsRead} className="btn-ghost" disabled={!notifications.length || unreadCount === 0}>
 						Marcar todas como leidas
-					</button>
-					<button type="button" onClick={clearAppNotifications} className="btn-ghost" disabled={!notifications.length}>
-						Vaciar
 					</button>
 				</div>
 			</header>
 
-			<div className="space-y-3">
-				{notifications.map((item) => (
-					<article key={item.id} className="surface-card p-5">
-						<div className="flex flex-wrap items-start justify-between gap-3">
-							<div>
-								<p className={`badge ${item.read ? "badge-muted" : "badge-primary"}`}>{item.read ? "Leida" : "Nueva"}</p>
-								<h2 className="mt-2 text-base font-semibold text-foreground">{item.title}</h2>
-								{item.message ? <p className="mt-1 text-sm text-(--muted)">{item.message}</p> : null}
-								<p className="mt-2 text-xs text-(--muted)">{formatDateTime(item.createdAt)}</p>
+			{loading ? (
+				<article className="surface-card p-5 text-sm text-(--muted)">
+					Cargando notificaciones...
+				</article>
+			) : (
+				<div className="space-y-3">
+					{notifications.map((item) => (
+						<article key={item.id} className="surface-card p-5">
+							<div className="flex flex-wrap items-start justify-between gap-3">
+								<div>
+									<p className={`badge ${item.read_at ? "badge-muted" : "badge-primary"}`}>
+										{item.read_at ? "Leida" : "Nueva"}
+									</p>
+									<h2 className="mt-2 text-base font-semibold text-foreground">{item.title}</h2>
+									{item.message ? <p className="mt-1 text-sm text-(--muted)">{item.message}</p> : null}
+									<p className="mt-2 text-xs text-(--muted)">{formatDateTime(item.created_at)}</p>
+								</div>
+								<button
+									type="button"
+									onClick={() => handleMarkAsRead(item.id)}
+									className="btn-ghost"
+									disabled={!!item.read_at}
+								>
+									Marcar leida
+								</button>
 							</div>
-							<button
-								type="button"
-								onClick={() => markAppNotificationAsRead(item.id)}
-								className="btn-ghost"
-								disabled={item.read}
-							>
-								Marcar leida
-							</button>
-						</div>
-					</article>
-				))}
-				{notifications.length === 0 ? (
-					<article className="surface-card p-5 text-sm text-(--muted)">
-						Las notificaciones de reservas apareceran aqui.
-					</article>
-				) : null}
-			</div>
+						</article>
+					))}
+					{notifications.length === 0 ? (
+						<article className="surface-card p-5 text-sm text-(--muted)">
+							Las notificaciones de reservas apareceran aqui.
+						</article>
+					) : null}
+				</div>
+			)}
 		</section>
 	);
 }

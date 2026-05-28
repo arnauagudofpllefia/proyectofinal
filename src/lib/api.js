@@ -235,3 +235,26 @@ export async function updateGymInfo(payload, token) {
     }
   );
 }
+
+export async function getNotifications(token) {
+  return apiRequest("/notifications", { token });
+}
+
+export async function getUnreadNotificationsCount(token) {
+  return apiRequest("/notifications/unread-count", { token });
+}
+
+export async function markNotificationAsRead(notificationId, token) {
+  const encodedId = encodeURIComponent(String(notificationId));
+  return apiRequest(`/notifications/${encodedId}/read`, {
+    method: "PATCH",
+    token,
+  });
+}
+
+export async function markAllNotificationsAsRead(token) {
+  return apiRequest("/notifications/read-all", {
+    method: "PATCH",
+    token,
+  });
+}
