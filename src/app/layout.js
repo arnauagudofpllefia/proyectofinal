@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "GymNau",
   description: "Gestion minimalista de maquinas y reservas",
+  icons: {
+    icon: "/logoGymNau.png",
+  },
 };
 
 export default async function RootLayout({ children }) {
@@ -47,11 +50,13 @@ export default async function RootLayout({ children }) {
 
         <header className="sticky top-0 z-20 border-b border-emerald-800 bg-emerald-700/95 backdrop-blur">
           <div className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 text-base font-semibold text-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
-                G
-              </span>
-              GymNau
+            <Link href="/" className="flex items-center gap-3 text-base font-semibold text-white">
+              <img
+                src="/logoGymNau.png"
+                alt="GymNau"
+                className="h-9 w-9 shrink-0 object-contain"
+              />
+              <span>GymNau</span>
             </Link>
             <HeaderNav navItems={navItems} isAuthenticated={isAuthenticated} />
           </div>

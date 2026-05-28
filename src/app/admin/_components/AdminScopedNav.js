@@ -8,6 +8,7 @@ const gymScopedNavItems = [
     { href: "/admin", label: "Resumen" },
     { href: "/admin/machines", label: "Maquinas" },
     { href: "/admin/reservations", label: "Reservas" },
+    { href: "/admin/estadisticas", label: "Estadisticas" },
     { href: "/admin/users", label: "Usuarios" },
 ];
 
@@ -56,7 +57,7 @@ export default function AdminScopedNav() {
 
             {!hasGymScope ? (
                 <p className="text-xs text-amber-700">
-                    Elige primero un gimnasio para gestionar Resumen, Maquinas, Reservas y Usuarios.
+                    Elige primero un gimnasio para gestionar Resumen, Maquinas, Reservas, Estadisticas y Usuarios.
                 </p>
             ) : null}
         </section>
