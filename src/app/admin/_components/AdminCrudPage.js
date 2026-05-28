@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ProfileGlyph from "@/app/_components/ProfileGlyph";
 import {
     createAdminResource,
     createEmptyForm,
@@ -21,6 +22,7 @@ import {
     readStoredAdminGymId,
 } from "@/lib/gym";
 import { resolvePublicImageUrl } from "@/lib/image";
+import { extractProfileIdentity, readStoredProfileIcon } from "@/lib/profileIcon";
 
 function flattenValidationErrors(details) {
     if (!details || typeof details !== "object") {
@@ -125,15 +127,22 @@ export default function AdminCrudPage({ resourceKey }) {
     const [userOptions, setUserOptions] = useState([]);
     const [machineOptions, setMachineOptions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const needsGymSelection = isGymScopedResource(resourceKey) && !selectedGymScopeId;
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    const supportsSearch = resourceKey === "users" || resourceKey === "machines" || resourceKey === "reservations";
 
     const mode = selectedId ? "edit" : "create";
     const canSubmit = selectedId ? canEdit : canCreate;
     const baseVisibleFields = getVisibleFields(resourceKey, mode);
     const visibleFields = baseVisibleFields.map((field) => {
         if (isGymScopedResource(resourceKey) && field.name === "gymId") {
-            return { ...field, options: gymOptions, disabled: Boolean(selectedGymScopeId) };
+            return {
+                ...field,
+                options: gymOptions,
+                disabled: resourceKey !== "users" && Boolean(selectedGymScopeId),
+            };
         }
         if (resourceKey === "reservations" && field.name === "userId") {
             return { ...field, options: userOptions };
@@ -143,6 +152,33 @@ export default function AdminCrudPage({ resourceKey }) {
         }
         return field;
     });
+    const visibleItems =
+        supportsSearch && normalizedSearchTerm
+            ? items.filter((item) => {
+                const searchableFieldsByResource = {
+                    users: [item.name, item.email, item.role],
+                    machines: [item.name, item.status, item.description, item.gymId],
+                    reservations: [
+                        item.userName,
+                        item.machineName,
+                        item.gymName,
+                        item.status,
+                        item.date,
+                        item.startTime,
+                        item.endTime,
+                        item.userId,
+                        item.machineId,
+                    ],
+                };
+
+                const haystack = (searchableFieldsByResource[resourceKey] || [])
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
+
+                return haystack.includes(normalizedSearchTerm);
+            })
+            : items;
 
     const loadItems = async () => {
         if (needsGymSelection) {
@@ -436,13 +472,32 @@ export default function AdminCrudPage({ resourceKey }) {
 
     return (
         <section className="space-y-6">
-            <header className="surface-card flex flex-wrap items-start justify-between gap-4 p-6">
+            <header
+                className={
+                    resourceKey === "users" ||
+                    resourceKey === "reservations" ||
+                    resourceKey === "machines" ||
+                    resourceKey === "gyms"
+                        ? "flex flex-wrap items-start justify-between gap-4 p-6"
+                        : "surface-card flex flex-wrap items-start justify-between gap-4 p-6"
+                }
+            >
                 <div>
-                    <p className="badge badge-primary mb-2">{resource.title}</p>
+                    {resourceKey !== "users" &&
+                    resourceKey !== "reservations" &&
+                    resourceKey !== "machines" &&
+                    resourceKey !== "gyms" ? (
+                        <p className="badge badge-primary mb-2">{resource.title}</p>
+                    ) : null}
                     <h2 className="text-2xl font-semibold text-[var(--foreground)]">
                         Gestion de {resource.title.toLowerCase()}
                     </h2>
-                    <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">{resource.description}</p>
+                    {resourceKey !== "users" &&
+                    resourceKey !== "reservations" &&
+                    resourceKey !== "machines" &&
+                    resourceKey !== "gyms" ? (
+                        <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">{resource.description}</p>
+                    ) : null}
                 </div>
                 {canCreate ? (
                     <button type="button" onClick={openCreateModal} className="btn-primary" disabled={forbidden}>
@@ -450,6 +505,37 @@ export default function AdminCrudPage({ resourceKey }) {
                     </button>
                 ) : null}
             </header>
+
+            {supportsSearch ? (
+                <div
+                    className={
+                        resourceKey === "users" || resourceKey === "reservations" || resourceKey === "machines"
+                            ? "p-4"
+                            : "surface-card p-4"
+                    }
+                >
+                    <label className="block text-sm font-medium text-[var(--foreground)]">
+                        {resourceKey === "users"
+                            ? "Buscar usuario"
+                            : resourceKey === "machines"
+                                ? "Buscar maquina"
+                                : "Buscar reserva"}
+                        <input
+                            type="search"
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                            placeholder={
+                                resourceKey === "users"
+                                    ? "Busca por nombre, email o rol"
+                                    : resourceKey === "machines"
+                                        ? "Busca por nombre, estado o descripcion"
+                                        : "Busca por usuario, maquina, gimnasio o fecha"
+                            }
+                            className="field-input mt-1"
+                        />
+                    </label>
+                </div>
+            ) : null}
 
             {errorMessage && !isModalOpen ? (
                 <div className="surface-card border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{errorMessage}</div>
@@ -460,89 +546,222 @@ export default function AdminCrudPage({ resourceKey }) {
                 </div>
             ) : null}
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {loading ? (
-                    <article className="surface-card p-5 text-sm text-[var(--muted)]">
-                        Cargando {resource.title.toLowerCase()}...
-                    </article>
-                ) : null}
+            {resourceKey === "reservations" || resourceKey === "users" ? (
+                <div className="surface-card overflow-hidden">
+                    {loading ? (
+                        <div className="p-5 text-sm text-[var(--muted)]">
+                            Cargando {resource.title.toLowerCase()}...
+                        </div>
+                    ) : null}
 
-                {!loading && items.length === 0 ? (
-                    <article className="surface-card p-5 text-sm text-[var(--muted)]">{resource.emptyState}</article>
-                ) : null}
+                    {!loading && visibleItems.length === 0 ? (
+                        <div className="p-5 text-sm text-[var(--muted)]">{resource.emptyState}</div>
+                    ) : null}
 
-                {items.map((item) => {
-                    const isMachine = resourceKey === "machines";
-                    const isAvailable = isMachine && /disponible|available/i.test(String(item.status || ""));
-                    const title = resource.getItemTitle(item);
-                    const meta = resource.getItemMeta(item);
-                    const initials = String(title || "?").trim().charAt(0).toUpperCase();
-                    return (
-                        <article key={item.id} className="surface-card surface-card-hover flex h-full flex-col overflow-hidden">
-                            {isMachine ? (
-                                <div className="card-image relative aspect-[4/3] w-full">
-                                    {item.imageUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            src={resolvePublicImageUrl(item.imageUrl)}
-                                            alt={title}
-                                        />
-                                    ) : (
-                                        <div className="image-placeholder absolute inset-0">{initials}</div>
-                                    )}
-                                    <span
-                                        className={`badge badge-floating absolute right-3 top-3 z-10 ${isAvailable ? "badge-success" : "badge-muted"
-                                            }`}
-                                    >
-                                        <span
-                                            className={`h-1.5 w-1.5 rounded-full ${isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
-                                                }`}
-                                        />
-                                        {item.status || "Sin estado"}
-                                    </span>
-                                </div>
-                            ) : null}
-                            <div className="flex flex-1 flex-col gap-3 p-5">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <h3 className="truncate text-base font-semibold tracking-tight text-(--foreground)">
-                                            {title}
-                                        </h3>
-                                        <p className="mt-1 text-sm text-(--muted)">
-                                            {meta || "Sin detalle adicional"}
-                                        </p>
-                                    </div>
-                                    {!isMachine ? (
-                                        <span className="badge badge-primary shrink-0">{resource.singularTitle}</span>
-                                    ) : null}
-                                </div>
-                                <div className="mt-auto flex flex-wrap gap-2 pt-2">
-                                    {canEdit ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleEdit(item)}
-                                            disabled={saving || forbidden}
-                                            className="btn-primary flex-1"
-                                        >
-                                            Editar
-                                        </button>
-                                    ) : null}
-                                    {canDelete ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDelete(item)}
-                                            disabled={saving || forbidden || deletingId === item.id}
-                                            className="btn-danger"
-                                        >
-                                            {deletingId === item.id ? "Eliminando..." : "Eliminar"}
-                                        </button>
-                                    ) : null}
-                                </div>
-                            </div>
+                    {!loading && visibleItems.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full border-collapse text-sm">
+                                <thead className="bg-(--background-subtle)">
+                                    <tr className="text-left text-[var(--muted-strong)]">
+                                        {resourceKey === "reservations" ? (
+                                            <>
+                                                <th className="px-4 py-3 font-semibold">Usuario</th>
+                                                <th className="px-4 py-3 font-semibold">Maquina</th>
+                                                <th className="px-4 py-3 font-semibold">Gimnasio</th>
+                                                <th className="px-4 py-3 font-semibold">Fecha</th>
+                                                <th className="px-4 py-3 font-semibold">Horario</th>
+                                                <th className="px-4 py-3 font-semibold">Estado</th>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <th className="px-4 py-3 font-semibold">Usuario</th>
+                                                <th className="px-4 py-3 font-semibold">Email</th>
+                                                <th className="px-4 py-3 font-semibold">Rol</th>
+                                                <th className="px-4 py-3 font-semibold">Gimnasio</th>
+                                            </>
+                                        )}
+                                        <th className="px-4 py-3 font-semibold text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {visibleItems.map((item) => {
+                                        const userIconId =
+                                            resourceKey === "users"
+                                                ? readStoredProfileIcon(extractProfileIdentity(item))
+                                                : "";
+                                        const gymName =
+                                            resourceKey === "users"
+                                                ? gymOptions.find((option) => option.value === String(item.gymId))?.label ||
+                                                (item.gymId ? `Gimnasio ${item.gymId}` : "-")
+                                                : "-";
+
+                                        return (
+                                            <tr key={item.id} className="border-t border-(--line) align-top">
+                                                {resourceKey === "reservations" ? (
+                                                    <>
+                                                        <td className="px-4 py-3 text-(--foreground)">{item.userName || `Usuario ${item.userId}`}</td>
+                                                        <td className="px-4 py-3 text-(--foreground)">{item.machineName || `Maquina ${item.machineId}`}</td>
+                                                        <td className="px-4 py-3 text-(--foreground)">{item.gymName || (item.gymId ? `Gimnasio ${item.gymId}` : "-")}</td>
+                                                        <td className="px-4 py-3 text-(--foreground)">{item.date || "-"}</td>
+                                                        <td className="px-4 py-3 text-(--foreground)">
+                                                            {[item.startTime, item.endTime].filter(Boolean).join(" - ") || "-"}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className="badge badge-primary">{item.status || "Sin estado"}</span>
+                                                        </td>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <td className="px-4 py-3 text-(--foreground)">
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-(--line) bg-(--background-subtle) text-(--foreground)">
+                                                                    <ProfileGlyph iconId={userIconId} className="h-4 w-4" />
+                                                                </span>
+                                                                <span>{item.name || `Usuario ${item.id}`}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-(--foreground)">{item.email || "-"}</td>
+                                                        <td className="px-4 py-3 text-(--foreground)">{item.role || "user"}</td>
+                                                        <td className="px-4 py-3 text-(--foreground)">{gymName}</td>
+                                                    </>
+                                                )}
+                                                <td className="px-4 py-3">
+                                                    <div className="flex justify-end gap-2">
+                                                        {canEdit ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleEdit(item)}
+                                                                disabled={saving || forbidden}
+                                                                className="btn-primary"
+                                                            >
+                                                                Editar
+                                                            </button>
+                                                        ) : null}
+                                                        {canDelete ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleDelete(item)}
+                                                                disabled={saving || forbidden || deletingId === item.id}
+                                                                className="btn-danger"
+                                                            >
+                                                                {deletingId === item.id ? "Eliminando..." : "Eliminar"}
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : null}
+                </div>
+            ) : (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {loading ? (
+                        <article className="surface-card p-5 text-sm text-[var(--muted)]">
+                            Cargando {resource.title.toLowerCase()}...
                         </article>
-                    );
-                })}
-            </div>
+                    ) : null}
+
+                    {!loading && visibleItems.length === 0 ? (
+                        <article className="surface-card p-5 text-sm text-[var(--muted)]">{resource.emptyState}</article>
+                    ) : null}
+
+                    {visibleItems.map((item) => {
+                        const isMachine = resourceKey === "machines";
+                        const isUser = resourceKey === "users";
+                        const isGym = resourceKey === "gyms";
+                        const isAvailable = isMachine && /activa|active|disponible|available/i.test(String(item.status || ""));
+                        const title = resource.getItemTitle(item);
+                        const meta = isMachine
+                            ? [
+                                gymOptions.find((option) => option.value === String(item.gymId))?.label ||
+                                (item.gymId ? `Gimnasio ${item.gymId}` : ""),
+                                item.status,
+                            ]
+                                .filter(Boolean)
+                                .join(" · ")
+                            : resource.getItemMeta(item);
+                        const initials = String(title || "?").trim().charAt(0).toUpperCase();
+                        const profileIconId = isUser
+                            ? readStoredProfileIcon(extractProfileIdentity(item))
+                            : "";
+                        return (
+                            <article key={item.id} className="surface-card surface-card-hover flex h-full flex-col overflow-hidden">
+                                {isMachine ? (
+                                    <div className="card-image relative aspect-[4/3] w-full">
+                                        {item.imageUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={resolvePublicImageUrl(item.imageUrl)}
+                                                alt={title}
+                                            />
+                                        ) : (
+                                            <div className="image-placeholder absolute inset-0">{initials}</div>
+                                        )}
+                                        <span
+                                            className={`badge badge-floating absolute right-3 top-3 z-10 ${isAvailable ? "badge-success" : "badge-muted"
+                                                }`}
+                                        >
+                                            <span
+                                                className={`h-1.5 w-1.5 rounded-full ${isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+                                                    }`}
+                                            />
+                                            {item.status || "Sin estado"}
+                                        </span>
+                                    </div>
+                                ) : null}
+                                <div className="flex flex-1 flex-col gap-3 p-5">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-3">
+                                                {isUser ? (
+                                                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--line) bg-(--background-subtle) text-(--foreground)">
+                                                        <ProfileGlyph iconId={profileIconId} className="h-5 w-5" />
+                                                    </span>
+                                                ) : null}
+                                                <h3 className="truncate text-base font-semibold tracking-tight text-(--foreground)">
+                                                    {title}
+                                                </h3>
+                                            </div>
+                                            <p className="mt-1 text-sm text-(--muted)">
+                                                {meta || "Sin detalle adicional"}
+                                            </p>
+                                        </div>
+                                        {!isMachine && !isUser && !isGym ? (
+                                            <span className="badge badge-primary shrink-0">{resource.singularTitle}</span>
+                                        ) : null}
+                                    </div>
+                                    <div className="mt-auto flex flex-wrap gap-2 pt-2">
+                                        {canEdit ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleEdit(item)}
+                                                disabled={saving || forbidden}
+                                                className="btn-primary flex-1"
+                                            >
+                                                Editar
+                                            </button>
+                                        ) : null}
+                                        {canDelete ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(item)}
+                                                disabled={saving || forbidden || deletingId === item.id}
+                                                className="btn-danger"
+                                            >
+                                                {deletingId === item.id ? "Eliminando..." : "Eliminar"}
+                                            </button>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            </article>
+                        );
+                    })}
+                </div>
+            )}
 
             {isModalOpen ? (
                 <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={closeModal}>

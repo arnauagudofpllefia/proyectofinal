@@ -28,7 +28,7 @@ export default function NotificationBellButton() {
 	return (
 		<Link
 			href="/notifications"
-			className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--line) text-foreground transition hover:bg-slate-100"
+			className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/40 text-white transition hover:bg-white/15"
 			aria-label="Notificaciones"
 			title="Notificaciones"
 		>

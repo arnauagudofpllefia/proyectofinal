@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { listAdminResource, normalizeResourceList } from "@/lib/admin";
 import { normalizeGymId, readStoredAdminGymId, writeStoredAdminGymId } from "@/lib/gym";
 
@@ -52,23 +52,10 @@ export default function AdminGymScopePicker() {
         return () => clearTimeout(timer);
     }, []);
 
-    const optionLabel = useMemo(() => {
-        const selectedOption = gymOptions.find((gym) => gym.value === selectedGymId);
-        return selectedOption?.label ?? "Sin gimnasio seleccionado";
-    }, [gymOptions, selectedGymId]);
-
     return (
         <section className="surface-card p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">Ambito admin</p>
-                    <h2 className="mt-1 text-lg font-semibold text-[var(--foreground)]">Gimnasio activo</h2>
-                </div>
-                <p className="text-xs text-[var(--muted)]">{loading ? "Cargando gimnasios..." : optionLabel}</p>
-            </div>
-
-            <label className="mt-3 block text-sm font-medium text-[var(--foreground)]">
-                Selecciona gimnasio a administrar
+            <label className="block text-sm font-medium text-[var(--foreground)]">
+                Selecciona un gimnasio
                 <select
                     value={selectedGymId}
                     onChange={(event) => {

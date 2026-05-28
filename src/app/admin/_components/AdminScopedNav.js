@@ -36,9 +36,7 @@ export default function AdminScopedNav() {
 
     return (
         <section className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-                <Link href="/admin/gyms" className="btn-secondary">Gimnasios</Link>
-
+            <div className="flex flex-wrap justify-center gap-2">
                 {gymScopedNavItems.map((item) =>
                     hasGymScope ? (
                         <Link key={item.href} href={item.href} className="btn-secondary">{item.label}</Link>
@@ -52,6 +50,8 @@ export default function AdminScopedNav() {
                         </span>
                     )
                 )}
+
+                <Link href="/admin/gyms" className="btn-secondary">Gimnasios</Link>
             </div>
 
             {!hasGymScope ? (

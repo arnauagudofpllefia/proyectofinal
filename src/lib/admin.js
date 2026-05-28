@@ -191,7 +191,7 @@ const adminResources = {
         slug: "machines",
         title: "Maquinas",
         singularTitle: "maquina",
-        description: "Administra el catalogo de maquinas, su zona y su estado operativo.",
+        description: "Administra el catalogo de maquinas y su estado operativo.",
         emptyState: "No hay maquinas registradas.",
         capabilities: {
             create: true,
@@ -218,21 +218,13 @@ const adminResources = {
                 options: [],
             },
             {
-                name: "zone",
-                label: "Zona",
-                type: "text",
-                required: true,
-                placeholder: "Cardio",
-            },
-            {
                 name: "status",
                 label: "Estado",
                 type: "select",
                 required: true,
                 options: [
-                    { value: "Disponible", label: "Disponible" },
-                    { value: "En uso", label: "En uso" },
-                    { value: "Mantenimiento", label: "Mantenimiento" },
+                    { value: "Activa", label: "Activa" },
+                    { value: "Inactiva", label: "Inactiva" },
                 ],
             },
             {
@@ -256,7 +248,7 @@ const adminResources = {
                 name: item?.name ?? item?.nombre ?? "",
                 gymId: normalizeId(item?.gimnasio_id ?? item?.gym_id ?? item?.gym?.id, ""),
                 zone: item?.zone ?? item?.zona ?? "",
-                status: item?.status ?? item?.estado ?? "Disponible",
+                status: item?.status ?? item?.estado ?? "Activa",
                 description: item?.description ?? item?.descripcion ?? "",
                 imageUrl: resolvePublicImageUrl(
                     item?.image_url ?? item?.imagen_url ?? item?.imagen ?? item?.image ?? item?.foto ?? ""
@@ -267,7 +259,6 @@ const adminResources = {
             const name = values.name.trim();
             const gymIdRaw = values.gymId.trim();
             const gymId = Number.parseInt(gymIdRaw, 10);
-            const zone = values.zone.trim();
             const status = values.status.trim();
             const description = (values.description ?? "").trim();
             const imageUrl = (values.imageUrl ?? "").trim();
@@ -276,7 +267,6 @@ const adminResources = {
                 gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 gym_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 nombre: name,
-                zona: zone,
                 estado: status,
                 description,
                 descripcion: description,
@@ -303,7 +293,7 @@ const adminResources = {
             return item.name || "Maquina sin nombre";
         },
         getItemMeta(item) {
-            return [item.gymId ? `Gym ${item.gymId}` : "", item.zone, item.status].filter(Boolean).join(" · ");
+            return [item.gymId ? `Gym ${item.gymId}` : "", item.status].filter(Boolean).join(" · ");
         },
     },
     reservations: {
@@ -497,13 +487,6 @@ const adminResources = {
                 placeholder: "ana@email.com",
             },
             {
-                name: "phone",
-                label: "Telefono",
-                type: "tel",
-                required: false,
-                placeholder: "600123123",
-            },
-            {
                 name: "role",
                 label: "Rol",
                 type: "select",
@@ -552,7 +535,6 @@ const adminResources = {
         buildPayload(values) {
             const name = values.name.trim();
             const email = values.email.trim();
-            const phone = values.phone.trim();
             const role = values.role.trim();
             const password = values.password.trim();
             const passwordConfirmation = values.passwordConfirmation.trim();
@@ -564,8 +546,6 @@ const adminResources = {
                 name,
                 nombre: name,
                 email,
-                phone,
-                telefono: phone,
                 role,
                 rol: role,
             };

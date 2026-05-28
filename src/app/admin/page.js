@@ -81,19 +81,7 @@ export default function AdminHomePage() {
 
     return (
         <section className="space-y-6">
-            <header className="surface-card p-6">
-                <p className="badge badge-primary mb-2">Resumen</p>
-                <h2 className="text-2xl font-semibold text-[var(--foreground)]">Vista global del sistema</h2>
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                    Accede al CRUD de cada recurso desde paginas separadas.
-                </p>
-                {selectedGymScopeId ? (
-                    <p className="mt-2 text-xs text-[var(--primary)]">Filtrando por gimnasio {selectedGymScopeId}.</p>
-                ) : (
-                    <p className="mt-2 text-xs text-amber-700">Selecciona un gimnasio para habilitar Resumen, Maquinas, Reservas y Usuarios.</p>
-                )}
-                {errorMessage ? <p className="mt-3 text-sm text-rose-600">{errorMessage}</p> : null}
-            </header>
+            {errorMessage ? <p className="text-sm text-rose-600">{errorMessage}</p> : null}
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {visibleResources.map((resource) => (

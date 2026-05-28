@@ -45,10 +45,10 @@ export default async function RootLayout({ children }) {
         <AuthSessionGuard />
         <ReservationNotificationScheduler />
 
-        <header className="sticky top-0 z-20 border-b border-(--line) bg-white/85 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-emerald-800 bg-emerald-700/95 backdrop-blur">
           <div className="relative mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 text-base font-semibold text-(--primary-strong)">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-(--primary) text-white">
+            <Link href="/" className="flex items-center gap-2 text-base font-semibold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white">
                 G
               </span>
               GymNau

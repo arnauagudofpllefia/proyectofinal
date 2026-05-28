@@ -81,8 +81,8 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
                         href={item.href}
                         className={
                             item.href === "/profile"
-                                ? "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--line) text-foreground transition hover:bg-slate-100"
-                                : "nav-link"
+                                ? "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/40 text-white transition hover:bg-white/15"
+                                : "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium text-white transition hover:bg-white/15"
                         }
                         aria-label={item.href === "/profile" ? "Perfil" : undefined}
                         title={item.href === "/profile" ? "Perfil" : undefined}
@@ -104,7 +104,7 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
 
                 <button
                     type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-(--line) bg-white text-(--foreground)"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-black bg-black text-white"
                     aria-label={isOpen ? "Cerrar menu" : "Abrir menu"}
                     aria-expanded={isOpen}
                     aria-controls="mobile-main-menu"
@@ -125,7 +125,7 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
             <div
                 id="mobile-main-menu"
                 aria-hidden={!isOpen}
-                className={`absolute inset-x-4 top-full z-30 rounded-b-2xl border border-(--line) border-t-0 bg-white p-3 shadow-[var(--shadow-lg)] transition-all duration-200 ease-out md:hidden ${
+                className={`absolute inset-x-4 top-full z-30 rounded-b-2xl border border-emerald-800 border-t-0 bg-emerald-700 p-3 shadow-[var(--shadow-lg)] transition-all duration-200 ease-out md:hidden ${
                     isOpen
                         ? "visible translate-y-0 opacity-100"
                         : "invisible -translate-y-1 opacity-0 pointer-events-none"
@@ -136,7 +136,7 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className="nav-link"
+                            className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium text-white transition hover:bg-white/15"
                             onClick={() => setIsOpen(false)}
                         >
                             {item.href === "/profile" ? (
@@ -152,7 +152,7 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
                 </nav>
 
                 {isAuthenticated ? (
-                    <div className="mt-3 flex items-center justify-end gap-2 border-t border-(--line) pt-3">
+                    <div className="mt-3 flex items-center justify-end gap-2 border-t border-white/25 pt-3">
                         <LogoutButton />
                     </div>
                 ) : null}
