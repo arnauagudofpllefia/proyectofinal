@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginRequest } from "@/lib/api";
 
 export default function LoginPage() {
-	const router = useRouter();
 	const [form, setForm] = useState({ email: "", password: "" });
 	const [loading, setLoading] = useState(false);
 	const [message, setMessage] = useState("");
@@ -34,7 +32,7 @@ export default function LoginPage() {
 			document.cookie = `auth_token=${encodeURIComponent(token)}; path=/; max-age=604800; samesite=lax`;
 
 			setMessage("Sesion iniciada correctamente.");
-			window.location.href = "/dashboard";
+			window.location.href = "/";
 		} catch (submitError) {
 			setError(submitError.message || "No se pudo iniciar sesion.");
 		} finally {

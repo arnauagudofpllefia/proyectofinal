@@ -21,8 +21,8 @@ function normalizeMachines(payload) {
 	return data.map((machine, index) => ({
 		id: String(machine?.id ?? machine?.uuid ?? index + 1),
 		name: machine?.name ?? machine?.nombre ?? `Maquina ${index + 1}`,
-		status: machine?.status ?? machine?.estado ?? "Sin estado",
-		zone: machine?.zone ?? machine?.zona ?? "Sin zona",
+		status: machine?.status ?? machine?.estado ?? "",
+		zone: machine?.zone ?? machine?.zona ?? "",
 		gymId: String(machine?.gym_id ?? machine?.gimnasio_id ?? machine?.gym?.id ?? ""),
 		description: machine?.description ?? machine?.descripcion ?? "",
 		imageUrl: resolvePublicImageUrl(
@@ -122,20 +122,22 @@ export default function MachinesPage() {
 								) : (
 									<div className="image-placeholder absolute inset-0">{initials}</div>
 								)}
-								<span
-									className={`badge badge-floating absolute right-3 top-3 z-10 ${isAvailable ? "badge-success" : "badge-muted"
-										}`}
-								>
+								{machine.status ? (
 									<span
-										className={`h-1.5 w-1.5 rounded-full ${isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+										className={`badge badge-floating absolute right-3 top-3 z-10 ${isAvailable ? "badge-success" : "badge-muted"
 											}`}
-									/>
-									{machine.status}
-								</span>
+									>
+										<span
+											className={`h-1.5 w-1.5 rounded-full ${isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+												}`}
+										/>
+										{machine.status}
+									</span>
+								) : null}
 							</div>
 							<div className="flex flex-1 flex-col gap-3 p-5">
 								<div>
-									<p className="eyebrow">{machine.zone || "Sin zona"}</p>
+									{machine.zone ? <p className="eyebrow">{machine.zone}</p> : null}
 									<h2 className="mt-1 truncate text-lg font-semibold tracking-tight text-(--foreground)">
 										{machine.name}
 									</h2>

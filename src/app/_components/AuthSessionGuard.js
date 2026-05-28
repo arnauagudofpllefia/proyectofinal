@@ -37,7 +37,7 @@ export default function AuthSessionGuard() {
         await getCurrentUser(token);
 
         if (isPublicRoute) {
-          router.replace("/dashboard");
+          router.replace("/");
           router.refresh();
         }
       } catch (error) {

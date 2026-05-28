@@ -12,8 +12,8 @@ function normalizeMachine(data, machineId) {
 	return {
 		id: String(data?.id ?? data?.uuid ?? machineId ?? ""),
 		name: data?.name ?? data?.nombre ?? `Maquina #${machineId}`,
-		status: data?.status ?? data?.estado ?? "Sin estado",
-		zone: data?.zone ?? data?.zona ?? "Sin zona",
+		status: data?.status ?? data?.estado ?? "",
+		zone: data?.zone ?? data?.zona ?? "",
 		description: data?.description ?? data?.descripcion ?? "",
 		gymName: data?.gym?.name ?? data?.gym?.nombre ?? data?.gimnasio?.name ?? data?.gimnasio?.nombre ?? "-",
 		gymId: String(data?.gym_id ?? data?.gimnasio_id ?? data?.gym?.id ?? ""),
@@ -156,6 +156,43 @@ function normalizeReservationTimeDisplay(value) {
 	return normalizeReservationHour(value);
 }
 
+function timeStringToMinutes(value) {
+	const match = String(value).match(/^(\d{2}):(\d{2})$/);
+	if (!match) {
+		return Number.NaN;
+	}
+
+	return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function getTodayDateKey() {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, "0");
+	const day = String(now.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+function getStartOfWeek(dateValue) {
+	const date = new Date(dateValue);
+	const day = (date.getDay() + 6) % 7;
+	date.setDate(date.getDate() - day);
+	date.setHours(0, 0, 0, 0);
+	return date;
+}
+
+function getDateKeyFromDate(dateValue) {
+	const year = dateValue.getFullYear();
+	const month = String(dateValue.getMonth() + 1).padStart(2, "0");
+	const day = String(dateValue.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+function isOccupiedReservationStatus(statusValue) {
+	const status = String(statusValue ?? "").toLowerCase();
+	return status.includes("activa") || status.includes("active") || status.includes("ocupada");
+}
+
 function getReservationTimestamp(item) {
 	const rawDateTime = item?.hora_inicio ?? item?.start_time;
 	if (typeof rawDateTime === "string" && rawDateTime) {
@@ -205,36 +242,6 @@ function normalizePublicReservations(payload) {
 		});
 }
 
-function getDayLabel(dateValue) {
-	if (typeof dateValue !== "string" || !dateValue) {
-		return "Sin fecha";
-	}
-
-	const parsedDate = new Date(dateValue);
-	if (Number.isNaN(parsedDate.getTime())) {
-		return dateValue;
-	}
-
-	const today = new Date();
-	const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-	const startOfDate = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
-	const diffDays = Math.round((startOfToday - startOfDate) / 86400000);
-
-	if (diffDays === 0) {
-		return "Hoy";
-	}
-
-	if (diffDays === 1) {
-		return "Ayer";
-	}
-
-	return parsedDate.toLocaleDateString("es-ES", {
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-	});
-}
-
 export default function MachineDetailPage() {
 	const params = useParams();
 	const id = params?.id;
@@ -245,17 +252,8 @@ export default function MachineDetailPage() {
 	const [reservationsError, setReservationsError] = useState("");
 	const [form, setForm] = useState({ date: "", startTime: "", endTime: "" });
 	const [requestState, setRequestState] = useState({ loading: false, error: "", success: "" });
-	const [expandedDays, setExpandedDays] = useState({});
-
-	const availableSlots = useMemo(() => {
-		return slots
-			.map((slot) => ({ ...slot, hour: normalizeHourValue(slot.hour) }))
-			.filter((slot) => slot.hour && isSlotReservable(slot));
-	}, [slots]);
-
-	const availableHourSet = useMemo(() => {
-		return new Set(availableSlots.map((slot) => slot.hour));
-	}, [availableSlots]);
+	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [selectedCalendarDate, setSelectedCalendarDate] = useState(() => getTodayDateKey());
 
 	const loadMachineData = useCallback(async () => {
 		if (!id) {
@@ -381,15 +379,6 @@ export default function MachineDetailPage() {
 			return;
 		}
 
-		if (availableSlots.length && !availableHourSet.has(form.startTime)) {
-			setRequestState({
-				loading: false,
-				error: "Selecciona una franja disponible para evitar solapamientos.",
-				success: "",
-			});
-			return;
-		}
-
 		const token = localStorage.getItem("auth_token") || "";
 		if (!token) {
 			setRequestState({
@@ -504,52 +493,45 @@ export default function MachineDetailPage() {
 		}
 	};
 
-	const statusText = machine?.status ?? "Sin estado";
+	const statusText = machine?.status ?? "";
 	const canReserve = String(statusText).toLowerCase() !== "mantenimiento";
-	const canReserveBySlots = !availableSlots.length || Boolean(form.startTime && availableHourSet.has(form.startTime));
-	const groupedReservations = useMemo(() => {
-		return machineReservations.reduce((groups, reservation) => {
-			const dateFromHora = reservation.hora?.split("T")[0] ?? "Sin fecha";
-			const label = getDayLabel(dateFromHora);
-			if (!groups[label]) {
-				groups[label] = [];
-			}
-			groups[label].push(reservation);
-			return groups;
-		}, {});
+	const weekDays = useMemo(() => {
+		const startOfWeek = getStartOfWeek(new Date());
+
+		return Array.from({ length: 7 }, (_, index) => {
+			const date = new Date(startOfWeek);
+			date.setDate(startOfWeek.getDate() + index);
+			const dateKey = getDateKeyFromDate(date);
+			const occupiedCount = machineReservations.filter((reservation) => {
+				const reservationDate = reservation.hora?.split("T")[0] ?? "";
+				return reservationDate === dateKey && isOccupiedReservationStatus(reservation.estado);
+			}).length;
+
+			return {
+				dateKey,
+				label: date.toLocaleDateString("es-ES", { weekday: "short", day: "2-digit", month: "2-digit" }),
+				occupiedCount,
+			};
+		});
 	}, [machineReservations]);
-	const groupedReservationEntries = useMemo(() => Object.entries(groupedReservations), [groupedReservations]);
+	const selectedDayOccupiedReservations = useMemo(() => {
+		return machineReservations
+			.filter((reservation) => {
+				const reservationDate = reservation.hora?.split("T")[0] ?? "";
+				return reservationDate === selectedCalendarDate && isOccupiedReservationStatus(reservation.estado);
+			})
+			.sort((a, b) => timeStringToMinutes(a.horaDisplay) - timeStringToMinutes(b.horaDisplay));
+	}, [machineReservations, selectedCalendarDate]);
 
 	useEffect(() => {
-		const timer = setTimeout(() => {
-			setExpandedDays((prev) => {
-				const next = {};
-				for (const [dayLabel] of groupedReservationEntries) {
-					if (Object.prototype.hasOwnProperty.call(prev, dayLabel)) {
-						next[dayLabel] = prev[dayLabel];
-						continue;
-					}
-
-					next[dayLabel] = dayLabel === "Hoy" || dayLabel === "Ayer";
-				}
-				return next;
-			});
-		}, 0);
-
-		return () => clearTimeout(timer);
-	}, [groupedReservationEntries]);
-
-	const toggleDayGroup = (dayLabel) => {
-		setExpandedDays((prev) => ({
-			...prev,
-			[dayLabel]: !prev[dayLabel],
-		}));
-	};
+		if (!weekDays.some((day) => day.dateKey === selectedCalendarDate) && weekDays.length) {
+			setSelectedCalendarDate(weekDays[0].dateKey);
+		}
+	}, [selectedCalendarDate, weekDays]);
 
 	return (
 		<section className="rise-in space-y-6">
 			<header className="surface-card p-6">
-				<p className="badge badge-primary mb-2">Detalle de maquina</p>
 				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">{machine?.name ?? `Maquina #${id}`}</h1>
 				<p className="mt-2 text-sm text-[var(--muted)]">Consulta disponibilidad y reserva sin salir de esta pantalla.</p>
 			</header>
@@ -563,67 +545,89 @@ export default function MachineDetailPage() {
 						) : null}
 						<div className="p-6">
 							<div className="flex flex-wrap items-center justify-between gap-3">
-								<p className="text-sm text-[var(--muted)]">Zona: {machine.zone}</p>
-								<span className={`badge ${/disponible|available/i.test(statusText) ? "badge-success" : "badge-muted"}`}>
-									{statusText}
-								</span>
+								{machine.zone ? <p className="text-sm text-[var(--muted)]">Zona: {machine.zone}</p> : null}
+								{statusText ? (
+									<span className={`badge ${/disponible|available/i.test(statusText) ? "badge-success" : "badge-muted"}`}>
+										{statusText}
+									</span>
+								) : null}
 							</div>
 							<p className="mt-3 text-sm text-[var(--muted)]">Gimnasio: {machine.gymName}</p>
 							<p className="mt-3 text-sm text-[var(--foreground)]">
 								{machine.description || "Sin descripcion disponible para esta maquina."}
 							</p>
 
-							<h2 className="mt-6 text-lg font-semibold text-[var(--foreground)]">Ocupacion actual</h2>
-							{machineReservations.length ? (
-								<div className="mt-3 space-y-3">
-									{groupedReservationEntries.map(([dayLabel, occupancy]) => (
-										<div key={dayLabel} className="space-y-2">
-											<button
-												type="button"
-												onClick={() => toggleDayGroup(dayLabel)}
-												className="flex w-full items-center justify-between rounded-lg border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-[var(--primary-strong)] transition hover:bg-[#eef2ff]"
-											>
-												<span>{dayLabel}</span>
-												<span>
-													{occupancy.length} franja{occupancy.length === 1 ? "" : "s"}
-													{expandedDays[dayLabel] ? " - Ocultar" : " - Ver"}
-												</span>
-											</button>
-											{expandedDays[dayLabel]
-												? occupancy.map((slot) => (
-													<div
-														key={slot.id}
-														className={`rounded-lg border p-3 text-sm ${slot.estado === "activa"
-																? "border-rose-200 bg-rose-50 text-rose-700"
-																: "border-[var(--line)] bg-white text-[var(--foreground)]"
-															}`}
+							<div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+								<h2 className="text-lg font-semibold text-[var(--foreground)]">Ocupacion actual</h2>
+								<button
+									type="button"
+									onClick={() => setIsCalendarOpen((prev) => !prev)}
+									className="btn-secondary"
+								>
+									{isCalendarOpen ? "Ocultar calendario" : "Ver calendario de hoy"}
+								</button>
+							</div>
+
+							{isCalendarOpen ? (
+								<>
+									<div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--background-subtle)] p-3">
+										<p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-strong)]">Calendario semanal</p>
+										<div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+											{weekDays.map((day) => {
+												const isSelected = day.dateKey === selectedCalendarDate;
+												return (
+													<button
+														key={day.dateKey}
+														type="button"
+														onClick={() => setSelectedCalendarDate(day.dateKey)}
+														className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
+															isSelected
+																? "border-[var(--line-strong)] bg-white text-[var(--foreground)]"
+																: "border-[var(--line)] bg-white/70 text-[var(--muted-strong)] hover:bg-white"
+														}`}
 													>
-														<p className="font-semibold">
-															{slot.horaDisplay}
-															{slot.horaFinDisplay && slot.horaFinDisplay !== "--:--" ? ` - ${slot.horaFinDisplay}` : ""}
-														</p>
-														<p>{slot.estado === "activa" ? "Ocupada" : "Disponible"}</p>
-													</div>
-												))
-												: null}
+														<p className="font-semibold">{day.label}</p>
+														<p className="mt-0.5 text-xs text-[var(--muted)]">{day.occupiedCount} ocupada{day.occupiedCount === 1 ? "" : "s"}</p>
+													</button>
+												);
+											})}
 										</div>
-									))}
-								</div>
-							) : (
-								<p className="mt-3 text-sm text-[var(--muted)]">
-									{reservationsError || "Todavia no hay reservas registradas para esta maquina."}
-								</p>
-							)}
+									</div>
+
+									{selectedDayOccupiedReservations.length === 0 ? (
+										<p className="mt-3 rounded-lg border border-[var(--line)] bg-[var(--background-subtle)] px-3 py-2 text-sm text-[var(--muted)]">
+											{reservationsError || "No hay horas ocupadas para el dia seleccionado."}
+										</p>
+									) : null}
+									<div className="mt-3 overflow-x-auto rounded-xl border border-[var(--line)] bg-white">
+										<table className="min-w-full border-collapse text-sm">
+											<thead className="bg-[var(--background-subtle)]">
+												<tr className="text-left text-[var(--muted-strong)]">
+													<th className="px-3 py-2 font-semibold">Inicio</th>
+													<th className="px-3 py-2 font-semibold">Fin</th>
+													<th className="px-3 py-2 font-semibold">Estado</th>
+												</tr>
+											</thead>
+											<tbody>
+												{selectedDayOccupiedReservations.map((reservation) => (
+													<tr key={reservation.id} className="border-t border-[var(--line)] even:bg-[var(--background-subtle)]/40">
+														<td className="px-3 py-2 font-medium text-[var(--foreground)]">{reservation.horaDisplay}</td>
+														<td className="px-3 py-2 text-[var(--foreground)]">{reservation.horaFinDisplay && reservation.horaFinDisplay !== "--:--" ? reservation.horaFinDisplay : "--:--"}</td>
+														<td className="px-3 py-2">
+															<span className="badge badge-danger">Ocupada</span>
+														</td>
+													</tr>
+												))}
+											</tbody>
+										</table>
+									</div>
+								</>
+							) : null}
 						</div>
 					</article>
 
 					<aside className="surface-card p-6">
 						<h2 className="text-lg font-semibold text-[var(--foreground)]">Reservar ahora</h2>
-						<p className="mt-1 text-xs text-[var(--muted)]">
-							{availableSlots.length
-								? "El inicio se selecciona solo entre franjas disponibles."
-								: "No hay franjas detectadas; puedes introducir hora manualmente."}
-						</p>
 						<p className="mt-1 text-xs text-[var(--muted)]">
 							Maximo 3 reservas por dia y solo una vez por maquina al dia.
 						</p>
@@ -641,29 +645,13 @@ export default function MachineDetailPage() {
 							</label>
 							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Hora inicio
-								{availableSlots.length ? (
-									<select
-										value={form.startTime}
-										onChange={(event) => handleChange("startTime", event.target.value)}
-										className="field-input mt-1"
-										required
-									>
-										<option value="">Selecciona una franja</option>
-										{availableSlots.map((slot) => (
-											<option key={slot.id} value={slot.hour}>
-												{slot.hour} ({slot.spots} plazas)
-											</option>
-										))}
-									</select>
-								) : (
-									<input
-										type="time"
-										value={form.startTime}
-										onChange={(event) => handleChange("startTime", event.target.value)}
-										className="field-input mt-1"
-										required
-									/>
-								)}
+								<input
+									type="time"
+									value={form.startTime}
+									onChange={(event) => handleChange("startTime", event.target.value)}
+									className="field-input mt-1"
+									required
+								/>
 							</label>
 							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Hora fin
@@ -681,7 +669,7 @@ export default function MachineDetailPage() {
 
 							<button
 								type="submit"
-								disabled={requestState.loading || !canReserve || !canReserveBySlots}
+								disabled={requestState.loading || !canReserve}
 								className="btn-primary w-full"
 							>
 								{requestState.loading ? "Reservando..." : canReserve ? "Confirmar reserva" : "No disponible"}
