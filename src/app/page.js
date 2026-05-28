@@ -35,13 +35,13 @@ export default async function Home() {
 
   if (!isAuthenticated) {
     return (
-      <section className="rise-in surface-card mx-auto max-w-3xl p-10 text-center">
-        <p className="badge badge-primary mb-4">GymNau</p>
-        <h1 className="text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
-          Gestion minimalista de tu gimnasio
+      <section className="rise-in hero-gradient mx-auto max-w-3xl p-10 text-center sm:p-14">
+        <p className="eyebrow">GymNau</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-(--foreground) sm:text-5xl">
+          Gestiona tu gimnasio con estilo
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-[var(--muted)] sm:text-base">
-          Reserva maquinas, controla disponibilidad y administra tu gym con una interfaz limpia y rapida.
+        <p className="mx-auto mt-4 max-w-xl text-sm text-(--muted) sm:text-base">
+          Reserva maquinas, controla la disponibilidad y administra todo desde una interfaz limpia, rapida y elegante.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/login" className="btn-primary">Iniciar sesion</Link>
@@ -75,29 +75,29 @@ export default async function Home() {
   const myReservationsCount = filterItemsByGym(myReservations, isAdmin ? "" : userGymId).length;
 
   return (
-    <section className="rise-in space-y-8">
-      <div className="surface-card p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
+    <section className="rise-in space-y-10">
+      <div className="hero-gradient p-6 sm:p-10">
+        <p className="eyebrow">
           {isAdmin ? "Panel global" : "Tu gimnasio"}
         </p>
-        <h1 className="mt-2 text-3xl font-semibold text-[var(--foreground)] sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-(--foreground) sm:text-4xl">
           {isAdmin
             ? "Vista general de GymNau"
             : resolvedGymName || "Aun no tienes gimnasio asignado"}
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-[var(--muted)] sm:text-base">
+        <p className="mt-3 max-w-2xl text-sm text-(--muted) sm:text-base">
           {isAdmin
-            ? "Consulta el estado del catalogo de maquinas y gestiona todo desde el panel admin."
+            ? "Consulta el estado del catalogo y gestiona todo desde el panel admin."
             : resolvedGymName
               ? "Estas son las maquinas disponibles en tu gimnasio actualmente."
               : "Selecciona tu gimnasio desde tu perfil para ver el listado de maquinas."}
         </p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="mt-7 grid gap-3 sm:grid-cols-3">
           <Stat label="Maquinas" value={gymMachines.length} />
           <Stat label="Disponibles" value={availableCount} accent="success" />
           <Stat label="Mis reservas" value={myReservationsCount} />
         </div>
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-7 flex flex-wrap gap-2">
           {isAdmin ? (
             <Link href="/admin" className="btn-primary">Panel admin</Link>
           ) : (
@@ -109,26 +109,24 @@ export default async function Home() {
       </div>
 
       <section>
-        <div className="mb-4 flex items-end justify-between gap-3">
+        <div className="mb-5 flex items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-              Maquinas
-            </p>
-            <h2 className="text-xl font-semibold text-[var(--foreground)]">
+            <p className="eyebrow">Maquinas</p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-(--foreground) sm:text-2xl">
               {isAdmin ? "Catalogo completo" : "En tu gimnasio"}
             </h2>
           </div>
-          <Link href="/machines" className="text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-strong)]">
-            Ver todas
+          <Link href="/machines" className="text-sm font-medium text-(--foreground) underline-offset-4 hover:underline">
+            Ver todas →
           </Link>
         </div>
 
         {gymMachines.length === 0 ? (
-          <div className="surface-card p-6 text-sm text-[var(--muted)]">
+          <div className="surface-card p-6 text-sm text-(--muted)">
             No hay maquinas disponibles{!isAdmin && resolvedGymName ? ` en ${resolvedGymName}` : ""}.
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {gymMachines.slice(0, 9).map((machine, index) => {
               const status = getMachineStatus(machine);
               const isAvailable = /disponible|available/i.test(status);
@@ -136,32 +134,36 @@ export default async function Home() {
               const zone = machine?.zone ?? machine?.zona ?? "";
               const image = getMachineImage(machine);
               const id = machine?.id ?? machine?.uuid ?? index;
+              const initials = String(name || "?").trim().charAt(0).toUpperCase();
               return (
                 <Link
                   key={id}
                   href={`/machines/${id}`}
-                  className="surface-card surface-card-hover overflow-hidden"
+                  className="surface-card surface-card-hover flex h-full flex-col overflow-hidden"
                 >
-                  {image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={image}
-                      alt={name}
-                      className="h-36 w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-36 w-full items-center justify-center bg-[#eef2ff] text-[var(--primary)]">
-                      <span className="text-2xl font-semibold">{String(name).charAt(0).toUpperCase()}</span>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-base font-semibold text-[var(--foreground)]">{name}</h3>
-                      <span className={`badge ${isAvailable ? "badge-success" : "badge-muted"}`}>
-                        {status}
-                      </span>
-                    </div>
-                    {zone ? <p className="mt-1 text-xs text-[var(--muted)]">{zone}</p> : null}
+                  <div className="card-image relative aspect-[4/3] w-full">
+                    {image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={image} alt={name} />
+                    ) : (
+                      <div className="image-placeholder absolute inset-0">{initials}</div>
+                    )}
+                    <span
+                      className={`badge badge-floating absolute right-3 top-3 z-10 ${
+                        isAvailable ? "badge-success" : "badge-muted"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+                        }`}
+                      />
+                      {status}
+                    </span>
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    {zone ? <p className="eyebrow">{zone}</p> : null}
+                    <h3 className="mt-1 truncate text-base font-semibold tracking-tight text-(--foreground)">{name}</h3>
                   </div>
                 </Link>
               );
@@ -175,11 +177,12 @@ export default async function Home() {
 
 function Stat({ label, value, accent }) {
   return (
-    <div className="rounded-xl border border-[var(--line)] bg-[var(--background)] p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">{label}</p>
+    <div className="stat-tile">
+      <p className="eyebrow">{label}</p>
       <p
-        className={`mt-1 text-2xl font-semibold ${accent === "success" ? "text-[var(--success)]" : "text-[var(--primary-strong)]"
-          }`}
+        className={`mt-2 text-2xl font-semibold tracking-tight ${
+          accent === "success" ? "text-(--accent-strong)" : "text-(--foreground)"
+        }`}
       >
         {value ?? "--"}
       </p>

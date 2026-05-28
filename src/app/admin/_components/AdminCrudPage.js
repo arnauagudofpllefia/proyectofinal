@@ -472,44 +472,59 @@ export default function AdminCrudPage({ resourceKey }) {
                 ) : null}
 
                 {items.map((item) => {
-                    const isAvailable = resourceKey === "machines"
-                        && /disponible|available/i.test(String(item.status || ""));
+                    const isMachine = resourceKey === "machines";
+                    const isAvailable = isMachine && /disponible|available/i.test(String(item.status || ""));
+                    const title = resource.getItemTitle(item);
+                    const meta = resource.getItemMeta(item);
+                    const initials = String(title || "?").trim().charAt(0).toUpperCase();
                     return (
-                        <article key={item.id} className="surface-card overflow-hidden">
-                            {resourceKey === "machines" && item.imageUrl ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={resolvePublicImageUrl(item.imageUrl)}
-                                    alt={resource.getItemTitle(item)}
-                                    className="h-36 w-full object-cover"
-                                />
+                        <article key={item.id} className="surface-card surface-card-hover flex h-full flex-col overflow-hidden">
+                            {isMachine ? (
+                                <div className="card-image relative aspect-[4/3] w-full">
+                                    {item.imageUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={resolvePublicImageUrl(item.imageUrl)}
+                                            alt={title}
+                                        />
+                                    ) : (
+                                        <div className="image-placeholder absolute inset-0">{initials}</div>
+                                    )}
+                                    <span
+                                        className={`badge badge-floating absolute right-3 top-3 z-10 ${
+                                            isAvailable ? "badge-success" : "badge-muted"
+                                        }`}
+                                    >
+                                        <span
+                                            className={`h-1.5 w-1.5 rounded-full ${
+                                                isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+                                            }`}
+                                        />
+                                        {item.status || "Sin estado"}
+                                    </span>
+                                </div>
                             ) : null}
-                            <div className="p-5">
+                            <div className="flex flex-1 flex-col gap-3 p-5">
                                 <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p className="text-xs uppercase tracking-wide text-[var(--muted)]">ID {item.id}</p>
-                                        <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">
-                                            {resource.getItemTitle(item)}
+                                    <div className="min-w-0">
+                                        <h3 className="truncate text-base font-semibold tracking-tight text-(--foreground)">
+                                            {title}
                                         </h3>
-                                        <p className="mt-1 text-sm text-[var(--muted)]">
-                                            {resource.getItemMeta(item) || "Sin detalle adicional"}
+                                        <p className="mt-1 text-sm text-(--muted)">
+                                            {meta || "Sin detalle adicional"}
                                         </p>
                                     </div>
-                                    {resourceKey === "machines" ? (
-                                        <span className={`badge ${isAvailable ? "badge-success" : "badge-muted"}`}>
-                                            {item.status || "—"}
-                                        </span>
-                                    ) : (
-                                        <span className="badge badge-primary">{resource.singularTitle}</span>
-                                    )}
+                                    {!isMachine ? (
+                                        <span className="badge badge-primary shrink-0">{resource.singularTitle}</span>
+                                    ) : null}
                                 </div>
-                                <div className="mt-4 flex flex-wrap gap-2">
+                                <div className="mt-auto flex flex-wrap gap-2 pt-2">
                                     {canEdit ? (
                                         <button
                                             type="button"
                                             onClick={() => handleEdit(item)}
                                             disabled={saving || forbidden}
-                                            className="btn-secondary"
+                                            className="btn-primary flex-1"
                                         >
                                             Editar
                                         </button>
