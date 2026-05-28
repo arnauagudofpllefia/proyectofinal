@@ -491,14 +491,12 @@ export default function AdminCrudPage({ resourceKey }) {
                                         <div className="image-placeholder absolute inset-0">{initials}</div>
                                     )}
                                     <span
-                                        className={`badge badge-floating absolute right-3 top-3 z-10 ${
-                                            isAvailable ? "badge-success" : "badge-muted"
-                                        }`}
+                                        className={`badge badge-floating absolute right-3 top-3 z-10 ${isAvailable ? "badge-success" : "badge-muted"
+                                            }`}
                                     >
                                         <span
-                                            className={`h-1.5 w-1.5 rounded-full ${
-                                                isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
-                                            }`}
+                                            className={`h-1.5 w-1.5 rounded-full ${isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+                                                }`}
                                         />
                                         {item.status || "Sin estado"}
                                     </span>

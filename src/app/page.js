@@ -149,14 +149,12 @@ export default async function Home() {
                       <div className="image-placeholder absolute inset-0">{initials}</div>
                     )}
                     <span
-                      className={`badge badge-floating absolute right-3 top-3 z-10 ${
-                        isAvailable ? "badge-success" : "badge-muted"
-                      }`}
+                      className={`badge badge-floating absolute right-3 top-3 z-10 ${isAvailable ? "badge-success" : "badge-muted"
+                        }`}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
-                        }`}
+                        className={`h-1.5 w-1.5 rounded-full ${isAvailable ? "bg-(--accent-strong)" : "bg-(--muted)"
+                          }`}
                       />
                       {status}
                     </span>
@@ -180,9 +178,8 @@ function Stat({ label, value, accent }) {
     <div className="stat-tile">
       <p className="eyebrow">{label}</p>
       <p
-        className={`mt-2 text-2xl font-semibold tracking-tight ${
-          accent === "success" ? "text-(--accent-strong)" : "text-(--foreground)"
-        }`}
+        className={`mt-2 text-2xl font-semibold tracking-tight ${accent === "success" ? "text-(--accent-strong)" : "text-(--foreground)"
+          }`}
       >
         {value ?? "--"}
       </p>
