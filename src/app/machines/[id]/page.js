@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { createReservation, getCurrentUser, getMachineById, getMachineReservations, getMachineSlots, getMyReservations } from "@/lib/api";
 import { getGymIdFromUser, getUserRole, isAdminRole, normalizeGymId } from "@/lib/gym";
 import { addAppNotification } from "@/lib/notifications";
+import { resolvePublicImageUrl } from "@/lib/image";
 
 function normalizeMachine(data, machineId) {
 	return {
@@ -16,7 +17,9 @@ function normalizeMachine(data, machineId) {
 		description: data?.description ?? data?.descripcion ?? "",
 		gymName: data?.gym?.name ?? data?.gym?.nombre ?? data?.gimnasio?.name ?? data?.gimnasio?.nombre ?? "-",
 		gymId: String(data?.gym_id ?? data?.gimnasio_id ?? data?.gym?.id ?? ""),
-		imageUrl: data?.image_url ?? data?.imagen_url ?? data?.imagen ?? data?.image ?? data?.foto ?? "",
+		imageUrl: resolvePublicImageUrl(
+			data?.image_url ?? data?.imagen_url ?? data?.imagen ?? data?.image ?? data?.foto ?? ""
+		),
 	};
 }
 
@@ -588,21 +591,20 @@ export default function MachineDetailPage() {
 											</button>
 											{expandedDays[dayLabel]
 												? occupancy.map((slot) => (
-														<div
-															key={slot.id}
-															className={`rounded-lg border p-3 text-sm ${
-																slot.estado === "activa"
-																	? "border-rose-200 bg-rose-50 text-rose-700"
-																	: "border-[var(--line)] bg-white text-[var(--foreground)]"
+													<div
+														key={slot.id}
+														className={`rounded-lg border p-3 text-sm ${slot.estado === "activa"
+																? "border-rose-200 bg-rose-50 text-rose-700"
+																: "border-[var(--line)] bg-white text-[var(--foreground)]"
 															}`}
-														>
-															<p className="font-semibold">
-																{slot.horaDisplay}
-																{slot.horaFinDisplay && slot.horaFinDisplay !== "--:--" ? ` - ${slot.horaFinDisplay}` : ""}
-															</p>
-															<p>{slot.estado === "activa" ? "Ocupada" : "Disponible"}</p>
-														</div>
-													))
+													>
+														<p className="font-semibold">
+															{slot.horaDisplay}
+															{slot.horaFinDisplay && slot.horaFinDisplay !== "--:--" ? ` - ${slot.horaFinDisplay}` : ""}
+														</p>
+														<p>{slot.estado === "activa" ? "Ocupada" : "Disponible"}</p>
+													</div>
+												))
 												: null}
 										</div>
 									))}
@@ -625,7 +627,7 @@ export default function MachineDetailPage() {
 						<p className="mt-1 text-xs text-[var(--muted)]">
 							Maximo 3 reservas por dia y solo una vez por maquina al dia.
 						</p>
-							<p className="mt-1 text-xs text-[var(--muted)]">Duracion maxima permitida: 1 hora.</p>
+						<p className="mt-1 text-xs text-[var(--muted)]">Duracion maxima permitida: 1 hora.</p>
 						<form className="mt-4 space-y-3" onSubmit={handleReserve}>
 							<label className="block text-sm font-medium text-[var(--foreground)]">
 								Fecha

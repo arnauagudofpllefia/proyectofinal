@@ -1,4 +1,5 @@
 import { apiRequest, apiRequestWithFallback } from "@/lib/api";
+import { resolvePublicImageUrl } from "@/lib/image";
 
 function normalizeCollection(payload) {
     const data = payload?.data ?? payload;
@@ -242,15 +243,8 @@ const adminResources = {
                 placeholder: "Descripcion de la maquina",
             },
             {
-                name: "imageFile",
-                label: "Subir imagen",
-                type: "file",
-                required: false,
-                accept: "image/*",
-            },
-            {
                 name: "imageUrl",
-                label: "URL imagen (opcional)",
+                label: "URL publica imagen (opcional)",
                 type: "url",
                 required: false,
                 placeholder: "https://...",
@@ -264,8 +258,9 @@ const adminResources = {
                 zone: item?.zone ?? item?.zona ?? "",
                 status: item?.status ?? item?.estado ?? "Disponible",
                 description: item?.description ?? item?.descripcion ?? "",
-                imageUrl: item?.image_url ?? item?.imagen_url ?? item?.imagen ?? item?.image ?? item?.foto ?? "",
-                imageFile: null,
+                imageUrl: resolvePublicImageUrl(
+                    item?.image_url ?? item?.imagen_url ?? item?.imagen ?? item?.image ?? item?.foto ?? ""
+                ),
             };
         },
         buildPayload(values) {
@@ -276,9 +271,8 @@ const adminResources = {
             const status = values.status.trim();
             const description = (values.description ?? "").trim();
             const imageUrl = (values.imageUrl ?? "").trim();
-            const imageFile = values.imageFile instanceof File ? values.imageFile : null;
 
-            const basePayload = {
+            return {
                 gimnasio_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 gym_id: Number.isInteger(gymId) ? gymId : gymIdRaw,
                 nombre: name,
@@ -286,24 +280,9 @@ const adminResources = {
                 estado: status,
                 description,
                 descripcion: description,
+                image_url: imageUrl,
+                imagen_url: imageUrl,
             };
-
-            if (!imageFile) {
-                return {
-                    ...basePayload,
-                    image_url: imageUrl,
-                    imagen_url: imageUrl,
-                    imagen: imageUrl,
-                };
-            }
-
-            const formData = new FormData();
-            for (const [key, value] of Object.entries(basePayload)) {
-                if (value === undefined || value === null) continue;
-                formData.append(key, String(value));
-            }
-            formData.append("imagen", imageFile);
-            return formData;
         },
         validate(values) {
             const errors = [];
@@ -311,6 +290,11 @@ const adminResources = {
 
             if (gymId && !/^\d+$/.test(gymId)) {
                 errors.push("gymId: debe ser un entero");
+            }
+
+            const imageUrl = String(values.imageUrl ?? "").trim();
+            if (imageUrl && !/^https?:\/\//i.test(imageUrl)) {
+                errors.push("imageUrl: usa una URL publica que empiece por http:// o https://");
             }
 
             return errors;

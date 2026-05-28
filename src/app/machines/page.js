@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCurrentUser, getMachines } from "@/lib/api";
 import { getGymIdFromUser, getGymNameFromUser, getUserRole, isAdminRole, normalizeGymId } from "@/lib/gym";
+import { resolvePublicImageUrl } from "@/lib/image";
 
 const machinesFallback = [
 	{ id: "1", name: "Cinta X9", status: "Disponible", zone: "Cardio", gymId: "1", description: "" },
@@ -24,7 +25,9 @@ function normalizeMachines(payload) {
 		zone: machine?.zone ?? machine?.zona ?? "Sin zona",
 		gymId: String(machine?.gym_id ?? machine?.gimnasio_id ?? machine?.gym?.id ?? ""),
 		description: machine?.description ?? machine?.descripcion ?? "",
-		imageUrl: machine?.image_url ?? machine?.imagen_url ?? machine?.imagen ?? machine?.image ?? machine?.foto ?? "",
+		imageUrl: resolvePublicImageUrl(
+			machine?.image_url ?? machine?.imagen_url ?? machine?.imagen ?? machine?.image ?? machine?.foto ?? ""
+		),
 	}));
 }
 

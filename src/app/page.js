@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getGyms, getMachines, getMyReservations } from "@/lib/api";
 import { getServerSessionInfo } from "@/lib/session";
 import { filterItemsByGym, getGymIdFromUser, getGymNameFromUser, normalizeGymId } from "@/lib/gym";
+import { resolvePublicImageUrl } from "@/lib/image";
 
 function extractList(result) {
   if (!result || result.status !== "fulfilled") return [];
@@ -15,7 +16,7 @@ function extractList(result) {
 }
 
 function getMachineImage(machine) {
-  return (
+  return resolvePublicImageUrl(
     machine?.image_url ||
     machine?.imagen_url ||
     machine?.imagen ||

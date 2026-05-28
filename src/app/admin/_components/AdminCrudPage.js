@@ -20,6 +20,7 @@ import {
     normalizeGymId,
     readStoredAdminGymId,
 } from "@/lib/gym";
+import { resolvePublicImageUrl } from "@/lib/image";
 
 function flattenValidationErrors(details) {
     if (!details || typeof details !== "object") {
@@ -478,7 +479,7 @@ export default function AdminCrudPage({ resourceKey }) {
                             {resourceKey === "machines" && item.imageUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
-                                    src={item.imageUrl}
+                                    src={resolvePublicImageUrl(item.imageUrl)}
                                     alt={resource.getItemTitle(item)}
                                     className="h-36 w-full object-cover"
                                 />
