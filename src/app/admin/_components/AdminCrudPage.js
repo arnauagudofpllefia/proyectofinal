@@ -24,6 +24,8 @@ import {
 import { resolvePublicImageUrl } from "@/lib/image";
 import { extractProfileIdentity, readStoredProfileIcon } from "@/lib/profileIcon";
 
+const ITEMS_PER_PAGE = 10;
+
 function flattenValidationErrors(details) {
     if (!details || typeof details !== "object") {
         return [];
@@ -128,6 +130,7 @@ export default function AdminCrudPage({ resourceKey }) {
     const [machineOptions, setMachineOptions] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
 
     const needsGymSelection = isGymScopedResource(resourceKey) && !selectedGymScopeId;
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
@@ -179,6 +182,22 @@ export default function AdminCrudPage({ resourceKey }) {
                 return haystack.includes(normalizedSearchTerm);
             })
             : items;
+    const totalItems = visibleItems.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+    const paginatedItems = visibleItems.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [resourceKey, selectedGymScopeId, normalizedSearchTerm]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const loadItems = async () => {
         if (needsGymSelection) {
@@ -584,7 +603,7 @@ export default function AdminCrudPage({ resourceKey }) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {visibleItems.map((item) => {
+                                    {paginatedItems.map((item) => {
                                         const userIconId =
                                             resourceKey === "users"
                                                 ? readStoredProfileIcon(extractProfileIdentity(item))
@@ -669,7 +688,7 @@ export default function AdminCrudPage({ resourceKey }) {
                         <article className="surface-card p-5 text-sm text-[var(--muted)]">{resource.emptyState}</article>
                     ) : null}
 
-                    {visibleItems.map((item) => {
+                    {paginatedItems.map((item) => {
                         const isMachine = resourceKey === "machines";
                         const isUser = resourceKey === "users";
                         const isGym = resourceKey === "gyms";
@@ -762,6 +781,44 @@ export default function AdminCrudPage({ resourceKey }) {
                     })}
                 </div>
             )}
+
+            {!loading && visibleItems.length > ITEMS_PER_PAGE ? (
+                <nav className="surface-card flex flex-wrap items-center justify-between gap-3 p-4" aria-label="Paginacion">
+                    <p className="text-sm text-[var(--muted)]">
+                        Mostrando {Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, totalItems)}-
+                        {Math.min(currentPage * ITEMS_PER_PAGE, totalItems)} de {totalItems}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Anterior
+                        </button>
+                        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                            <button
+                                key={page}
+                                type="button"
+                                className={page === currentPage ? "btn-primary" : "btn-secondary"}
+                                onClick={() => setCurrentPage(page)}
+                                aria-current={page === currentPage ? "page" : undefined}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                            disabled={currentPage === totalPages}
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </nav>
+            ) : null}
 
             {isModalOpen ? (
                 <div className="modal-backdrop" role="dialog" aria-modal="true" onClick={closeModal}>

@@ -7,8 +7,8 @@ import {
     CartesianGrid,
     Cell,
     Legend,
-    Pie,
-    PieChart,
+    Line,
+    LineChart,
     ResponsiveContainer,
     Tooltip,
     XAxis,
@@ -48,6 +48,41 @@ function getReservationHour(reservation) {
     }
 
     return "";
+}
+
+function getReservationDateValue(reservation) {
+    const candidates = [
+        reservation?.date,
+        reservation?.fecha,
+        reservation?.hora_inicio,
+        reservation?.start_time,
+    ];
+
+    for (const candidate of candidates) {
+        if (!candidate) {
+            continue;
+        }
+
+        const match = String(candidate).match(/^(\d{4}-\d{2}-\d{2})/);
+        if (match) {
+            return match[1];
+        }
+    }
+
+    return "";
+}
+
+function getWeekdayKey(dateValue) {
+    if (!dateValue) {
+        return "";
+    }
+
+    const parsedDate = new Date(`${dateValue}T12:00:00`);
+    if (Number.isNaN(parsedDate.getTime())) {
+        return "";
+    }
+
+    return String(parsedDate.getDay());
 }
 
 function getMachineIdentifier(reservation) {
@@ -226,20 +261,30 @@ export default function AdminStatisticsPage() {
         return machineLookup.get(key) || fallbackName;
     };
 
-    const topMachines = useMemo(() => {
-        return aggregateCounts(
-            reservations,
-            (reservation) => getMachineIdentifier(reservation) || String(reservation?.machineName ?? reservation?.maquina_nombre ?? "").trim(),
-            getResolvedMachineLabel
-        ).slice(0, 8);
-    }, [machineLookup, reservations]);
-
     const hourCounts = useMemo(() => {
-        return aggregateCounts(
-            reservations,
-            (reservation) => getReservationHour(reservation),
-            (_, key) => formatHourLabel(key)
-        ).slice(0, 8);
+        const startHour = 6;
+        const endHour = 22;
+        const hourRange = Array.from({ length: endHour - startHour + 1 }, (_, index) => {
+            const hour = startHour + index;
+            const key = String(hour).padStart(2, "0");
+            return { key, label: formatHourLabel(key), count: 0 };
+        });
+
+        const countsByHour = new Map(hourRange.map((item) => [item.key, 0]));
+
+        for (const reservation of reservations) {
+            const hourKey = getReservationHour(reservation);
+            if (!hourKey || !countsByHour.has(hourKey)) {
+                continue;
+            }
+
+            countsByHour.set(hourKey, (countsByHour.get(hourKey) || 0) + 1);
+        }
+
+        return hourRange.map((item) => ({
+            ...item,
+            count: countsByHour.get(item.key) || 0,
+        }));
     }, [reservations]);
 
     const machineRanking = useMemo(() => {
@@ -250,20 +295,43 @@ export default function AdminStatisticsPage() {
         ).slice(0, 10);
     }, [machineLookup, reservations]);
 
-    const topMachinesChartData = useMemo(
-        () => topMachines.map((item) => ({ ...item, value: item.count })),
-        [topMachines]
-    );
-
     const hourChartData = useMemo(
         () => hourCounts.map((item) => ({ ...item, value: item.count })),
         [hourCounts]
     );
 
     const rankingChartData = useMemo(
-        () => machineRanking.slice().reverse().map((item) => ({ ...item, value: item.count })),
+        () => machineRanking.map((item) => ({ ...item, value: item.count })),
         [machineRanking]
     );
+
+    const weekdayChartData = useMemo(() => {
+        const weekDays = [
+            { key: "1", label: "Lunes", count: 0 },
+            { key: "2", label: "Martes", count: 0 },
+            { key: "3", label: "Miercoles", count: 0 },
+            { key: "4", label: "Jueves", count: 0 },
+            { key: "5", label: "Viernes", count: 0 },
+            { key: "6", label: "Sabado", count: 0 },
+            { key: "0", label: "Domingo", count: 0 },
+        ];
+
+        const counts = new Map(weekDays.map((day) => [day.key, 0]));
+
+        for (const reservation of reservations) {
+            const weekdayKey = getWeekdayKey(getReservationDateValue(reservation));
+            if (!weekdayKey) {
+                continue;
+            }
+            counts.set(weekdayKey, (counts.get(weekdayKey) || 0) + 1);
+        }
+
+        return weekDays.map((day) => ({
+            ...day,
+            count: counts.get(day.key) || 0,
+            value: counts.get(day.key) || 0,
+        }));
+    }, [reservations]);
 
     const busiestHour = hourCounts[0];
     const mostUsedMachine = machineRanking[0];
@@ -311,34 +379,7 @@ export default function AdminStatisticsPage() {
                         />
                     </div>
 
-                    <div className="grid gap-6 xl:grid-cols-2">
-                        <ChartShell
-                            title="Top maquinas"
-                            subtitle="Maquinas mas reservadas"
-                            loading={loading}
-                            emptyLabel={!loading && !topMachinesChartData.length ? "Todavia no hay reservas para mostrar." : ""}
-                        >
-                            <div className="h-80 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <RechartsBarChart data={topMachinesChartData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 24, 39, 0.08)" />
-                                        <XAxis
-                                            dataKey="label"
-                                            interval={0}
-                                            angle={-18}
-                                            textAnchor="end"
-                                            height={60}
-                                            tick={{ fill: "#4b5563", fontSize: 12 }}
-                                        />
-                                        <YAxis allowDecimals={false} tick={{ fill: "#4b5563", fontSize: 12 }} />
-                                        <Tooltip content={<ChartTooltip suffix="reservas" />} />
-                                        <Legend />
-                                        <Bar dataKey="value" name="Reservas" fill="var(--primary)" radius={[10, 10, 0, 0]} />
-                                    </RechartsBarChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </ChartShell>
-
+                    <div className="grid gap-6">
                         <ChartShell
                             title="Picos de actividad"
                             subtitle="Horas con mas reservas"
@@ -347,18 +388,46 @@ export default function AdminStatisticsPage() {
                         >
                             <div className="h-80 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <RechartsBarChart data={hourChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                    <LineChart data={hourChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 24, 39, 0.08)" />
                                         <XAxis dataKey="label" tick={{ fill: "#4b5563", fontSize: 12 }} />
                                         <YAxis allowDecimals={false} tick={{ fill: "#4b5563", fontSize: 12 }} />
                                         <Tooltip content={<ChartTooltip suffix="reservas" />} />
                                         <Legend />
-                                        <Bar dataKey="value" name="Reservas" fill="var(--accent)" radius={[10, 10, 0, 0]} />
-                                    </RechartsBarChart>
+                                        <Line
+                                            type="monotone"
+                                            dataKey="value"
+                                            name="Reservas"
+                                            stroke="var(--accent)"
+                                            strokeWidth={3}
+                                            dot={{ r: 4, fill: "var(--accent)" }}
+                                            activeDot={{ r: 6 }}
+                                        />
+                                    </LineChart>
                                 </ResponsiveContainer>
                             </div>
                         </ChartShell>
                     </div>
+
+                    <ChartShell
+                        title="Reservas por dia de la semana"
+                        subtitle="Distribucion semanal"
+                        loading={loading}
+                        emptyLabel={!loading && !weekdayChartData.some((item) => item.value > 0) ? "Todavia no hay reservas con fecha para mostrar la semana." : ""}
+                    >
+                        <div className="h-80 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <RechartsBarChart data={weekdayChartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(17, 24, 39, 0.08)" />
+                                    <XAxis dataKey="label" tick={{ fill: "#4b5563", fontSize: 12 }} />
+                                    <YAxis allowDecimals={false} tick={{ fill: "#4b5563", fontSize: 12 }} />
+                                    <Tooltip content={<ChartTooltip suffix="reservas" />} />
+                                    <Legend />
+                                    <Bar dataKey="value" name="Reservas" fill="var(--primary-strong)" radius={[10, 10, 0, 0]} />
+                                </RechartsBarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </ChartShell>
 
                     <ChartShell
                         title="Clasificacion general"
