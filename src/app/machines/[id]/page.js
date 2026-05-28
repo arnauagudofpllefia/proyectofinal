@@ -541,7 +541,7 @@ export default function MachineDetailPage() {
 					<article className="surface-card overflow-hidden lg:col-span-2">
 						{machine.imageUrl ? (
 							// eslint-disable-next-line @next/next/no-img-element
-							<img src={machine.imageUrl} alt={machine.name} className="h-64 w-full object-cover" />
+							<img src={machine.imageUrl} alt={machine.name} className="h-64 w-full bg-[var(--background-subtle)] object-contain" />
 						) : null}
 						<div className="p-6">
 							<div className="flex flex-wrap items-center justify-between gap-3">
