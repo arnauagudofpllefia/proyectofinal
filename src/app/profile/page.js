@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProfileGlyph from "@/app/_components/ProfileGlyph";
-import { getCurrentUser, getGyms, updateUserGym } from "@/lib/api";
+import { getAvatarImages, getCurrentUser, getGyms, updateUserGym } from "@/lib/api";
 import {
 	DEFAULT_PROFILE_ICON_ID,
 	extractProfileIdentity,
@@ -104,11 +104,59 @@ function extractUserInfo(payload) {
 	};
 }
 
+function normalizeAvatarList(payload) {
+	const source = payload?.images ?? payload?.data?.images ?? payload?.data ?? payload;
+	if (!Array.isArray(source)) {
+		return PROFILE_ICON_PRESETS.map((avatar) => ({
+			id: avatar.id,
+			label: avatar.label,
+			url: `/api/avatar-images/${encodeURIComponent(avatar.id)}`,
+		}));
+	}
+
+	const normalized = source
+		.map((item, index) => {
+			if (!item) {
+				return null;
+			}
+
+			if (typeof item === "string") {
+				return {
+					id: item,
+					label: `Avatar ${index + 1}`,
+					url: `/api/avatar-images/${encodeURIComponent(item)}`,
+				};
+			}
+
+			const id = String(item.file ?? item.filename ?? item.name ?? item.id ?? "").trim();
+			const url = String(item.url ?? item.src ?? "").trim();
+			if (!id) {
+				return null;
+			}
+
+			return {
+				id,
+				label: String(item.label ?? item.title ?? `Avatar ${index + 1}`).trim(),
+				url: url || `/api/avatar-images/${encodeURIComponent(id)}`,
+			};
+		})
+		.filter(Boolean);
+
+	return normalized.length
+		? normalized
+		: PROFILE_ICON_PRESETS.map((avatar) => ({
+			id: avatar.id,
+			label: avatar.label,
+			url: `/api/avatar-images/${encodeURIComponent(avatar.id)}`,
+		}));
+}
+
 export default function ProfilePage() {
 	const [user, setUser] = useState(null);
 	const [gyms, setGyms] = useState([]);
 	const [selectedGymId, setSelectedGymId] = useState("");
 	const [selectedProfileIconId, setSelectedProfileIconId] = useState(DEFAULT_PROFILE_ICON_ID);
+	const [avatarOptions, setAvatarOptions] = useState(() => normalizeAvatarList([]));
 	const [nextAllowedChangeAt, setNextAllowedChangeAt] = useState("");
 	const [showGymForm, setShowGymForm] = useState(false);
 	const [showIconPicker, setShowIconPicker] = useState(false);
@@ -160,6 +208,13 @@ export default function ProfilePage() {
 				);
 			} catch {
 				setGyms([]);
+			}
+
+			try {
+				const avatarData = await getAvatarImages(token);
+				setAvatarOptions(normalizeAvatarList(avatarData));
+			} catch {
+				setAvatarOptions(normalizeAvatarList([]));
 			}
 		}, 0);
 
@@ -266,8 +321,8 @@ export default function ProfilePage() {
 				<>
 					<div className="surface-card p-6 space-y-6">
 						<div className="flex items-center gap-5">
-							<div className="relative inline-flex h-24 w-24 shrink-0 items-center justify-center rounded-3xl border border-(--line) bg-white text-(--foreground) sm:h-28 sm:w-28">
-								<ProfileGlyph iconId={selectedProfileIconId} className="h-12 w-12 sm:h-14 sm:w-14" />
+							<div className="relative inline-flex h-28 w-28 shrink-0 items-center justify-center rounded-3xl border border-(--line) bg-white text-(--foreground) sm:h-32 sm:w-32">
+								<ProfileGlyph iconId={selectedProfileIconId} className="h-16 w-16 sm:h-20 sm:w-20" />
 								<button
 									type="button"
 									onClick={toggleIconPicker}
@@ -294,21 +349,22 @@ export default function ProfilePage() {
 									{iconSuccess ? <span className="text-xs text-emerald-700">{iconSuccess}</span> : null}
 								</div>
 
-								<div className="grid grid-cols-3 gap-3">
-									{PROFILE_ICON_PRESETS.map((icon) => {
+								<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+									{avatarOptions.map((icon) => {
 										const isActive = icon.id === selectedProfileIconId;
 										return (
 											<button
 												type="button"
 												key={icon.id}
 												onClick={() => handleProfileIconChange(icon.id)}
-												className={`flex flex-col items-center gap-2 rounded-xl border p-3 text-xs transition ${
+												className={`flex h-28 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-xs transition ${
 													isActive
 														? "border-(--foreground) bg-(--primary-soft) text-(--foreground)"
 														: "border-(--line) text-(--muted-strong) hover:border-(--line-strong) hover:bg-white"
 												}`}
 											>
-												<ProfileGlyph iconId={icon.id} className="h-5 w-5" />
+												{/* eslint-disable-next-line @next/next/no-img-element */}
+												<img src={icon.url} alt={icon.label} className="h-14 w-14 rounded-full object-cover" />
 												<span>{icon.label}</span>
 											</button>
 										);

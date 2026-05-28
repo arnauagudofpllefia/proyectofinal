@@ -95,7 +95,6 @@ export default function RegisterPage() {
 	return (
 		<section className="rise-in mx-auto w-full max-w-md space-y-6">
 			<header className="text-center">
-				<p className="badge badge-primary mb-2">Registro</p>
 				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">Crea tu cuenta</h1>
 			</header>
 

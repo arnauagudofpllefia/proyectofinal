@@ -43,7 +43,6 @@ export default function LoginPage() {
 	return (
 		<section className="rise-in mx-auto w-full max-w-md space-y-6">
 			<header className="text-center">
-				<p className="badge badge-primary mb-2">Acceso</p>
 				<h1 className="text-2xl font-semibold text-[var(--foreground)] sm:text-3xl">Bienvenido de vuelta</h1>
 			</header>
 

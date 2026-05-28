@@ -165,6 +165,10 @@ export async function getCurrentUser(token) {
   return apiRequest("/user", { token });
 }
 
+export async function getAvatarImages(token) {
+  return apiRequest("/avatar-images", { token: token || undefined });
+}
+
 export async function logoutRequest(token) {
   return apiRequest("/logout", {
     method: "POST",
