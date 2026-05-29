@@ -1,6 +1,6 @@
 # GymNau
 
-Plataforma web para gestionar gimnasios, maquinas y reservas con dos perfiles principales: usuario final y administrador.
+Plataforma web para gestionar gimnasios, maquinas y reservas con dos perfiles principales: usuario y administrador.
 
 ## 1. Titulo del proyecto
 
@@ -10,23 +10,22 @@ Plataforma web para gestionar gimnasios, maquinas y reservas con dos perfiles pr
 
 ### 2.1 Explicacion
 
-GymNau es una aplicacion web que permite:
+GymNau es una aplicacion web que permite hacer reservas de maquinas de gimnasio a los usuarios, ademas para la administración
+del gimnasio permite trackear todo el uso de las maquinas con graficos, tambien permite una gestión total tanto de usuarios, 
+reservas, maquinas y gimnasios.
 
-- Consultar maquinas disponibles.
-- Reservar franjas horarias para una maquina.
-- Gestionar el perfil de usuario y el gimnasio asignado.
-- Administrar recursos del sistema desde un backoffice (maquinas, reservas, usuarios y estadisticas).
 
 ### 2.2 Objetivos
 
 - Digitalizar el proceso de reserva de maquinas.
-- Reducir cuellos de botella y conflictos de ocupacion.
+- Reducir aglomeraciones innecesarias y conflictos de ocupacion.
 - Dar visibilidad operativa a los administradores.
 - Ofrecer una experiencia clara tanto en movil como en escritorio.
 
 ### 2.3 Justificacion
 
-En muchos gimnasios, la gestion de reservas es manual o fragmentada (papel, mensajeria, hojas de calculo). Esto provoca errores, duplicidades y poca trazabilidad. GymNau centraliza la informacion en una sola plataforma, mejorando:
+En muchos gimnasios, la gestion de reservas es manual o inecxistente. Esto provoca errores, duplicidades y sobretodo mucha aglomeraccion de personas que provoca que la gente cambie de gimnasio.
+GymNau centraliza la informacion en una sola plataforma, mejorando:
 
 - La eficiencia operativa.
 - La satisfaccion de usuarios.
@@ -36,25 +35,26 @@ En muchos gimnasios, la gestion de reservas es manual o fragmentada (papel, mens
 
 ### 3.1 Frontend
 
-- **Next.js (App Router)**
+- **Next.js**
 	- Justificacion: estructura escalable, renderizado eficiente e integracion directa con React moderno.
-- **React 19**
-	- Justificacion: componentizacion, reutilizacion y gestion declarativa de la UI.
-- **Tailwind CSS v4**
+- **Tailwind CSS**
 	- Justificacion: velocidad de desarrollo y consistencia visual.
 - **Recharts**
 	- Justificacion: construccion de graficas en el apartado de estadisticas de administracion.
+
 
 ### 3.2 Backend (integrado via API)
 
 - **Laravel API** (consumida desde el frontend)
 	- Justificacion: separacion clara frontend/backend, endpoints REST para autenticacion y recursos del negocio.
+- **MySQL**
+	- Justificacion: base de datos relacional, adecuada para gestionar relaciones entre usuarios, reservas, maquinas y gimnasios con integridad referencial, consultas eficientes y buena escalabilidad.
 
 ### 3.3 Otras decisiones tecnicas
 
 - Autenticacion con token en cliente.
 - Variables de entorno para separar entornos local, preview y produccion.
-- Arquitectura basada en modulos (`src/app` para pantallas y `src/lib` para servicios/normalizacion).
+- Arquitectura basada en modulos (`src/app` para pantallas y `src/lib` para servicios).
 
 ## 4. Herramientas de desarrollo y CI/CD
 
@@ -68,8 +68,10 @@ En muchos gimnasios, la gestion de reservas es manual o fragmentada (papel, mens
 ### 4.2 CI/CD y despliegue
 
 - **Vercel** para desplegar el frontend.
-- Flujo de despliegue orientado a ramas (preview/produccion).
-- Configuracion de entorno via variables (`NEXT_PUBLIC_API_URL`, etc.).
+- **Render** para desplegar el backend.
+- **AlwaysData** para subir a la nube la base de datos.
+
+
 
 ### 4.3 Uso de IA
 
@@ -78,52 +80,46 @@ Se ha utilizado IA como soporte en:
 - Generacion y refactorizacion de componentes.
 - Deteccion de puntos de mejora de UX/UI.
 - Soporte en resolucion de errores y validacion rapida de cambios.
+- Generar codigo con revisión constante
 
-La IA se ha usado como asistente, manteniendo revision humana sobre decisiones de producto y arquitectura.
 
 ### 4.4 Metodologia de trabajo
 
 Metodologia **iterativa-incremental** inspirada en Scrum:
 
 - Division por historias de usuario.
-- Entregas cortas por funcionalidades.
 - Revision y ajuste continuo en base a feedback.
 
 ## 5. Planificacion (historias, sprints, gantt)
 
 ### 5.1 Historias de usuario (resumen)
 
-- Como usuario, quiero registrarme e iniciar sesion para acceder al sistema.
-- Como usuario, quiero ver maquinas y reservar franjas disponibles.
-- Como usuario, quiero consultar y gestionar mis reservas.
-- Como administrador, quiero gestionar maquinas, reservas y usuarios.
-- Como administrador, quiero ver estadisticas para optimizar la gestion del gimnasio.
+- **Historia 1** Diseño de la estructura de datos del gimnasio.
+- **Historia 2** Sistema de autenticación de usuarios.
+- **Historia 3** Sistema de roles y permisos.
+- **Historia 4** Gestión del gimnasio (administrador).
+- **Historia 5** Gestión de máquinas (CRUD completo).
+- **Historia 6** Visualización de máquinas disponibles.
+- **Historia 7** Generación de slots horarios.
+- **Historia 8** Crear reservas (núcleo del sistema).
+- **Historia 9** Cancelar reserva.
+- **Historia 10** Evitar reservas duplicadas (conflictos avanzados).
+- **Historia 11** Ver mis reservas (panel de usuario).
+- **Historia 12** Generación de disponibilidad en tiempo real (cierre del SaaS)
 
 ### 5.2 Sprints propuestos
 
-- **Sprint 1:** autenticacion, registro, estructura base de navegacion.
-- **Sprint 2:** catalogo de maquinas y detalle.
-- **Sprint 3:** flujo completo de reservas de usuario.
-- **Sprint 4:** panel admin CRUD (maquinas, reservas, usuarios, gimnasios).
-- **Sprint 5:** estadisticas, mejoras UX/UI, estabilizacion y deploy.
+- **Sprint 1:** Historia 1 y Historia 2.
+- **Sprint 2:** Historia 3 y Historia 4.
+- **Sprint 3:** Historia 5 y Historia 6.
+- **Sprint 4:** Historia 7 y Historia 8.
+- **Sprint 5:** Historia 9 y Historia 10.
+- **Sprint 6:** Historia 11 y Historia 12.
 
 ### 5.3 Diagrama de Gantt (orientativo)
 
-```mermaid
-gantt
-		title Planificacion GymNau
-		dateFormat  YYYY-MM-DD
-		section Sprint 1
-		Autenticacion y registro           :done, s1, 2026-03-03, 7d
-		section Sprint 2
-		Catalogo y detalle de maquinas     :done, s2, 2026-03-10, 7d
-		section Sprint 3
-		Sistema de reservas usuario        :done, s3, 2026-03-17, 10d
-		section Sprint 4
-		Backoffice administracion          :done, s4, 2026-03-27, 10d
-		section Sprint 5
-		Estadisticas y refinamiento UX/UI  :active, s5, 2026-04-06, 10d
-```
+![Diagrama de Gantt de GymNau](./public/diagramadegantt.png)
+
 
 ## 6. Casos de uso y diagrama de casos de uso
 
@@ -143,31 +139,7 @@ gantt
 
 ### 6.3 Diagrama de casos de uso
 
-```mermaid
-flowchart LR
-		U[Usuario]
-		A[Administrador]
-
-		UC1((Registrarse / Login))
-		UC2((Consultar maquinas))
-		UC3((Crear / ver reservas))
-		UC4((Gestionar perfil))
-		UC5((CRUD maquinas))
-		UC6((CRUD reservas))
-		UC7((CRUD usuarios))
-		UC8((Ver estadisticas))
-
-		U --> UC1
-		U --> UC2
-		U --> UC3
-		U --> UC4
-
-		A --> UC1
-		A --> UC5
-		A --> UC6
-		A --> UC7
-		A --> UC8
-```
+![Diagrama de Casos de uso de GymNau](./public/diagramadecasosdeuso.png)
 
 ## 7. Explicacion del codigo por bloques
 
@@ -236,7 +208,53 @@ npm run dev
 
 ### 9.2 Mejoras futuras
 
-- Tests automatizados (unitarios y e2e).
-- Internacionalizacion.
-- Mejora de monitorizacion y observabilidad.
-- Mecanismos avanzados de cache y optimizacion de rendimiento.
+- Tests automatizados.
+- Implementar un nuevo rango de administración de solo un gimnasio en especifico
+- Añadir QR a las maquinas
+
+
+## 10. Manual de uso
+
+
+### 10.1 Usuarios de prueba y roles
+
+Puedes usar estos usuarios de prueba para validar el funcionamiento del sistema:
+
+- Administrador
+Correo: admin@example.com
+Contraseña: Admin12345
+Rol: admin
+
+- Usuario
+Correo: pepe@gmail.com
+Contraseña: pepe1234
+Rol: user
+
+### 10.2 Instrucciones basicas para registrarte
+
+1. Abre la aplicacion en el navegador.
+2. Entra en la pantalla de registro en /register.
+3. Completa los campos obligatorios:
+
+- Nombre
+- Email
+- Contraseña
+- Confirmacion de contraseña
+- Gimnasio
+
+4. Pulsa el boton Crear cuenta.
+5. Si todo es correcto, el sistema te redirige al login.
+
+### 10.3 Instrucciones basicas para logearte
+
+1. Entra en la pantalla de login en /login.
+2. Introduce tu email y contrasena.
+3. Pulsa el boton Iniciar sesion.
+4. Si las credenciales son validas, accederas a la aplicacion.
+
+Consejo:
+Si no quieres registrarte ahora, puedes usar uno de los usuarios de prueba del apartado 10.1.
+
+
+
+
