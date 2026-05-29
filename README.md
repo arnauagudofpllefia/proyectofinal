@@ -94,6 +94,76 @@ Metodología **iterativa-incremental** inspirada en Scrum:
 
 ![Diagrama de base de datos de GymNau](./public/diagramabd.png)
 
+### 4.6 Endpoints de la API
+
+La aplicacion consume una API REST separada para autenticar usuarios, leer recursos y ejecutar operaciones del negocio. A continuacion se resume la estructura de rutas utilizada en el backend.
+
+**Rutas publicas**
+
+```php
+Route::get('/health', function () {
+	return response()->json(['status' => 'ok'], 200);
+});
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/gyms', [GimnasiosController::class, 'index']);
+Route::get('/gyms/{gimnasio}', [GimnasiosController::class, 'show']);
+Route::get('/avatar-images', [MachineImagesController::class, 'index']);
+Route::get('/avatar-images/{filename}', [MachineImagesController::class, 'show'])
+	->where('filename', '[A-Za-z0-9._-]+')
+	->name('avatar-images.show');
+```
+
+**Rutas protegidas con autenticacion**
+
+```php
+Route::middleware('auth:api')->group(function () {
+	Route::get('/user', function (Request $request) {
+		return response()->json($request->user()->load('gimnasio'));
+	});
+	Route::patch('/user', [UsuariosController::class, 'updateAuthenticatedUser']);
+	Route::post('/logout', [AuthController::class, 'logout']);
+
+	Route::get('/machines', [MaquinasController::class, 'index']);
+	Route::get('/machines/{maquina}', [MaquinasController::class, 'show']);
+	Route::get('/machines/{maquina}/slots', [MaquinasController::class, 'getSlots']);
+	Route::get('/machines/{id}/reservations', [ReservasController::class, 'getMachineReservations']);
+
+	Route::post('/reservations', [ReservasController::class, 'store']);
+	Route::get('/reservations/my', [ReservasController::class, 'getMyReservations']);
+	Route::delete('/reservations/{reserva}', [ReservasController::class, 'destroy']);
+
+	Route::get('/notifications', [NotificacionesController::class, 'index']);
+	Route::get('/notifications/unread-count', [NotificacionesController::class, 'unreadCount']);
+	Route::patch('/notifications/read-all', [NotificacionesController::class, 'markAllAsRead']);
+	Route::patch('/notifications/{notificacion}/read', [NotificacionesController::class, 'markAsRead']);
+
+	Route::middleware('role:admin')->prefix('admin')->group(function () {
+		Route::get('/dashboard', [AdminController::class, 'dashboard']);
+
+		Route::get('/machines', [MachineController::class, 'index']);
+		Route::post('/machines', [MachineController::class, 'store']);
+		Route::put('/machines/{maquina}', [MachineController::class, 'update']);
+		Route::post('/machines/{maquina}', [MachineController::class, 'update']);
+		Route::delete('/machines/{maquina}', [MachineController::class, 'destroy']);
+
+		Route::post('/gym', [AdminController::class, 'createGym']);
+		Route::get('/gym', [AdminController::class, 'getGym']);
+		Route::get('/gym/{id}', [AdminController::class, 'showGym']);
+		Route::delete('/gym/{id}', [AdminController::class, 'destroyGym']);
+		Route::put('/gym/{id}', [AdminController::class, 'updateGym']);
+
+		Route::apiResource('users', UsuariosController::class)
+			->parameters(['users' => 'usuario']);
+		Route::patch('/users/{id}/role', [AdminController::class, 'updateUserRole']);
+		Route::patch('/users/{id}/gym', [AdminController::class, 'updateUserGym']);
+
+		Route::apiResource('reservations', ReservasController::class)
+			->parameters(['reservations' => 'reserva']);
+	});
+});
+```
+
 ## 5. Planificación (historias, sprints, gantt)
 
 ### 5.1 Historias de usuario (resumen)
