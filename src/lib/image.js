@@ -1,16 +1,13 @@
 ﻿// Resumen del archivo: src\lib\image.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
 /**
  * Funcion: deriveBackendBaseFromApi.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function deriveBackendBaseFromApi(apiUrl) {
     if (!apiUrl) {
@@ -27,11 +24,8 @@ function deriveBackendBaseFromApi(apiUrl) {
 
 /**
  * Funcion: getBackendBaseUrl.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getBackendBaseUrl() {
     const explicitBase = String(BACKEND_BASE_URL || "").trim().replace(/\/+$/, "");

@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\lib\gym.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 export const ADMIN_GYM_SCOPE_KEY = "admin_active_gym_id";
 export const ADMIN_GYM_SCOPE_EVENT = "admin-gym-scope-change";

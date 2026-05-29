@@ -1,16 +1,13 @@
 ﻿// Resumen del archivo: src\lib\api.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const SANCTUM_CSRF_URL = process.env.NEXT_PUBLIC_SANCTUM_CSRF_URL || "";
 
 /**
  * Funcion: getApiUrl.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getApiUrl(path) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -19,8 +16,8 @@ function getApiUrl(path) {
 
 /**
  * Funcion: parseResponse.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";

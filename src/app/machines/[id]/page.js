@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\machines\[id]\page.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -13,8 +13,8 @@ import { resolvePublicImageUrl } from "@/lib/image";
 
 /**
  * Funcion: normalizeMachine.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeMachine(data, machineId) {
 	return {
@@ -33,8 +33,8 @@ function normalizeMachine(data, machineId) {
 
 /**
  * Funcion: normalizeSlots.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeSlots(payload) {
 	const data = payload?.data ?? payload;
@@ -52,8 +52,8 @@ function normalizeSlots(payload) {
 
 /**
  * Funcion: toIsoDateTime.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function toIsoDateTime(date, time) {
 	return `${date}T${time}:00`;
@@ -61,8 +61,8 @@ function toIsoDateTime(date, time) {
 
 /**
  * Funcion: normalizeHourValue.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeHourValue(value) {
 	if (typeof value !== "string") {
@@ -75,8 +75,8 @@ function normalizeHourValue(value) {
 
 /**
  * Funcion: normalizeDateValue.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeDateValue(value) {
 	if (typeof value !== "string" || !value) {
@@ -92,8 +92,8 @@ function normalizeDateValue(value) {
 
 /**
  * Funcion: getReservationMachineId.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationMachineId(item) {
 	return String(item?.machine_id ?? item?.maquina_id ?? item?.machine?.id ?? item?.machineId ?? "");
@@ -101,8 +101,8 @@ function getReservationMachineId(item) {
 
 /**
  * Funcion: getReservationDateKey.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationDateKey(item) {
 	const directDate = normalizeDateValue(item?.date ?? item?.fecha ?? item?.hora_inicio ?? item?.start_time);
@@ -117,8 +117,8 @@ function getReservationDateKey(item) {
 
 /**
  * Funcion: addMinutesToTime.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function addMinutesToTime(time, minutesToAdd) {
 	const [hourString, minuteString] = String(time).split(":");
@@ -131,10 +131,10 @@ function addMinutesToTime(time, minutesToAdd) {
 
 	const totalMinutes = hours * 60 + minutes + minutesToAdd;
 	/**
-	 * Funcion auxiliar: normalizedTotal.
-	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
-	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
-	 */
+ * Funcion: normalizedTotal.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const normalizedTotal = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
 	const finalHours = String(Math.floor(normalizedTotal / 60)).padStart(2, "0");
 	const finalMinutes = String(normalizedTotal % 60).padStart(2, "0");
@@ -144,8 +144,8 @@ function addMinutesToTime(time, minutesToAdd) {
 
 /**
  * Funcion: getMinutesBetweenTimes.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getMinutesBetweenTimes(startTime, endTime) {
 	const startMatch = String(startTime).match(/^(\d{2}):(\d{2})$/);
@@ -163,8 +163,8 @@ function getMinutesBetweenTimes(startTime, endTime) {
 
 /**
  * Funcion: isSlotReservable.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function isSlotReservable(slot) {
 	const status = String(slot?.status ?? "").toLowerCase();
@@ -177,8 +177,8 @@ function isSlotReservable(slot) {
 
 /**
  * Funcion: extractUserId.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractUserId(userPayload) {
 	const user = userPayload?.data ?? userPayload;
@@ -188,8 +188,8 @@ function extractUserId(userPayload) {
 
 /**
  * Funcion: normalizeReservationDate.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeReservationDate(value) {
 	if (typeof value !== "string" || !value) {
@@ -205,8 +205,8 @@ function normalizeReservationDate(value) {
 
 /**
  * Funcion: normalizeReservationHour.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeReservationHour(value) {
 	if (typeof value !== "string" || !value) {
@@ -219,8 +219,8 @@ function normalizeReservationHour(value) {
 
 /**
  * Funcion: normalizeReservationTimeDisplay.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeReservationTimeDisplay(value) {
 	if (typeof value !== "string" || !value) {
@@ -236,8 +236,8 @@ function normalizeReservationTimeDisplay(value) {
 
 /**
  * Funcion: timeStringToMinutes.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function timeStringToMinutes(value) {
 	const match = String(value).match(/^(\d{2}):(\d{2})$/);
@@ -250,8 +250,8 @@ function timeStringToMinutes(value) {
 
 /**
  * Funcion: getTodayDateKey.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getTodayDateKey() {
 	const now = new Date();
@@ -263,16 +263,16 @@ function getTodayDateKey() {
 
 /**
  * Funcion: getStartOfWeek.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getStartOfWeek(dateValue) {
 	const date = new Date(dateValue);
 	/**
-	 * Funcion auxiliar: day.
-	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
-	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
-	 */
+ * Funcion: day.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const day = (date.getDay() + 6) % 7;
 	date.setDate(date.getDate() - day);
 	date.setHours(0, 0, 0, 0);
@@ -281,8 +281,8 @@ function getStartOfWeek(dateValue) {
 
 /**
  * Funcion: getDateKeyFromDate.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getDateKeyFromDate(dateValue) {
 	const year = dateValue.getFullYear();
@@ -293,8 +293,8 @@ function getDateKeyFromDate(dateValue) {
 
 /**
  * Funcion: isOccupiedReservationStatus.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function isOccupiedReservationStatus(statusValue) {
 	const status = String(statusValue ?? "").toLowerCase();
@@ -303,8 +303,8 @@ function isOccupiedReservationStatus(statusValue) {
 
 /**
  * Funcion: getReservationTimestamp.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationTimestamp(item) {
 	const rawDateTime = item?.hora_inicio ?? item?.start_time;
@@ -330,8 +330,8 @@ function getReservationTimestamp(item) {
 
 /**
  * Funcion: normalizePublicReservations.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizePublicReservations(payload) {
 	const reservasArray = payload?.reservas ?? payload?.data ?? [];
@@ -362,8 +362,8 @@ function normalizePublicReservations(payload) {
 
 /**
  * Funcion: MachineDetailPage.
- * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
- * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function MachineDetailPage() {
 	const params = useParams();
@@ -448,10 +448,10 @@ export default function MachineDetailPage() {
 	}, [id, loadMachineData]);
 
 	/**
-	 * Funcion auxiliar: handleChange.
-	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
-	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
-	 */
+ * Funcion: handleChange.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleChange = (field, value) => {
 		setForm((prev) => {
 			if (field === "startTime") {
@@ -467,10 +467,10 @@ export default function MachineDetailPage() {
 	};
 
 	/**
-	 * Funcion auxiliar: handleReserve.
-	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
-	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
-	 */
+ * Funcion: handleReserve.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleReserve = async (event) => {
 		event.preventDefault();
 		setRequestState({ loading: true, error: "", success: "" });

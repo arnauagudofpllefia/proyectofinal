@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\admin\estadisticas\page.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -27,11 +27,8 @@ import {
 
 /**
  * Funcion: formatHourLabel.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function formatHourLabel(hourValue) {
     return `${String(hourValue).padStart(2, "0")}:00`;
@@ -39,11 +36,8 @@ function formatHourLabel(hourValue) {
 
 /**
  * Funcion: getReservationHour.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationHour(reservation) {
     const candidates = [
@@ -71,11 +65,8 @@ function getReservationHour(reservation) {
 
 /**
  * Funcion: getReservationDateValue.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationDateValue(reservation) {
     const candidates = [
@@ -101,11 +92,8 @@ function getReservationDateValue(reservation) {
 
 /**
  * Funcion: getWeekdayKey.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getWeekdayKey(dateValue) {
     if (!dateValue) {
@@ -122,11 +110,8 @@ function getWeekdayKey(dateValue) {
 
 /**
  * Funcion: getMachineIdentifier.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getMachineIdentifier(reservation) {
     return String(reservation?.machineId ?? reservation?.maquina_id ?? reservation?.machine_id ?? "").trim();
@@ -134,11 +119,8 @@ function getMachineIdentifier(reservation) {
 
 /**
  * Funcion: buildMachineLookup.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function buildMachineLookup(machines) {
     return new Map(
@@ -152,11 +134,8 @@ function buildMachineLookup(machines) {
 
 /**
  * Funcion: aggregateCounts.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function aggregateCounts(items, getKey, getLabel) {
     const counts = new Map();
@@ -183,11 +162,8 @@ function aggregateCounts(items, getKey, getLabel) {
 
 /**
  * Funcion: ChartShell.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function ChartShell({ title, subtitle, children, emptyLabel, loading }) {
     return (
@@ -212,11 +188,8 @@ function ChartShell({ title, subtitle, children, emptyLabel, loading }) {
 
 /**
  * Funcion: ChartTooltip.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function ChartTooltip({ active, payload, label, suffix = "reservas" }) {
     if (!active || !payload?.length) {
@@ -235,11 +208,8 @@ function ChartTooltip({ active, payload, label, suffix = "reservas" }) {
 
 /**
  * Funcion: StatCard.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function StatCard({ label, value, hint }) {
     return (
@@ -253,11 +223,8 @@ function StatCard({ label, value, hint }) {
 
 /**
  * Funcion: AdminStatisticsPage.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function AdminStatisticsPage() {
     const [selectedGymScopeId, setSelectedGymScopeId] = useState("");
@@ -272,13 +239,10 @@ export default function AdminStatisticsPage() {
         }, 0);
 
         /**
- * Funcion auxiliar: handleGymScopeChange.
-
-         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-         * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-         */
+ * Funcion: handleGymScopeChange.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -303,13 +267,10 @@ export default function AdminStatisticsPage() {
         let cancelled = false;
 
         /**
- * Funcion auxiliar: loadStatistics.
-
-         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-         * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-         */
+ * Funcion: loadStatistics.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
         const loadStatistics = async () => {
             setLoading(true);
             setErrorMessage("");
@@ -364,13 +325,10 @@ export default function AdminStatisticsPage() {
     const machineLookup = useMemo(() => buildMachineLookup(machines), [machines]);
 
     /**
- * Funcion auxiliar: getResolvedMachineLabel.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: getResolvedMachineLabel.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const getResolvedMachineLabel = (reservation, key) => {
         const fallbackName = String(reservation?.machineName ?? reservation?.maquina_nombre ?? key ?? "Maquina sin nombre").trim();
         return machineLookup.get(key) || fallbackName;

@@ -1,13 +1,13 @@
 ﻿// Resumen del archivo: src\app\dashboard\page.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import { redirect } from "next/navigation";
 import { getServerSessionInfo } from "@/lib/session";
 
 /**
  * Funcion: DashboardPage.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default async function DashboardPage() {
 	const { isAdmin } = await getServerSessionInfo();

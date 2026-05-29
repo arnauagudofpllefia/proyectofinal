@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\page.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import Link from "next/link";
 import { getGyms, getMachines, getMyReservations } from "@/lib/api";
@@ -9,11 +9,8 @@ import { resolvePublicImageUrl } from "@/lib/image";
 
 /**
  * Funcion: extractList.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractList(result) {
   if (!result || result.status !== "fulfilled") return [];
@@ -28,11 +25,8 @@ function extractList(result) {
 
 /**
  * Funcion: getMachineImage.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getMachineImage(machine) {
   return resolvePublicImageUrl(
@@ -47,11 +41,8 @@ function getMachineImage(machine) {
 
 /**
  * Funcion: getMachineStatus.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getMachineStatus(machine) {
   return String(machine?.status ?? machine?.estado ?? "Disponible");
@@ -59,8 +50,8 @@ function getMachineStatus(machine) {
 
 /**
  * Funcion: Home.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default async function Home() {
   const { token, isAdmin, isAuthenticated, user } = await getServerSessionInfo();
@@ -207,11 +198,8 @@ export default async function Home() {
 
 /**
  * Funcion: Stat.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function Stat({ label, value, accent }) {
   return (

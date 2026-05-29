@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\admin\_components\AdminCrudPage.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -31,11 +31,8 @@ const ITEMS_PER_PAGE = 10;
 
 /**
  * Funcion: flattenValidationErrors.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function flattenValidationErrors(details) {
     if (!details || typeof details !== "object") {
@@ -53,11 +50,8 @@ function flattenValidationErrors(details) {
 
 /**
  * Funcion: FieldInput.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function FieldInput({ field, value, disabled, onChange }) {
     if (field.type === "select") {
@@ -114,11 +108,8 @@ function FieldInput({ field, value, disabled, onChange }) {
 
 /**
  * Funcion: isGymScopedResource.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function isGymScopedResource(resourceKey) {
     return resourceKey === "machines" || resourceKey === "reservations" || resourceKey === "users";
@@ -126,8 +117,8 @@ function isGymScopedResource(resourceKey) {
 
 /**
  * Funcion: fetchResourceItems.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 async function fetchResourceItems(resourceKey, token, gymScopeId) {
     const response = await listAdminResource(resourceKey, token, { gymId: gymScopeId });
@@ -142,11 +133,8 @@ async function fetchResourceItems(resourceKey, token, gymScopeId) {
 
 /**
  * Funcion: AdminCrudPage.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function AdminCrudPage({ resourceKey }) {
     const resource = getAdminResource(resourceKey);
@@ -215,13 +203,10 @@ export default function AdminCrudPage({ resourceKey }) {
                 };
 
                 /**
- * Funcion auxiliar: haystack.
-
-                 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-                 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-                 */
+ * Funcion: haystack.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
                 const haystack = (searchableFieldsByResource[resourceKey] || [])
                     .filter(Boolean)
                     .join(" ")
@@ -248,13 +233,10 @@ export default function AdminCrudPage({ resourceKey }) {
     }, [currentPage, totalPages]);
 
     /**
- * Funcion auxiliar: loadItems.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: loadItems.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const loadItems = async () => {
         if (needsGymSelection) {
             setItems([]);
@@ -297,13 +279,10 @@ export default function AdminCrudPage({ resourceKey }) {
         }, 0);
 
         /**
- * Funcion auxiliar: handleGymScopeChange.
-
-         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-         * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-         */
+ * Funcion: handleGymScopeChange.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -422,13 +401,10 @@ export default function AdminCrudPage({ resourceKey }) {
     }, [resource.title, resourceKey, selectedGymScopeId, selectedId, needsGymSelection]);
 
     /**
- * Funcion auxiliar: handleChange.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: handleChange.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const handleChange = (event) => {
         const { name, value, type, files } = event.target;
         if (type === "file") {
@@ -440,13 +416,10 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     /**
- * Funcion auxiliar: closeModal.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: closeModal.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const closeModal = () => {
         setIsModalOpen(false);
         setFieldErrors([]);
@@ -454,13 +427,10 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     /**
- * Funcion auxiliar: openCreateModal.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: openCreateModal.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const openCreateModal = () => {
         const nextForm = createEmptyForm(resourceKey);
         if (isGymScopedResource(resourceKey) && selectedGymScopeId) {
@@ -475,13 +445,10 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     /**
- * Funcion auxiliar: handleEdit.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: handleEdit.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const handleEdit = (item) => {
         if (!canEdit) return;
         setSelectedId(item.id);
@@ -493,13 +460,10 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     /**
- * Funcion auxiliar: handleSubmit.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: handleSubmit.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const handleSubmit = async (event) => {
         event.preventDefault();
         if (!canSubmit) {
@@ -552,13 +516,10 @@ export default function AdminCrudPage({ resourceKey }) {
     };
 
     /**
- * Funcion auxiliar: handleDelete.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: handleDelete.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const handleDelete = async (item) => {
         if (!canDelete) return;
         const confirmed = window.confirm(`Se eliminara ${resource.singularTitle} ${resource.getItemTitle(item)}.`);

@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\_components\LogoutButton.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -8,11 +8,8 @@ import { logoutRequest } from "@/lib/api";
 
 /**
  * Funcion: clearClientSession.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function clearClientSession() {
     localStorage.removeItem("auth_token");
@@ -21,23 +18,17 @@ function clearClientSession() {
 
 /**
  * Funcion: LogoutButton.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function LogoutButton() {
     const router = useRouter();
 
     /**
- * Funcion auxiliar: handleLogout.
-
-     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-     * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-     */
+ * Funcion: handleLogout.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
     const handleLogout = async () => {
         const token = localStorage.getItem("auth_token") || "";
 

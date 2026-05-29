@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\_components\ReservationNotificationScheduler.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -13,11 +13,8 @@ const REMINDER_STORAGE_KEY = "gymnau_reservation_reminders_sent";
 
 /**
  * Funcion: isValidDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function isValidDate(value) {
 	return value instanceof Date && Number.isFinite(value.getTime());
@@ -25,11 +22,8 @@ function isValidDate(value) {
 
 /**
  * Funcion: parseDateTime.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function parseDateTime(value) {
 	if (typeof value !== "string" || !value.trim()) {
@@ -42,11 +36,8 @@ function parseDateTime(value) {
 
 /**
  * Funcion: parseDateHour.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function parseDateHour(dateValue, hourValue) {
 	if (typeof dateValue !== "string" || typeof hourValue !== "string") {
@@ -82,11 +73,8 @@ function parseDateHour(dateValue, hourValue) {
 
 /**
  * Funcion: getReservationStartDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationStartDate(item) {
 	const candidates = [
@@ -109,11 +97,8 @@ function getReservationStartDate(item) {
 
 /**
  * Funcion: getSentReminderIds.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getSentReminderIds() {
 	if (typeof window === "undefined") {
@@ -131,11 +116,8 @@ function getSentReminderIds() {
 
 /**
  * Funcion: setSentReminderIds.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function setSentReminderIds(idsSet) {
 	if (typeof window === "undefined") {
@@ -147,11 +129,8 @@ function setSentReminderIds(idsSet) {
 
 /**
  * Funcion: normalizeReservation.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeReservation(item, index) {
 	return {
@@ -166,11 +145,8 @@ function normalizeReservation(item, index) {
 
 /**
  * Funcion: extractReservationsArray.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractReservationsArray(payload) {
 	const directCandidates = [
@@ -191,8 +167,8 @@ function extractReservationsArray(payload) {
 
 /**
  * Funcion: showSystemNotification.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 async function showSystemNotification(reservation) {
 	if (!("Notification" in window) || !("serviceWorker" in navigator)) {
@@ -231,11 +207,8 @@ async function showSystemNotification(reservation) {
 
 /**
  * Funcion: ReservationNotificationScheduler.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function ReservationNotificationScheduler() {
 	const timeoutIdsRef = useRef([]);
@@ -267,13 +240,10 @@ export default function ReservationNotificationScheduler() {
 		let cancelled = false;
 
 		/**
- * Funcion auxiliar: clearTimeouts.
-
-		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-		 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-		 */
+ * Funcion: clearTimeouts.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 		const clearTimeouts = () => {
 			for (const timeoutId of timeoutIdsRef.current) {
 				clearTimeout(timeoutId);
@@ -282,13 +252,10 @@ export default function ReservationNotificationScheduler() {
 		};
 
 		/**
- * Funcion auxiliar: scheduleReminders.
-
-		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-		 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-		 */
+ * Funcion: scheduleReminders.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 		const scheduleReminders = async () => {
 			clearTimeouts();
 
@@ -321,13 +288,10 @@ export default function ReservationNotificationScheduler() {
 					}
 
 					/**
- * Funcion auxiliar: triggerReminder.
-
-					 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-					 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-					 */
+ * Funcion: triggerReminder.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 					const triggerReminder = () => {
 						if (cancelled) {
 							return;
@@ -361,10 +325,10 @@ export default function ReservationNotificationScheduler() {
 
 		void scheduleReminders();
 		/**
-		 * Funcion auxiliar: handleVisibility.
-		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-		 * Contexto: se usa como callback o helper dentro del flujo del componente.
-		 */
+ * Funcion: handleVisibility.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 		const handleVisibility = () => {
 			if (document.visibilityState === "visible") {
 				void scheduleReminders();

@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\lib\profileIcon.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import { resolvePublicImageUrl } from "@/lib/image";
 
@@ -28,11 +28,8 @@ const AVATAR_ID_PATTERN = /^avatar(?:10|[1-9])(?:\.[a-z0-9]+)?$/i;
 
 /**
  * Funcion: isAvatarId.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function isAvatarId(iconId) {
   return AVATAR_ID_PATTERN.test(String(iconId || "").trim());
@@ -40,11 +37,8 @@ function isAvatarId(iconId) {
 
 /**
  * Funcion: normalizeIconId.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeIconId(iconId) {
   const normalized = String(iconId || "").trim();
@@ -57,11 +51,8 @@ function normalizeIconId(iconId) {
 
 /**
  * Funcion: getStorageKey.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getStorageKey(identity) {
   return `profile_icon:${identity || "anonymous"}`;

@@ -1,16 +1,13 @@
 ﻿// Resumen del archivo: src\app\admin\layout.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import AdminGymScopePicker from "@/app/admin/_components/AdminGymScopePicker";
 import AdminScopedNav from "@/app/admin/_components/AdminScopedNav";
 
 /**
  * Funcion: AdminLayout.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function AdminLayout({ children }) {
     return (

@@ -1,16 +1,13 @@
 ﻿// Resumen del archivo: src\lib\admin.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import { apiRequest, apiRequestWithFallback } from "@/lib/api";
 import { resolvePublicImageUrl } from "@/lib/image";
 
 /**
  * Funcion: normalizeCollection.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeCollection(payload) {
     const data = payload?.data ?? payload;
@@ -84,11 +81,8 @@ function normalizeCollection(payload) {
 
 /**
  * Funcion: normalizeId.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeId(value, fallback) {
     if (value === undefined || value === null || value === "") {
@@ -100,11 +94,8 @@ function normalizeId(value, fallback) {
 
 /**
  * Funcion: extractDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractDate(value) {
     if (!value) {
@@ -117,11 +108,8 @@ function extractDate(value) {
 
 /**
  * Funcion: extractTime.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractTime(value) {
     if (!value) {
@@ -134,11 +122,8 @@ function extractTime(value) {
 
 /**
  * Funcion: extractEntityName.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractEntityName(value) {
     if (!value) {
@@ -304,16 +289,16 @@ const adminResources = {
             const gymId = Number.parseInt(gymIdRaw, 10);
             const status = values.status.trim();
             /**
-             * Funcion auxiliar: description.
-             * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-             * Contexto: se usa como callback o helper dentro del flujo del componente.
-             */
+ * Funcion: description.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
             const description = (values.description ?? "").trim();
             /**
-             * Funcion auxiliar: imageUrl.
-             * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-             * Contexto: se usa como callback o helper dentro del flujo del componente.
-             */
+ * Funcion: imageUrl.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
             const imageUrl = (values.imageUrl ?? "").trim();
 
             return {
@@ -643,11 +628,8 @@ const adminResources = {
 
 /**
  * Funcion: resolvePath.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function resolvePath(path, params = {}) {
     if (!path) {
@@ -663,11 +645,8 @@ function resolvePath(path, params = {}) {
 
 /**
  * Funcion: appendGymScopeToPath.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function appendGymScopeToPath(path, gymId) {
     if (!gymId || !path) {
@@ -680,11 +659,8 @@ function appendGymScopeToPath(path, gymId) {
 
 /**
  * Funcion: applyGymScopeToPath.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function applyGymScopeToPath(pathOrPaths, gymId) {
     if (!gymId) {
@@ -699,8 +675,8 @@ function applyGymScopeToPath(pathOrPaths, gymId) {
 }
 /**
  * Funcion: requestPath.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 async function requestPath(pathOrPaths, options) {
     if (Array.isArray(pathOrPaths)) {
@@ -792,11 +768,8 @@ export function validateResourceForm(resourceKey, values, mode) {
 
 /**
  * Funcion: hasInvalidEstadoError.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function hasInvalidEstadoError(error) {
     const details = error?.details;
@@ -813,11 +786,8 @@ function hasInvalidEstadoError(error) {
 
 /**
  * Funcion: getReservationStatusCandidates.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationStatusCandidates(status) {
     const normalized = String(status || "").trim().toLowerCase();
@@ -835,8 +805,8 @@ function getReservationStatusCandidates(status) {
 
 /**
  * Funcion: requestReservationWithStatusFallback.
- * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
- * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 async function requestReservationWithStatusFallback(path, method, payload, token) {
     try {

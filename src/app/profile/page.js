@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\profile\page.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -20,11 +20,8 @@ const GYM_NEXT_ALLOWED_KEY = "gym_next_allowed_change_at";
 
 /**
  * Funcion: daysUntilDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function daysUntilDate(isoDate) {
 	if (!isoDate) {
@@ -42,11 +39,8 @@ function daysUntilDate(isoDate) {
 
 /**
  * Funcion: plusTwoWeeks.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function plusTwoWeeks(isoDate) {
 	if (!isoDate) {
@@ -63,11 +57,8 @@ function plusTwoWeeks(isoDate) {
 
 /**
  * Funcion: formatLocalDateTime.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function formatLocalDateTime(isoDate) {
 	if (!isoDate) {
@@ -90,11 +81,8 @@ function formatLocalDateTime(isoDate) {
 
 /**
  * Funcion: parseIsoDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function parseIsoDate(isoDate) {
 	if (!isoDate) {
@@ -107,11 +95,8 @@ function parseIsoDate(isoDate) {
 
 /**
  * Funcion: pickMostRestrictiveDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function pickMostRestrictiveDate(...dates) {
 	const parsedDates = dates
@@ -128,11 +113,8 @@ function pickMostRestrictiveDate(...dates) {
 
 /**
  * Funcion: extractUserInfo.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractUserInfo(payload) {
 	const user = payload?.data ?? payload;
@@ -157,11 +139,8 @@ function extractUserInfo(payload) {
 
 /**
  * Funcion: normalizeAvatarList.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeAvatarList(payload) {
 	const source = payload?.images ?? payload?.data?.images ?? payload?.data ?? payload;
@@ -212,11 +191,8 @@ function normalizeAvatarList(payload) {
 
 /**
  * Funcion: ProfilePage.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function ProfilePage() {
 	const [user, setUser] = useState(null);
@@ -289,13 +265,10 @@ export default function ProfilePage() {
 	}, []);
 
 	/**
- * Funcion auxiliar: handleProfileIconChange.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: handleProfileIconChange.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleProfileIconChange = (iconId) => {
 		if (!user?.identity) {
 			return;
@@ -312,13 +285,10 @@ export default function ProfilePage() {
 	};
 
 	/**
- * Funcion auxiliar: handleChangeGym.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: handleChangeGym.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleChangeGym = async (event) => {
 		event.preventDefault();
 		setError("");
@@ -389,13 +359,10 @@ export default function ProfilePage() {
 	};
 
 	/**
- * Funcion auxiliar: toggleGymForm.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: toggleGymForm.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const toggleGymForm = () => {
 		setShowGymForm((prev) => !prev);
 		setError("");
@@ -403,13 +370,10 @@ export default function ProfilePage() {
 	};
 
 	/**
- * Funcion auxiliar: toggleIconPicker.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: toggleIconPicker.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const toggleIconPicker = () => {
 		setShowIconPicker((prev) => !prev);
 	};

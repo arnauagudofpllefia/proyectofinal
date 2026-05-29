@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\_components\NotificationBellButton.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -10,11 +10,8 @@ import { getUnreadNotificationsCount } from "@/lib/api";
 
 /**
  * Funcion: NotificationBellButton.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function NotificationBellButton() {
 	const [unreadCount, setUnreadCount] = useState(0);
@@ -24,13 +21,10 @@ export default function NotificationBellButton() {
 		const token = localStorage.getItem("auth_token") || "";
 
 		/**
- * Funcion auxiliar: loadUnreadCount.
-
-		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-		 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-		 */
+ * Funcion: loadUnreadCount.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 		const loadUnreadCount = async () => {
 			if (!token) {
 				setLoading(false);
@@ -51,13 +45,10 @@ export default function NotificationBellButton() {
 		const timer = setTimeout(loadUnreadCount, 0);
 
 		/**
- * Funcion auxiliar: handleUpdate.
-
-		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-		 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-		 */
+ * Funcion: handleUpdate.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 		const handleUpdate = () => loadUnreadCount();
 		window.addEventListener("storage", handleUpdate);
 		window.addEventListener(getNotificationsUpdateEventName(), handleUpdate);

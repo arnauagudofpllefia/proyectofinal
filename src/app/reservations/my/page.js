@@ -1,5 +1,5 @@
 ﻿// Resumen del archivo: src\app\reservations\my\page.js
-// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -13,11 +13,8 @@ const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
 /**
  * Funcion: extractText.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractText(value, fallback = "") {
 	if (typeof value === "string") {
@@ -43,11 +40,8 @@ function extractText(value, fallback = "") {
 
 /**
  * Funcion: extractDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractDate(dateSource) {
 	if (typeof dateSource !== "string" || !dateSource) {
@@ -63,11 +57,8 @@ function extractDate(dateSource) {
 
 /**
  * Funcion: extractHour.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function extractHour(timeSource) {
 	if (typeof timeSource !== "string" || !timeSource) {
@@ -80,11 +71,8 @@ function extractHour(timeSource) {
 
 /**
  * Funcion: isValidDate.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function isValidDate(value) {
 	return value instanceof Date && Number.isFinite(value.getTime());
@@ -92,11 +80,8 @@ function isValidDate(value) {
 
 /**
  * Funcion: parseDateTime.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function parseDateTime(value) {
 	if (typeof value !== "string" || !value.trim()) {
@@ -113,11 +98,8 @@ function parseDateTime(value) {
 
 /**
  * Funcion: parseDateHour.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function parseDateHour(dateValue, hourValue) {
 	if (typeof dateValue !== "string" || typeof hourValue !== "string") {
@@ -155,11 +137,8 @@ function parseDateHour(dateValue, hourValue) {
 
 /**
  * Funcion: getReservationStartAt.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationStartAt(item) {
 	const directCandidates = [
@@ -185,11 +164,8 @@ function getReservationStartAt(item) {
 
 /**
  * Funcion: getReservationEndAt.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function getReservationEndAt(item) {
 	const directCandidates = [
@@ -210,11 +186,8 @@ function getReservationEndAt(item) {
 
 /**
  * Funcion: normalizeMyReservations.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 function normalizeMyReservations(payload) {
 	const data = payload?.data ?? payload;
@@ -243,11 +216,8 @@ function normalizeMyReservations(payload) {
 
 /**
  * Funcion: MyReservationsPage.
-
- * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
-
- * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
-
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
  */
 export default function MyReservationsPage() {
 	const router = useRouter();
@@ -359,13 +329,10 @@ export default function MyReservationsPage() {
 		}
 
 		/**
- * Funcion auxiliar: setupWebNotifications.
-
-		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-		 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-		 */
+ * Funcion: setupWebNotifications.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 		const setupWebNotifications = async () => {
 			try {
 				await navigator.serviceWorker.register("/sw-notifications.js", {
@@ -445,13 +412,10 @@ export default function MyReservationsPage() {
 			}
 
 			/**
- * Funcion auxiliar: triggerReminder.
-
-			 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-			 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-			 */
+ * Funcion: triggerReminder.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 			const triggerReminder = () => {
 				remindedReservationsRef.current.add(reservationId);
 				addAppNotification({
@@ -529,13 +493,10 @@ export default function MyReservationsPage() {
 	}, [searchParams, pathname, router, cancelReservationById]);
 
 	/**
- * Funcion auxiliar: openCancelModal.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: openCancelModal.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const openCancelModal = (reservation) => {
 		setReservationToCancel(reservation);
 		setApiError("");
@@ -543,13 +504,10 @@ export default function MyReservationsPage() {
 	};
 
 	/**
- * Funcion auxiliar: closeCancelModal.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: closeCancelModal.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const closeCancelModal = () => {
 		if (cancelingId) {
 			return;
@@ -559,13 +517,10 @@ export default function MyReservationsPage() {
 	};
 
 	/**
- * Funcion auxiliar: handleReminderAccept.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: handleReminderAccept.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleReminderAccept = () => {
 		if (reminderReservation) {
 			addAppNotification({
@@ -581,13 +536,10 @@ export default function MyReservationsPage() {
 	};
 
 	/**
- * Funcion auxiliar: handleReminderReject.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: handleReminderReject.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleReminderReject = async () => {
 		if (!reminderReservation) {
 			return;
@@ -600,13 +552,10 @@ export default function MyReservationsPage() {
 	};
 
 	/**
- * Funcion auxiliar: handleCancelReservation.
-
-	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
-
-	 * Contexto: se usa como callback o helper dentro del flujo del componente.
-
-	 */
+ * Funcion: handleCancelReservation.
+ * Que hace: encapsula una tarea concreta dentro de este modulo para que el flujo principal sea facil de seguir.
+ * Por que existe: evita duplicar logica y permite mantener o ampliar el comportamiento sin romper otras partes.
+ */
 	const handleCancelReservation = async () => {
 		if (!reservationToCancel) {
 			return;
