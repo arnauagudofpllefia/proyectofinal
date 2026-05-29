@@ -450,8 +450,10 @@ Rol: user
 3. Pulsa el botón Iniciar sesión.
 4. Si las credenciales son válidas, accederás a la aplicación.
 
-Consejo:
-Si no quieres registrarte ahora, puedes usar uno de los usuarios de prueba del apartado 10.1.
+
+![Logo de GymNau](./public/logoGymNau.png)
+
+
 
 
 
