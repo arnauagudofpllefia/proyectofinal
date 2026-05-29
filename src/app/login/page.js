@@ -88,7 +88,7 @@ export default function LoginPage() {
 							onChange={handleChange}
 							required
 							className="field-input mt-1"
-							placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+							placeholder="********"
 						/>
 					</label>
 
