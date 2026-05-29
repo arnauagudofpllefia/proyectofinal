@@ -98,6 +98,8 @@ Metodología **iterativa-incremental** inspirada en Scrum:
 
 ### 5.1 Historias de usuario (resumen)
 
+El detalle completo de cada historia de usuario se encuentra en la carpeta `historias/` (archivos `historia1.md` a `historia12.md`).
+
 - **Historia 1** Diseño de la estructura de datos del gimnasio.
 - **Historia 2** Sistema de autenticación de usuarios.
 - **Historia 3** Sistema de roles y permisos.
