@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\proxy.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 import { NextResponse } from "next/server";
 
 const PUBLIC_ROUTES = new Set(["/login", "/register"]);
@@ -18,3 +21,4 @@ export function proxy(request) {
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
+

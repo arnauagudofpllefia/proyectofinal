@@ -1,9 +1,20 @@
+﻿// Resumen del archivo: src\app\admin\_components\AdminGymScopePicker.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { listAdminResource, normalizeResourceList } from "@/lib/admin";
 import { normalizeGymId, readStoredAdminGymId, writeStoredAdminGymId } from "@/lib/gym";
 
+/**
+ * Funcion: AdminGymScopePicker.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function AdminGymScopePicker() {
     const [gymOptions, setGymOptions] = useState([]);
     const [selectedGymId, setSelectedGymId] = useState("");
@@ -77,3 +88,4 @@ export default function AdminGymScopePicker() {
         </section>
     );
 }
+

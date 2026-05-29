@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\_components\AuthSessionGuard.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect } from "react";
@@ -6,11 +9,27 @@ import { getCurrentUser } from "@/lib/api";
 
 const PUBLIC_ROUTES = new Set(["/login", "/register"]);
 
+/**
+ * Funcion: clearClientSession.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function clearClientSession() {
   localStorage.removeItem("auth_token");
   document.cookie = "auth_token=; path=/; max-age=0; samesite=lax";
 }
 
+/**
+ * Funcion: AuthSessionGuard.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function AuthSessionGuard() {
   const pathname = usePathname();
   const router = useRouter();
@@ -64,3 +83,5 @@ export default function AuthSessionGuard() {
 
   return null;
 }
+
+

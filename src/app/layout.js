@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\layout.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthSessionGuard from "@/app/_components/AuthSessionGuard";
@@ -24,6 +27,11 @@ export const metadata = {
   },
 };
 
+/**
+ * Funcion: RootLayout.
+ * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
+ * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ */
 export default async function RootLayout({ children }) {
   const { isAuthenticated, isAdmin } = await getServerSessionInfo();
   const navItems = isAuthenticated
@@ -69,3 +77,5 @@ export default async function RootLayout({ children }) {
     </html>
   );
 }
+
+

@@ -1,9 +1,20 @@
+﻿// Resumen del archivo: src\app\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 import Link from "next/link";
 import { getGyms, getMachines, getMyReservations } from "@/lib/api";
 import { getServerSessionInfo } from "@/lib/session";
 import { filterItemsByGym, getGymIdFromUser, getGymNameFromUser, normalizeGymId } from "@/lib/gym";
 import { resolvePublicImageUrl } from "@/lib/image";
 
+/**
+ * Funcion: extractList.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractList(result) {
   if (!result || result.status !== "fulfilled") return [];
   const data = result.value?.data ?? result.value;
@@ -15,6 +26,14 @@ function extractList(result) {
   return [];
 }
 
+/**
+ * Funcion: getMachineImage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getMachineImage(machine) {
   return resolvePublicImageUrl(
     machine?.image_url ||
@@ -26,10 +45,23 @@ function getMachineImage(machine) {
   );
 }
 
+/**
+ * Funcion: getMachineStatus.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getMachineStatus(machine) {
   return String(machine?.status ?? machine?.estado ?? "Disponible");
 }
 
+/**
+ * Funcion: Home.
+ * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
+ * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ */
 export default async function Home() {
   const { token, isAdmin, isAuthenticated, user } = await getServerSessionInfo();
 
@@ -117,7 +149,7 @@ export default async function Home() {
             </h2>
           </div>
           <Link href="/machines" className="text-sm font-medium text-(--foreground) underline-offset-4 hover:underline">
-            Ver todas →
+            Ver todas â†’
           </Link>
         </div>
 
@@ -173,6 +205,14 @@ export default async function Home() {
   );
 }
 
+/**
+ * Funcion: Stat.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function Stat({ label, value, accent }) {
   return (
     <div className="stat-tile">
@@ -186,3 +226,5 @@ function Stat({ label, value, accent }) {
     </div>
   );
 }
+
+

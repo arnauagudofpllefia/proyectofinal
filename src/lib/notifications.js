@@ -1,11 +1,30 @@
+﻿// Resumen del archivo: src\lib\notifications.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 const STORAGE_KEY = "gymnau_notifications";
 const MAX_ITEMS = 80;
 const UPDATE_EVENT = "gymnau:notifications-updated";
 
+/**
+ * Funcion: isBrowser.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function isBrowser() {
 	return typeof window !== "undefined" && typeof localStorage !== "undefined";
 }
 
+/**
+ * Funcion: safeParse.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function safeParse(rawValue) {
 	if (!rawValue) {
 		return [];
@@ -19,6 +38,14 @@ function safeParse(rawValue) {
 	}
 }
 
+/**
+ * Funcion: emitUpdate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function emitUpdate() {
 	if (!isBrowser()) {
 		return;
@@ -110,3 +137,5 @@ export function clearAppNotifications() {
 	localStorage.removeItem(STORAGE_KEY);
 	emitUpdate();
 }
+
+

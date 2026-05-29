@@ -1,19 +1,46 @@
+﻿// Resumen del archivo: src\app\login\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useState } from "react";
 import { loginRequest } from "@/lib/api";
 
+/**
+ * Funcion: LoginPage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function LoginPage() {
 	const [form, setForm] = useState({ email: "", password: "" });
 	const [loading, setLoading] = useState(false);
 	const [message, setMessage] = useState("");
 	const [error, setError] = useState("");
 
+	/**
+ * Funcion auxiliar: handleChange.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleChange = (event) => {
 		const { name, value } = event.target;
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
+	/**
+ * Funcion auxiliar: handleSubmit.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		setLoading(true);
@@ -70,7 +97,7 @@ export default function LoginPage() {
 							onChange={handleChange}
 							required
 							className="field-input mt-1"
-							placeholder="••••••••"
+							placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
 						/>
 					</label>
 
@@ -85,3 +112,4 @@ export default function LoginPage() {
 		</section>
 	);
 }
+

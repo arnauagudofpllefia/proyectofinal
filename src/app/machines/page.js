@@ -1,4 +1,7 @@
-﻿"use client";
+﻿// Resumen del archivo: src\app\machines\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,6 +15,14 @@ const machinesFallback = [
 	{ id: "3", name: "Leg Press V2", status: "Mantenimiento", zone: "Fuerza", gymId: "1", description: "" },
 ];
 
+/**
+ * Funcion: normalizeMachines.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeMachines(payload) {
 	const data = payload?.data ?? payload;
 	if (!Array.isArray(data)) {
@@ -31,6 +42,14 @@ function normalizeMachines(payload) {
 	}));
 }
 
+/**
+ * Funcion: MachinesPage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function MachinesPage() {
 	const [machines, setMachines] = useState([]);
 	const [userGymId, setUserGymId] = useState("");
@@ -161,5 +180,7 @@ export default function MachinesPage() {
 		</section>
 	);
 }
+
+
 
 

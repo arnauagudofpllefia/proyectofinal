@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\notifications\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -8,6 +11,14 @@ import {
 } from "@/lib/api";
 import { getNotificationsUpdateEventName } from "@/lib/notifications";
 
+/**
+ * Funcion: formatDateTime.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function formatDateTime(value) {
 	if (!value) {
 		return "Sin fecha";
@@ -27,6 +38,14 @@ function formatDateTime(value) {
 	});
 }
 
+/**
+ * Funcion: NotificationsPage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function NotificationsPage() {
 	const [notifications, setNotifications] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -34,6 +53,14 @@ export default function NotificationsPage() {
 	useEffect(() => {
 		const token = localStorage.getItem("auth_token") || "";
 
+		/**
+ * Funcion auxiliar: loadNotifications.
+
+		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+		 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+		 */
 		const loadNotifications = async () => {
 			if (!token) {
 				setLoading(false);
@@ -53,6 +80,14 @@ export default function NotificationsPage() {
 
 		loadNotifications();
 
+		/**
+ * Funcion auxiliar: handleUpdate.
+
+		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+		 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+		 */
 		const handleUpdate = () => loadNotifications();
 		window.addEventListener("storage", handleUpdate);
 		window.addEventListener(getNotificationsUpdateEventName(), handleUpdate);
@@ -68,6 +103,14 @@ export default function NotificationsPage() {
 		[notifications]
 	);
 
+	/**
+ * Funcion auxiliar: handleMarkAllAsRead.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleMarkAllAsRead = async () => {
 		const token = localStorage.getItem("auth_token") || "";
 		if (!token) return;
@@ -79,10 +122,18 @@ export default function NotificationsPage() {
 			);
 			window.dispatchEvent(new Event(getNotificationsUpdateEventName()));
 		} catch {
-			console.error("Error al marcar como leídas");
+			console.error("Error al marcar como leÃ­das");
 		}
 	};
 
+	/**
+ * Funcion auxiliar: handleMarkAsRead.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleMarkAsRead = async (notificationId) => {
 		const token = localStorage.getItem("auth_token") || "";
 		if (!token) return;
@@ -98,7 +149,7 @@ export default function NotificationsPage() {
 			);
 			window.dispatchEvent(new Event(getNotificationsUpdateEventName()));
 		} catch {
-			console.error("Error al marcar como leída");
+			console.error("Error al marcar como leÃ­da");
 		}
 	};
 
@@ -157,3 +208,5 @@ export default function NotificationsPage() {
 		</section>
 	);
 }
+
+

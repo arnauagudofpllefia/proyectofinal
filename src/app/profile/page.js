@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\profile\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -15,6 +18,14 @@ import {
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 const GYM_NEXT_ALLOWED_KEY = "gym_next_allowed_change_at";
 
+/**
+ * Funcion: daysUntilDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function daysUntilDate(isoDate) {
 	if (!isoDate) {
 		return 0;
@@ -29,6 +40,14 @@ function daysUntilDate(isoDate) {
 	return diff > 0 ? Math.ceil(diff / (24 * 60 * 60 * 1000)) : 0;
 }
 
+/**
+ * Funcion: plusTwoWeeks.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function plusTwoWeeks(isoDate) {
 	if (!isoDate) {
 		return "";
@@ -42,6 +61,14 @@ function plusTwoWeeks(isoDate) {
 	return new Date(parsed + TWO_WEEKS_MS).toISOString();
 }
 
+/**
+ * Funcion: formatLocalDateTime.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function formatLocalDateTime(isoDate) {
 	if (!isoDate) {
 		return "";
@@ -61,6 +88,14 @@ function formatLocalDateTime(isoDate) {
 	});
 }
 
+/**
+ * Funcion: parseIsoDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function parseIsoDate(isoDate) {
 	if (!isoDate) {
 		return null;
@@ -70,6 +105,14 @@ function parseIsoDate(isoDate) {
 	return Number.isNaN(parsed) ? null : parsed;
 }
 
+/**
+ * Funcion: pickMostRestrictiveDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function pickMostRestrictiveDate(...dates) {
 	const parsedDates = dates
 		.map((date) => ({ date, parsed: parseIsoDate(date) }))
@@ -83,6 +126,14 @@ function pickMostRestrictiveDate(...dates) {
 	return parsedDates[0].date;
 }
 
+/**
+ * Funcion: extractUserInfo.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractUserInfo(payload) {
 	const user = payload?.data ?? payload;
 	const lastGymChangeAt =
@@ -104,6 +155,14 @@ function extractUserInfo(payload) {
 	};
 }
 
+/**
+ * Funcion: normalizeAvatarList.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeAvatarList(payload) {
 	const source = payload?.images ?? payload?.data?.images ?? payload?.data ?? payload;
 	if (!Array.isArray(source)) {
@@ -151,6 +210,14 @@ function normalizeAvatarList(payload) {
 		}));
 }
 
+/**
+ * Funcion: ProfilePage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function ProfilePage() {
 	const [user, setUser] = useState(null);
 	const [gyms, setGyms] = useState([]);
@@ -221,6 +288,14 @@ export default function ProfilePage() {
 		return () => clearTimeout(timer);
 	}, []);
 
+	/**
+ * Funcion auxiliar: handleProfileIconChange.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleProfileIconChange = (iconId) => {
 		if (!user?.identity) {
 			return;
@@ -236,6 +311,14 @@ export default function ProfilePage() {
 		}, 1800);
 	};
 
+	/**
+ * Funcion auxiliar: handleChangeGym.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleChangeGym = async (event) => {
 		event.preventDefault();
 		setError("");
@@ -305,12 +388,28 @@ export default function ProfilePage() {
 		}
 	};
 
+	/**
+ * Funcion auxiliar: toggleGymForm.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const toggleGymForm = () => {
 		setShowGymForm((prev) => !prev);
 		setError("");
 		setSuccess("");
 	};
 
+	/**
+ * Funcion auxiliar: toggleIconPicker.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const toggleIconPicker = () => {
 		setShowIconPicker((prev) => !prev);
 	};
@@ -432,3 +531,5 @@ export default function ProfilePage() {
 		</section>
 	);
 }
+
+

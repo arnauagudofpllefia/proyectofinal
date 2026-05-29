@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\lib\profileIcon.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 import { resolvePublicImageUrl } from "@/lib/image";
 
 export const DEFAULT_PROFILE_ICON_ID = "avatar4";
@@ -23,10 +26,26 @@ const LEGACY_GLYPH_ICON = {
 
 const AVATAR_ID_PATTERN = /^avatar(?:10|[1-9])(?:\.[a-z0-9]+)?$/i;
 
+/**
+ * Funcion: isAvatarId.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function isAvatarId(iconId) {
   return AVATAR_ID_PATTERN.test(String(iconId || "").trim());
 }
 
+/**
+ * Funcion: normalizeIconId.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeIconId(iconId) {
   const normalized = String(iconId || "").trim();
   if (!normalized) {
@@ -36,6 +55,14 @@ function normalizeIconId(iconId) {
   return isAvatarId(normalized) ? normalized : DEFAULT_PROFILE_ICON_ID;
 }
 
+/**
+ * Funcion: getStorageKey.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getStorageKey(identity) {
   return `profile_icon:${identity || "anonymous"}`;
 }
@@ -89,3 +116,4 @@ export function getProfileIconDefinition(iconId) {
 
   return LEGACY_GLYPH_ICON;
 }
+

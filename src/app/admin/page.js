@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\admin\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import Link from "next/link";
@@ -8,6 +11,14 @@ import { ADMIN_GYM_SCOPE_EVENT, filterItemsByGym, normalizeGymId, readStoredAdmi
 const resources = getAdminResources();
 const gymScopedResourceKeys = new Set(["machines", "reservations", "users"]);
 
+/**
+ * Funcion: AdminHomePage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function AdminHomePage() {
     const [counts, setCounts] = useState({});
     const [errorMessage, setErrorMessage] = useState("");
@@ -18,6 +29,14 @@ export default function AdminHomePage() {
             setSelectedGymScopeId(readStoredAdminGymId());
         }, 0);
 
+        /**
+ * Funcion auxiliar: handleGymScopeChange.
+
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+         */
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -94,7 +113,7 @@ export default function AdminHomePage() {
                         <p className="mt-2 text-3xl font-semibold text-[var(--primary-strong)]">{counts[resource.key] ?? "--"}</p>
                         <p className="mt-2 text-sm text-[var(--muted)]">{resource.description}</p>
                         <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">
-                            Abrir gestion →
+                            Abrir gestion â†’
                         </p>
                     </Link>
                 ))}
@@ -102,3 +121,4 @@ export default function AdminHomePage() {
         </section>
     );
 }
+

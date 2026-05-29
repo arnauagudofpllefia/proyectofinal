@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\admin\estadisticas\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -22,10 +25,26 @@ import {
     readStoredAdminGymId,
 } from "@/lib/gym";
 
+/**
+ * Funcion: formatHourLabel.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function formatHourLabel(hourValue) {
     return `${String(hourValue).padStart(2, "0")}:00`;
 }
 
+/**
+ * Funcion: getReservationHour.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getReservationHour(reservation) {
     const candidates = [
         reservation?.startTime,
@@ -50,6 +69,14 @@ function getReservationHour(reservation) {
     return "";
 }
 
+/**
+ * Funcion: getReservationDateValue.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getReservationDateValue(reservation) {
     const candidates = [
         reservation?.date,
@@ -72,6 +99,14 @@ function getReservationDateValue(reservation) {
     return "";
 }
 
+/**
+ * Funcion: getWeekdayKey.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getWeekdayKey(dateValue) {
     if (!dateValue) {
         return "";
@@ -85,10 +120,26 @@ function getWeekdayKey(dateValue) {
     return String(parsedDate.getDay());
 }
 
+/**
+ * Funcion: getMachineIdentifier.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getMachineIdentifier(reservation) {
     return String(reservation?.machineId ?? reservation?.maquina_id ?? reservation?.machine_id ?? "").trim();
 }
 
+/**
+ * Funcion: buildMachineLookup.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function buildMachineLookup(machines) {
     return new Map(
         machines.map((machine) => {
@@ -99,6 +150,14 @@ function buildMachineLookup(machines) {
     );
 }
 
+/**
+ * Funcion: aggregateCounts.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function aggregateCounts(items, getKey, getLabel) {
     const counts = new Map();
 
@@ -122,6 +181,14 @@ function aggregateCounts(items, getKey, getLabel) {
     });
 }
 
+/**
+ * Funcion: ChartShell.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function ChartShell({ title, subtitle, children, emptyLabel, loading }) {
     return (
         <article className="surface-card p-5">
@@ -143,6 +210,14 @@ function ChartShell({ title, subtitle, children, emptyLabel, loading }) {
     );
 }
 
+/**
+ * Funcion: ChartTooltip.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function ChartTooltip({ active, payload, label, suffix = "reservas" }) {
     if (!active || !payload?.length) {
         return null;
@@ -158,6 +233,14 @@ function ChartTooltip({ active, payload, label, suffix = "reservas" }) {
     );
 }
 
+/**
+ * Funcion: StatCard.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function StatCard({ label, value, hint }) {
     return (
         <article className="surface-card p-5">
@@ -168,6 +251,14 @@ function StatCard({ label, value, hint }) {
     );
 }
 
+/**
+ * Funcion: AdminStatisticsPage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function AdminStatisticsPage() {
     const [selectedGymScopeId, setSelectedGymScopeId] = useState("");
     const [reservations, setReservations] = useState([]);
@@ -180,6 +271,14 @@ export default function AdminStatisticsPage() {
             setSelectedGymScopeId(readStoredAdminGymId());
         }, 0);
 
+        /**
+ * Funcion auxiliar: handleGymScopeChange.
+
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+         */
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -203,6 +302,14 @@ export default function AdminStatisticsPage() {
 
         let cancelled = false;
 
+        /**
+ * Funcion auxiliar: loadStatistics.
+
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+         */
         const loadStatistics = async () => {
             setLoading(true);
             setErrorMessage("");
@@ -256,6 +363,14 @@ export default function AdminStatisticsPage() {
 
     const machineLookup = useMemo(() => buildMachineLookup(machines), [machines]);
 
+    /**
+ * Funcion auxiliar: getResolvedMachineLabel.
+
+     * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+     * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+     */
     const getResolvedMachineLabel = (reservation, key) => {
         const fallbackName = String(reservation?.machineName ?? reservation?.maquina_nombre ?? key ?? "Maquina sin nombre").trim();
         return machineLookup.get(key) || fallbackName;
@@ -466,3 +581,4 @@ export default function AdminStatisticsPage() {
         </section>
     );
 }
+

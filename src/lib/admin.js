@@ -1,6 +1,17 @@
+﻿// Resumen del archivo: src\lib\admin.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 import { apiRequest, apiRequestWithFallback } from "@/lib/api";
 import { resolvePublicImageUrl } from "@/lib/image";
 
+/**
+ * Funcion: normalizeCollection.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeCollection(payload) {
     const data = payload?.data ?? payload;
 
@@ -71,6 +82,14 @@ function normalizeCollection(payload) {
     return [];
 }
 
+/**
+ * Funcion: normalizeId.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeId(value, fallback) {
     if (value === undefined || value === null || value === "") {
         return fallback;
@@ -79,6 +98,14 @@ function normalizeId(value, fallback) {
     return String(value);
 }
 
+/**
+ * Funcion: extractDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractDate(value) {
     if (!value) {
         return "";
@@ -88,6 +115,14 @@ function extractDate(value) {
     return match ? match[1] : "";
 }
 
+/**
+ * Funcion: extractTime.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractTime(value) {
     if (!value) {
         return "";
@@ -97,6 +132,14 @@ function extractTime(value) {
     return match ? match[1] : "";
 }
 
+/**
+ * Funcion: extractEntityName.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractEntityName(value) {
     if (!value) {
         return "";
@@ -183,7 +226,7 @@ const adminResources = {
             return item.name || "Gimnasio sin nombre";
         },
         getItemMeta(item) {
-            return [item.address, item.phone].filter(Boolean).join(" · ");
+            return [item.address, item.phone].filter(Boolean).join(" Â· ");
         },
     },
     machines: {
@@ -260,7 +303,17 @@ const adminResources = {
             const gymIdRaw = values.gymId.trim();
             const gymId = Number.parseInt(gymIdRaw, 10);
             const status = values.status.trim();
+            /**
+             * Funcion auxiliar: description.
+             * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+             * Contexto: se usa como callback o helper dentro del flujo del componente.
+             */
             const description = (values.description ?? "").trim();
+            /**
+             * Funcion auxiliar: imageUrl.
+             * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+             * Contexto: se usa como callback o helper dentro del flujo del componente.
+             */
             const imageUrl = (values.imageUrl ?? "").trim();
 
             return {
@@ -293,7 +346,7 @@ const adminResources = {
             return item.name || "Maquina sin nombre";
         },
         getItemMeta(item) {
-            return [item.gymId ? `Gym ${item.gymId}` : "", item.status].filter(Boolean).join(" · ");
+            return [item.gymId ? `Gym ${item.gymId}` : "", item.status].filter(Boolean).join(" Â· ");
         },
     },
     reservations: {
@@ -452,7 +505,7 @@ const adminResources = {
                 item.status,
             ]
                 .filter(Boolean)
-                .join(" · ");
+                .join(" Â· ");
         },
     },
     users: {
@@ -568,7 +621,7 @@ const adminResources = {
             return item.name || "Usuario sin nombre";
         },
         getItemMeta(item) {
-            return [item.email, item.phone, item.role].filter(Boolean).join(" · ");
+            return [item.email, item.phone, item.role].filter(Boolean).join(" Â· ");
         },
         validate(values, mode) {
             const errors = [];
@@ -588,6 +641,14 @@ const adminResources = {
     },
 };
 
+/**
+ * Funcion: resolvePath.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function resolvePath(path, params = {}) {
     if (!path) {
         return "";
@@ -600,6 +661,14 @@ function resolvePath(path, params = {}) {
     return path.replaceAll("{id}", encodeURIComponent(String(params.id ?? "")));
 }
 
+/**
+ * Funcion: appendGymScopeToPath.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function appendGymScopeToPath(path, gymId) {
     if (!gymId || !path) {
         return path;
@@ -609,6 +678,14 @@ function appendGymScopeToPath(path, gymId) {
     return `${path}${separator}gimnasio_id=${encodeURIComponent(gymId)}&gym_id=${encodeURIComponent(gymId)}`;
 }
 
+/**
+ * Funcion: applyGymScopeToPath.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function applyGymScopeToPath(pathOrPaths, gymId) {
     if (!gymId) {
         return pathOrPaths;
@@ -620,6 +697,11 @@ function applyGymScopeToPath(pathOrPaths, gymId) {
 
     return appendGymScopeToPath(pathOrPaths, gymId);
 }
+/**
+ * Funcion: requestPath.
+ * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
+ * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ */
 async function requestPath(pathOrPaths, options) {
     if (Array.isArray(pathOrPaths)) {
         return apiRequestWithFallback(pathOrPaths, options);
@@ -708,6 +790,14 @@ export function validateResourceForm(resourceKey, values, mode) {
     return errors;
 }
 
+/**
+ * Funcion: hasInvalidEstadoError.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function hasInvalidEstadoError(error) {
     const details = error?.details;
     const estadoErrors = details?.estado;
@@ -721,6 +811,14 @@ function hasInvalidEstadoError(error) {
     );
 }
 
+/**
+ * Funcion: getReservationStatusCandidates.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getReservationStatusCandidates(status) {
     const normalized = String(status || "").trim().toLowerCase();
     const byIntent = {
@@ -735,6 +833,11 @@ function getReservationStatusCandidates(status) {
     return [...new Set([normalized, ...specific, ...defaults].filter(Boolean))];
 }
 
+/**
+ * Funcion: requestReservationWithStatusFallback.
+ * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
+ * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ */
 async function requestReservationWithStatusFallback(path, method, payload, token) {
     try {
         return await requestPath(path, {
@@ -907,3 +1010,4 @@ export async function deleteAdminResource(resourceKey, id, token) {
         token,
     });
 }
+

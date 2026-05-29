@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\admin\_components\AdminScopedNav.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import Link from "next/link";
@@ -12,6 +15,14 @@ const gymScopedNavItems = [
     { href: "/admin/users", label: "Usuarios" },
 ];
 
+/**
+ * Funcion: AdminScopedNav.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function AdminScopedNav() {
     const [selectedGymScopeId, setSelectedGymScopeId] = useState("");
 
@@ -20,6 +31,14 @@ export default function AdminScopedNav() {
             setSelectedGymScopeId(readStoredAdminGymId());
         }, 0);
 
+        /**
+ * Funcion auxiliar: handleGymScopeChange.
+
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+         */
         const handleGymScopeChange = (event) => {
             const nextGymId = normalizeGymId(event?.detail?.gymId ?? readStoredAdminGymId());
             setSelectedGymScopeId(nextGymId);
@@ -63,3 +82,4 @@ export default function AdminScopedNav() {
         </section>
     );
 }
+

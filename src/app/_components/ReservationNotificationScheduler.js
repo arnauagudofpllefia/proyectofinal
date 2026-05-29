@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\_components\ReservationNotificationScheduler.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -8,10 +11,26 @@ const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 const POLL_INTERVAL_IN_MS = 60 * 1000;
 const REMINDER_STORAGE_KEY = "gymnau_reservation_reminders_sent";
 
+/**
+ * Funcion: isValidDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function isValidDate(value) {
 	return value instanceof Date && Number.isFinite(value.getTime());
 }
 
+/**
+ * Funcion: parseDateTime.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function parseDateTime(value) {
 	if (typeof value !== "string" || !value.trim()) {
 		return null;
@@ -21,6 +40,14 @@ function parseDateTime(value) {
 	return isValidDate(parsed) ? parsed : null;
 }
 
+/**
+ * Funcion: parseDateHour.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function parseDateHour(dateValue, hourValue) {
 	if (typeof dateValue !== "string" || typeof hourValue !== "string") {
 		return null;
@@ -53,6 +80,14 @@ function parseDateHour(dateValue, hourValue) {
 	return isValidDate(parsed) ? parsed : null;
 }
 
+/**
+ * Funcion: getReservationStartDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getReservationStartDate(item) {
 	const candidates = [
 		item?.start_time,
@@ -72,6 +107,14 @@ function getReservationStartDate(item) {
 	return parseDateHour(item?.date ?? item?.fecha, item?.hour ?? item?.hora);
 }
 
+/**
+ * Funcion: getSentReminderIds.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getSentReminderIds() {
 	if (typeof window === "undefined") {
 		return new Set();
@@ -86,6 +129,14 @@ function getSentReminderIds() {
 	}
 }
 
+/**
+ * Funcion: setSentReminderIds.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function setSentReminderIds(idsSet) {
 	if (typeof window === "undefined") {
 		return;
@@ -94,6 +145,14 @@ function setSentReminderIds(idsSet) {
 	localStorage.setItem(REMINDER_STORAGE_KEY, JSON.stringify(Array.from(idsSet)));
 }
 
+/**
+ * Funcion: normalizeReservation.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeReservation(item, index) {
 	return {
 		id: String(item?.id ?? item?.code ?? `reservation-${index + 1}`),
@@ -105,6 +164,14 @@ function normalizeReservation(item, index) {
 	};
 }
 
+/**
+ * Funcion: extractReservationsArray.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractReservationsArray(payload) {
 	const directCandidates = [
 		payload?.data,
@@ -122,6 +189,11 @@ function extractReservationsArray(payload) {
 	return [];
 }
 
+/**
+ * Funcion: showSystemNotification.
+ * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
+ * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ */
 async function showSystemNotification(reservation) {
 	if (!("Notification" in window) || !("serviceWorker" in navigator)) {
 		return false;
@@ -157,6 +229,14 @@ async function showSystemNotification(reservation) {
 	return true;
 }
 
+/**
+ * Funcion: ReservationNotificationScheduler.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function ReservationNotificationScheduler() {
 	const timeoutIdsRef = useRef([]);
 
@@ -186,6 +266,14 @@ export default function ReservationNotificationScheduler() {
 
 		let cancelled = false;
 
+		/**
+ * Funcion auxiliar: clearTimeouts.
+
+		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+		 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+		 */
 		const clearTimeouts = () => {
 			for (const timeoutId of timeoutIdsRef.current) {
 				clearTimeout(timeoutId);
@@ -193,6 +281,14 @@ export default function ReservationNotificationScheduler() {
 			timeoutIdsRef.current = [];
 		};
 
+		/**
+ * Funcion auxiliar: scheduleReminders.
+
+		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+		 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+		 */
 		const scheduleReminders = async () => {
 			clearTimeouts();
 
@@ -224,6 +320,14 @@ export default function ReservationNotificationScheduler() {
 						continue;
 					}
 
+					/**
+ * Funcion auxiliar: triggerReminder.
+
+					 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+					 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+					 */
 					const triggerReminder = () => {
 						if (cancelled) {
 							return;
@@ -256,6 +360,11 @@ export default function ReservationNotificationScheduler() {
 		};
 
 		void scheduleReminders();
+		/**
+		 * Funcion auxiliar: handleVisibility.
+		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+		 * Contexto: se usa como callback o helper dentro del flujo del componente.
+		 */
 		const handleVisibility = () => {
 			if (document.visibilityState === "visible") {
 				void scheduleReminders();
@@ -278,3 +387,5 @@ export default function ReservationNotificationScheduler() {
 
 	return null;
 }
+
+

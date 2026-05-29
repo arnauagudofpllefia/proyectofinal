@@ -1,11 +1,27 @@
+﻿// Resumen del archivo: src\lib\api.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const SANCTUM_CSRF_URL = process.env.NEXT_PUBLIC_SANCTUM_CSRF_URL || "";
 
+/**
+ * Funcion: getApiUrl.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getApiUrl(path) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${normalizedPath}`;
 }
 
+/**
+ * Funcion: parseResponse.
+ * Proposito: encapsular comportamiento concreto para que el flujo principal sea mas facil de leer.
+ * Uso: se ejecuta dentro de este modulo como parte de la logica de UI, datos o validaciones.
+ */
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
@@ -262,3 +278,5 @@ export async function markAllNotificationsAsRead(token) {
     token,
   });
 }
+
+

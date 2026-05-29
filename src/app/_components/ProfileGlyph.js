@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\_components\ProfileGlyph.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,6 +8,14 @@ import { getProfileAvatarUrl, getProfileIconDefinition } from "@/lib/profileIcon
 
 const AVATAR_PLACEHOLDER_SRC = "/avatar-placeholder.svg";
 
+/**
+ * Funcion: ProfileGlyph.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function ProfileGlyph({ iconId, className = "h-5 w-5" }) {
   const icon = getProfileIconDefinition(iconId);
   const avatarUrl = getProfileAvatarUrl(iconId);
@@ -31,3 +42,4 @@ export default function ProfileGlyph({ iconId, className = "h-5 w-5" }) {
     </span>
   );
 }
+

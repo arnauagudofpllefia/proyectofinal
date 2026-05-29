@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\machines\[id]\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import Link from "next/link";
@@ -8,6 +11,11 @@ import { getGymIdFromUser, getUserRole, isAdminRole, normalizeGymId } from "@/li
 import { addAppNotification } from "@/lib/notifications";
 import { resolvePublicImageUrl } from "@/lib/image";
 
+/**
+ * Funcion: normalizeMachine.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeMachine(data, machineId) {
 	return {
 		id: String(data?.id ?? data?.uuid ?? machineId ?? ""),
@@ -23,6 +31,11 @@ function normalizeMachine(data, machineId) {
 	};
 }
 
+/**
+ * Funcion: normalizeSlots.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeSlots(payload) {
 	const data = payload?.data ?? payload;
 	if (!Array.isArray(data)) {
@@ -37,10 +50,20 @@ function normalizeSlots(payload) {
 	}));
 }
 
+/**
+ * Funcion: toIsoDateTime.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function toIsoDateTime(date, time) {
 	return `${date}T${time}:00`;
 }
 
+/**
+ * Funcion: normalizeHourValue.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeHourValue(value) {
 	if (typeof value !== "string") {
 		return "";
@@ -50,6 +73,11 @@ function normalizeHourValue(value) {
 	return match ? match[1] : "";
 }
 
+/**
+ * Funcion: normalizeDateValue.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeDateValue(value) {
 	if (typeof value !== "string" || !value) {
 		return "";
@@ -62,10 +90,20 @@ function normalizeDateValue(value) {
 	return value;
 }
 
+/**
+ * Funcion: getReservationMachineId.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getReservationMachineId(item) {
 	return String(item?.machine_id ?? item?.maquina_id ?? item?.machine?.id ?? item?.machineId ?? "");
 }
 
+/**
+ * Funcion: getReservationDateKey.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getReservationDateKey(item) {
 	const directDate = normalizeDateValue(item?.date ?? item?.fecha ?? item?.hora_inicio ?? item?.start_time);
 	if (directDate) {
@@ -77,6 +115,11 @@ function getReservationDateKey(item) {
 	return parsed;
 }
 
+/**
+ * Funcion: addMinutesToTime.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function addMinutesToTime(time, minutesToAdd) {
 	const [hourString, minuteString] = String(time).split(":");
 	const hours = Number.parseInt(hourString, 10);
@@ -87,6 +130,11 @@ function addMinutesToTime(time, minutesToAdd) {
 	}
 
 	const totalMinutes = hours * 60 + minutes + minutesToAdd;
+	/**
+	 * Funcion auxiliar: normalizedTotal.
+	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+	 */
 	const normalizedTotal = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
 	const finalHours = String(Math.floor(normalizedTotal / 60)).padStart(2, "0");
 	const finalMinutes = String(normalizedTotal % 60).padStart(2, "0");
@@ -94,6 +142,11 @@ function addMinutesToTime(time, minutesToAdd) {
 	return `${finalHours}:${finalMinutes}`;
 }
 
+/**
+ * Funcion: getMinutesBetweenTimes.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getMinutesBetweenTimes(startTime, endTime) {
 	const startMatch = String(startTime).match(/^(\d{2}):(\d{2})$/);
 	const endMatch = String(endTime).match(/^(\d{2}):(\d{2})$/);
@@ -108,6 +161,11 @@ function getMinutesBetweenTimes(startTime, endTime) {
 	return endMinutes - startMinutes;
 }
 
+/**
+ * Funcion: isSlotReservable.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function isSlotReservable(slot) {
 	const status = String(slot?.status ?? "").toLowerCase();
 	const blockedStatuses = ["mantenimiento", "cerrado", "ocupado", "completo", "full"];
@@ -117,12 +175,22 @@ function isSlotReservable(slot) {
 	return !isBlocked && spots > 0;
 }
 
+/**
+ * Funcion: extractUserId.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function extractUserId(userPayload) {
 	const user = userPayload?.data ?? userPayload;
 	const candidate = user?.id ?? user?.user_id ?? user?.usuario_id ?? user?.uuid;
 	return candidate != null ? String(candidate) : "";
 }
 
+/**
+ * Funcion: normalizeReservationDate.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeReservationDate(value) {
 	if (typeof value !== "string" || !value) {
 		return "Sin fecha";
@@ -135,6 +203,11 @@ function normalizeReservationDate(value) {
 	return value;
 }
 
+/**
+ * Funcion: normalizeReservationHour.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeReservationHour(value) {
 	if (typeof value !== "string" || !value) {
 		return "--:--";
@@ -144,6 +217,11 @@ function normalizeReservationHour(value) {
 	return match ? match[1] : "--:--";
 }
 
+/**
+ * Funcion: normalizeReservationTimeDisplay.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizeReservationTimeDisplay(value) {
 	if (typeof value !== "string" || !value) {
 		return "--:--";
@@ -156,6 +234,11 @@ function normalizeReservationTimeDisplay(value) {
 	return normalizeReservationHour(value);
 }
 
+/**
+ * Funcion: timeStringToMinutes.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function timeStringToMinutes(value) {
 	const match = String(value).match(/^(\d{2}):(\d{2})$/);
 	if (!match) {
@@ -165,6 +248,11 @@ function timeStringToMinutes(value) {
 	return Number(match[1]) * 60 + Number(match[2]);
 }
 
+/**
+ * Funcion: getTodayDateKey.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getTodayDateKey() {
 	const now = new Date();
 	const year = now.getFullYear();
@@ -173,14 +261,29 @@ function getTodayDateKey() {
 	return `${year}-${month}-${day}`;
 }
 
+/**
+ * Funcion: getStartOfWeek.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getStartOfWeek(dateValue) {
 	const date = new Date(dateValue);
+	/**
+	 * Funcion auxiliar: day.
+	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+	 */
 	const day = (date.getDay() + 6) % 7;
 	date.setDate(date.getDate() - day);
 	date.setHours(0, 0, 0, 0);
 	return date;
 }
 
+/**
+ * Funcion: getDateKeyFromDate.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getDateKeyFromDate(dateValue) {
 	const year = dateValue.getFullYear();
 	const month = String(dateValue.getMonth() + 1).padStart(2, "0");
@@ -188,11 +291,21 @@ function getDateKeyFromDate(dateValue) {
 	return `${year}-${month}-${day}`;
 }
 
+/**
+ * Funcion: isOccupiedReservationStatus.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function isOccupiedReservationStatus(statusValue) {
 	const status = String(statusValue ?? "").toLowerCase();
 	return status.includes("activa") || status.includes("active") || status.includes("ocupada");
 }
 
+/**
+ * Funcion: getReservationTimestamp.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function getReservationTimestamp(item) {
 	const rawDateTime = item?.hora_inicio ?? item?.start_time;
 	if (typeof rawDateTime === "string" && rawDateTime) {
@@ -215,6 +328,11 @@ function getReservationTimestamp(item) {
 	return 0;
 }
 
+/**
+ * Funcion: normalizePublicReservations.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 function normalizePublicReservations(payload) {
 	const reservasArray = payload?.reservas ?? payload?.data ?? [];
 	if (!Array.isArray(reservasArray)) {
@@ -242,6 +360,11 @@ function normalizePublicReservations(payload) {
 		});
 }
 
+/**
+ * Funcion: MachineDetailPage.
+ * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+ * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+ */
 export default function MachineDetailPage() {
 	const params = useParams();
 	const id = params?.id;
@@ -324,6 +447,11 @@ export default function MachineDetailPage() {
 		return () => clearTimeout(timer);
 	}, [id, loadMachineData]);
 
+	/**
+	 * Funcion auxiliar: handleChange.
+	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+	 */
 	const handleChange = (field, value) => {
 		setForm((prev) => {
 			if (field === "startTime") {
@@ -338,6 +466,11 @@ export default function MachineDetailPage() {
 		});
 	};
 
+	/**
+	 * Funcion auxiliar: handleReserve.
+	 * Proposito: encapsular logica para mantener el codigo legible y desacoplado.
+	 * Comportamiento: participa en el flujo principal de datos/eventos de este modulo.
+	 */
 	const handleReserve = async (event) => {
 		event.preventDefault();
 		setRequestState({ loading: true, error: "", success: "" });

@@ -1,6 +1,17 @@
+﻿// Resumen del archivo: src\lib\session.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/api";
 
+/**
+ * Funcion: normalizeRole.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeRole(user) {
     const rawRole =
         user?.role ??
@@ -49,3 +60,4 @@ export async function getServerSessionInfo() {
         };
     }
 }
+

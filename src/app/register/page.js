@@ -1,9 +1,20 @@
-﻿"use client";
+﻿// Resumen del archivo: src\app\register\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getGyms, registerRequest } from "@/lib/api";
 
+/**
+ * Funcion: RegisterPage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function RegisterPage() {
 	const router = useRouter();
 	const [form, setForm] = useState({
@@ -37,11 +48,27 @@ export default function RegisterPage() {
 		return () => clearTimeout(timer);
 	}, []);
 
+	/**
+ * Funcion auxiliar: handleChange.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleChange = (event) => {
 		const { name, value } = event.target;
 		setForm((prev) => ({ ...prev, [name]: value }));
 	};
 
+	/**
+ * Funcion auxiliar: handleSubmit.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		setLoading(true);
@@ -149,3 +176,5 @@ export default function RegisterPage() {
 		</section>
 	);
 }
+
+

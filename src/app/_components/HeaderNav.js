@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\_components\HeaderNav.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import Link from "next/link";
@@ -13,11 +16,24 @@ import {
     readStoredProfileIcon,
 } from "@/lib/profileIcon";
 
+/**
+ * Funcion: HeaderNav.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function HeaderNav({ navItems, isAuthenticated }) {
     const [isOpen, setIsOpen] = useState(false);
     const [profileIconId, setProfileIconId] = useState(DEFAULT_PROFILE_ICON_ID);
 
     useEffect(() => {
+        /**
+         * Funcion auxiliar: closeOnDesktop.
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+         */
         const closeOnDesktop = () => {
             if (window.innerWidth >= 768) {
                 setIsOpen(false);
@@ -38,6 +54,14 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
 
         let cancelled = false;
 
+        /**
+ * Funcion auxiliar: syncProfileIcon.
+
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+         */
         const syncProfileIcon = async () => {
             const token = localStorage.getItem("auth_token") || "";
             if (!token) {
@@ -58,6 +82,14 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
             }
         };
 
+        /**
+ * Funcion auxiliar: handleProfileIconUpdate.
+
+         * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+         * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+         */
         const handleProfileIconUpdate = (event) => {
             const nextIconId = event?.detail?.iconId || DEFAULT_PROFILE_ICON_ID;
             setProfileIconId(nextIconId);
@@ -160,3 +192,4 @@ export default function HeaderNav({ navItems, isAuthenticated }) {
         </>
     );
 }
+

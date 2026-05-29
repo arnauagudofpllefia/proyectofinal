@@ -1,3 +1,6 @@
+﻿// Resumen del archivo: src\app\reservations\my\page.js
+// Este modulo implementa responsabilidades concretas del sistema, separando logica de forma clara para facilitar mantenimiento y escalabilidad.
+
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -8,6 +11,14 @@ import { addAppNotification } from "@/lib/notifications";
 
 const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
+/**
+ * Funcion: extractText.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractText(value, fallback = "") {
 	if (typeof value === "string") {
 		return value;
@@ -30,6 +41,14 @@ function extractText(value, fallback = "") {
 	return fallback;
 }
 
+/**
+ * Funcion: extractDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractDate(dateSource) {
 	if (typeof dateSource !== "string" || !dateSource) {
 		return "Sin fecha";
@@ -42,6 +61,14 @@ function extractDate(dateSource) {
 	return dateSource;
 }
 
+/**
+ * Funcion: extractHour.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function extractHour(timeSource) {
 	if (typeof timeSource !== "string" || !timeSource) {
 		return "--:--";
@@ -51,10 +78,26 @@ function extractHour(timeSource) {
 	return match ? match[1] : "--:--";
 }
 
+/**
+ * Funcion: isValidDate.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function isValidDate(value) {
 	return value instanceof Date && Number.isFinite(value.getTime());
 }
 
+/**
+ * Funcion: parseDateTime.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function parseDateTime(value) {
 	if (typeof value !== "string" || !value.trim()) {
 		return null;
@@ -68,6 +111,14 @@ function parseDateTime(value) {
 	return null;
 }
 
+/**
+ * Funcion: parseDateHour.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function parseDateHour(dateValue, hourValue) {
 	if (typeof dateValue !== "string" || typeof hourValue !== "string") {
 		return null;
@@ -102,6 +153,14 @@ function parseDateHour(dateValue, hourValue) {
 	return null;
 }
 
+/**
+ * Funcion: getReservationStartAt.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getReservationStartAt(item) {
 	const directCandidates = [
 		item?.start_time,
@@ -124,6 +183,14 @@ function getReservationStartAt(item) {
 	return combined ? combined.toISOString() : "";
 }
 
+/**
+ * Funcion: getReservationEndAt.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function getReservationEndAt(item) {
 	const directCandidates = [
 		item?.end_time,
@@ -141,6 +208,14 @@ function getReservationEndAt(item) {
 	return "";
 }
 
+/**
+ * Funcion: normalizeMyReservations.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 function normalizeMyReservations(payload) {
 	const data = payload?.data ?? payload;
 	if (!Array.isArray(data)) {
@@ -166,6 +241,14 @@ function normalizeMyReservations(payload) {
 	}));
 }
 
+/**
+ * Funcion: MyReservationsPage.
+
+ * Proposito: encapsular una parte concreta de la logica para mejorar claridad y mantenimiento.
+
+ * Contexto: se invoca desde el flujo principal de esta pantalla o modulo.
+
+ */
 export default function MyReservationsPage() {
 	const router = useRouter();
 	const pathname = usePathname();
@@ -275,6 +358,14 @@ export default function MyReservationsPage() {
 			return;
 		}
 
+		/**
+ * Funcion auxiliar: setupWebNotifications.
+
+		 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+		 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+		 */
 		const setupWebNotifications = async () => {
 			try {
 				await navigator.serviceWorker.register("/sw-notifications.js", {
@@ -353,6 +444,14 @@ export default function MyReservationsPage() {
 				continue;
 			}
 
+			/**
+ * Funcion auxiliar: triggerReminder.
+
+			 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+			 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+			 */
 			const triggerReminder = () => {
 				remindedReservationsRef.current.add(reservationId);
 				addAppNotification({
@@ -429,12 +528,28 @@ export default function MyReservationsPage() {
 		}
 	}, [searchParams, pathname, router, cancelReservationById]);
 
+	/**
+ * Funcion auxiliar: openCancelModal.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const openCancelModal = (reservation) => {
 		setReservationToCancel(reservation);
 		setApiError("");
 		setSuccessMessage("");
 	};
 
+	/**
+ * Funcion auxiliar: closeCancelModal.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const closeCancelModal = () => {
 		if (cancelingId) {
 			return;
@@ -443,6 +558,14 @@ export default function MyReservationsPage() {
 		setReservationToCancel(null);
 	};
 
+	/**
+ * Funcion auxiliar: handleReminderAccept.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleReminderAccept = () => {
 		if (reminderReservation) {
 			addAppNotification({
@@ -457,6 +580,14 @@ export default function MyReservationsPage() {
 		setReminderReservation(null);
 	};
 
+	/**
+ * Funcion auxiliar: handleReminderReject.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleReminderReject = async () => {
 		if (!reminderReservation) {
 			return;
@@ -468,6 +599,14 @@ export default function MyReservationsPage() {
 		}
 	};
 
+	/**
+ * Funcion auxiliar: handleCancelReservation.
+
+	 * Proposito: aislar comportamiento puntual para evitar duplicidad de codigo.
+
+	 * Contexto: se usa como callback o helper dentro del flujo del componente.
+
+	 */
 	const handleCancelReservation = async () => {
 		if (!reservationToCancel) {
 			return;
@@ -541,7 +680,7 @@ export default function MyReservationsPage() {
 								aria-label="Cerrar"
 								disabled={Boolean(cancelingId)}
 							>
-								✕
+								âœ•
 							</button>
 						</div>
 						<div className="space-y-4 px-6 py-5">
@@ -616,3 +755,4 @@ export default function MyReservationsPage() {
 		</section>
 	);
 }
+
