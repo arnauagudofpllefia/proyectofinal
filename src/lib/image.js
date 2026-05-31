@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\lib\image.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";

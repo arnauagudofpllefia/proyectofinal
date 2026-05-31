@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\notifications\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -107,7 +105,7 @@ export default function NotificationsPage() {
 			);
 			window.dispatchEvent(new Event(getNotificationsUpdateEventName()));
 		} catch {
-			console.error("Error al marcar como leÃ­das");
+			console.error("Error al marcar como leídas");
 		}
 	};
 
@@ -131,7 +129,7 @@ export default function NotificationsPage() {
 			);
 			window.dispatchEvent(new Event(getNotificationsUpdateEventName()));
 		} catch {
-			console.error("Error al marcar como leÃ­da");
+			console.error("Error al marcar como leída");
 		}
 	};
 

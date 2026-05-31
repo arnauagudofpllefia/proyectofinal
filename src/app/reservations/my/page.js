@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\reservations\my\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -629,7 +627,7 @@ export default function MyReservationsPage() {
 								aria-label="Cerrar"
 								disabled={Boolean(cancelingId)}
 							>
-								âœ•
+								✕
 							</button>
 						</div>
 						<div className="space-y-4 px-6 py-5">

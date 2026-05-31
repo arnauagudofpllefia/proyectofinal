@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\admin\_components\AdminCrudPage.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -774,7 +772,7 @@ export default function AdminCrudPage({ resourceKey }) {
                                 item.status,
                             ]
                                 .filter(Boolean)
-                                .join(" Â· ")
+                                .join(" · ")
                             : resource.getItemMeta(item);
                         const initials = String(title || "?").trim().charAt(0).toUpperCase();
                         const profileIconId = isUser
@@ -906,7 +904,7 @@ export default function AdminCrudPage({ resourceKey }) {
                                 </h3>
                             </div>
                             <button type="button" onClick={closeModal} className="btn-ghost" aria-label="Cerrar">
-                                âœ•
+                                ✕
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">

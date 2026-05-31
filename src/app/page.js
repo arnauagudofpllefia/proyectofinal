@@ -1,5 +1,4 @@
-﻿// Resumen del archivo: src\app\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
+
 
 import Link from "next/link";
 import { getGyms, getMachines, getMyReservations } from "@/lib/api";
@@ -140,7 +139,7 @@ export default async function Home() {
             </h2>
           </div>
           <Link href="/machines" className="text-sm font-medium text-(--foreground) underline-offset-4 hover:underline">
-            Ver todas â†’
+            Ver todas →
           </Link>
         </div>
 

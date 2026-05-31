@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\lib\admin.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import { apiRequest, apiRequestWithFallback } from "@/lib/api";
 import { resolvePublicImageUrl } from "@/lib/image";
@@ -211,7 +209,7 @@ const adminResources = {
             return item.name || "Gimnasio sin nombre";
         },
         getItemMeta(item) {
-            return [item.address, item.phone].filter(Boolean).join(" Â· ");
+            return [item.address, item.phone].filter(Boolean).join(" · ");
         },
     },
     machines: {
@@ -331,7 +329,7 @@ const adminResources = {
             return item.name || "Maquina sin nombre";
         },
         getItemMeta(item) {
-            return [item.gymId ? `Gym ${item.gymId}` : "", item.status].filter(Boolean).join(" Â· ");
+            return [item.gymId ? `Gym ${item.gymId}` : "", item.status].filter(Boolean).join(" · ");
         },
     },
     reservations: {
@@ -490,7 +488,7 @@ const adminResources = {
                 item.status,
             ]
                 .filter(Boolean)
-                .join(" Â· ");
+                .join(" · ");
         },
     },
     users: {
@@ -606,7 +604,7 @@ const adminResources = {
             return item.name || "Usuario sin nombre";
         },
         getItemMeta(item) {
-            return [item.email, item.phone, item.role].filter(Boolean).join(" Â· ");
+            return [item.email, item.phone, item.role].filter(Boolean).join(" · ");
         },
         validate(values, mode) {
             const errors = [];

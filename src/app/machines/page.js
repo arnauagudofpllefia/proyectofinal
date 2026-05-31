@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\machines\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -114,7 +112,7 @@ export default function MachinesPage() {
 				</p>
 				{userGymId ? (
 					<Link href="/profile" className="btn-ghost mt-4 inline-flex">
-						Cambiar gimnasio →
+						Cambiar gimnasio ?
 					</Link>
 				) : null}
 			</header>

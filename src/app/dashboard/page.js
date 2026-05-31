@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\dashboard\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import { redirect } from "next/navigation";
 import { getServerSessionInfo } from "@/lib/session";

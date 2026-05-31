@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\admin\layout.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import AdminGymScopePicker from "@/app/admin/_components/AdminGymScopePicker";
 import AdminScopedNav from "@/app/admin/_components/AdminScopedNav";

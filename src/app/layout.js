@@ -1,5 +1,4 @@
-﻿// Resumen del archivo: src\app\layout.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
+
 
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";

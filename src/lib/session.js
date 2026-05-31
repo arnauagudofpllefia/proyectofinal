@@ -1,5 +1,4 @@
-﻿// Resumen del archivo: src\lib\session.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
+﻿
 
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/api";

@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\admin\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -107,7 +105,7 @@ export default function AdminHomePage() {
                         <p className="mt-2 text-3xl font-semibold text-[var(--primary-strong)]">{counts[resource.key] ?? "--"}</p>
                         <p className="mt-2 text-sm text-[var(--muted)]">{resource.description}</p>
                         <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--primary)]">
-                            Abrir gestion â†’
+                            Abrir gestion →
                         </p>
                     </Link>
                 ))}

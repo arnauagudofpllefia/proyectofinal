@@ -1,5 +1,3 @@
-ï»¿// Resumen del archivo: src\app\register\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 "use client";
 
@@ -140,12 +138,12 @@ export default function RegisterPage() {
 
 					<label className="block text-sm font-medium text-[var(--foreground)]">
 						Contrasena
-						<input name="password" type="password" value={form.password} onChange={handleChange} minLength={8} required className="field-input mt-1" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+						<input name="password" type="password" value={form.password} onChange={handleChange} minLength={8} required className="field-input mt-1" placeholder="••••••••" />
 					</label>
 
 					<label className="block text-sm font-medium text-[var(--foreground)]">
 						Repite contrasena
-						<input name="password_confirmation" type="password" value={form.password_confirmation} onChange={handleChange} minLength={8} required className="field-input mt-1" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" />
+						<input name="password_confirmation" type="password" value={form.password_confirmation} onChange={handleChange} minLength={8} required className="field-input mt-1" placeholder="••••••••" />
 					</label>
 
 					{error ? <p className="text-sm text-rose-600">{error}</p> : null}

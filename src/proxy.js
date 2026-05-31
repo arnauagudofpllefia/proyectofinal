@@ -1,5 +1,5 @@
-﻿// Resumen del archivo: src\proxy.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
+﻿
+
 
 import { NextResponse } from "next/server";
 

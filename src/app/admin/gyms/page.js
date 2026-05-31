@@ -1,5 +1,3 @@
-﻿// Resumen del archivo: src\app\admin\gyms\page.js
-// Este modulo esta comentado en estilo docente: explica que hace cada parte, por que existe y como encaja en el flujo general.
 
 import AdminCrudPage from "@/app/admin/_components/AdminCrudPage";
 
